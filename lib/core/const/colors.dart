@@ -5,6 +5,7 @@ class ColorsData {
   static Color black1e = const Color(0xFF1E1E1E);
   static Color purple13 = const Color.fromRGBO(158, 0, 210, 1.0);
   static Color purple255 = const Color.fromARGB(255, 159, 109, 176);
+  static Color purple233 = const Color.fromARGB(255, 232, 215, 255);
   static Color purple206 = const Color.fromARGB(255, 145, 85, 171);
   static Color purple260 = const Color(0xFFF8E2FF);
   static Color black25 = const Color(0xFF252F3F);

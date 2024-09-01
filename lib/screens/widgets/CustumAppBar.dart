@@ -4,41 +4,52 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:tech/core/const/colors.dart';
 
 class CustumAppBar extends StatelessWidget {
- /* final String titleText; // Texte du titre
-  final String userAvatarSvgPath; // Chemin de l'image SVG de la photo de profil de l'utilisateur dans assets
+  final String title;
 
-  CustumAppBar({required this.titleText, required this.userAvatarSvgPath});*/
+  CustumAppBar ({
+    super.key,
+    required this.title,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return AppBar(
-      title: Row(
-        children: [
-          Text(
-              'ProFinder', // Affiche le texte "Profinder" à gauche
-              style: GoogleFonts.brunoAce(
-                  textStyle: TextStyle(
+    return SafeArea(
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 10.0),
+          margin: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+          height: 50,
+          decoration: BoxDecoration(
+            color: ColorsData.purple260.withOpacity(0.7),
+            borderRadius: BorderRadius.circular(30.0)
+          ),
+          child: Row(
+            children: [
+              IconButton(
+                icon: Icon(
+                    Icons.chevron_left,
                     color: ColorsData.purple00A,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                    size: 30,
+                ), // Icône de retour
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+              SizedBox(width: 20,),
+              Expanded(
+                  child:  Text(
+                      title,
+                      style: GoogleFonts.karla(
+                        textStyle: TextStyle(
+                          fontWeight: FontWeight.w900,
+                          color: ColorsData.purple00A,
+                          fontSize: 20,
+                        ),
+                      ),
+                    ),
                   )
-              )
+            ],
           ),
-          Spacer(),
-          //SizedBox(width: 16.0),
-          CircleAvatar(
-            radius: 20, // Ajustez la taille selon vos besoins
-            backgroundColor: Colors.transparent, // Couleur de l'arrière-plan transparente pour le cercle
-            child: SvgPicture.asset(
-              'assets/images/profil.svg', // Charge la photo de profil SVG depuis assets
-              width: 35, // Ajustez la largeur selon vos besoins
-              height: 35, // Ajustez la hauteur selon vos besoins
-            ),
-          ),
-        ],
-      ),
-      backgroundColor: ColorsData.transparent,
-      shadowColor: ColorsData.transparent,
+        )
     );
   }
 }

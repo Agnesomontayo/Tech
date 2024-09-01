@@ -8,6 +8,10 @@ class AssetsData {
   static String Avatar = "$imageAssets/avatar.png";
   static String p = "$imageAssets/p.jpeg";
   static String d = "$imageAssets/d.jpeg";
+  static String workers = "$imageAssets/workers.jpeg";
+  static String best = "$imageAssets/des1.jpeg";
+  static String menage = "$imageAssets/menage.jpeg";
+  static String carpenter = "$imageAssets/carpter.svg";
 
   //Icons
   static String searchIcon = "$iconAssets/loupe.svg";
@@ -25,5 +29,11 @@ class AssetsData {
   static String mecanicienIcon = "$iconAssets/mecanique.svg";
   static String menuisierIcon = "$iconAssets/menuisier.svg";
   static String plusIcon = "$iconAssets/plus.svg";
+  static String chatIcon = "$iconAssets/chat.svg";
+  static String favIcon = "$iconAssets/fav.svg";
+  static String homeIcon = "$iconAssets/home.svg";
+  static String mapIcon = "$iconAssets/map.svg";
+  static String userIcon = "$iconAssets/user.svg";
+  static String locationIcon = "$iconAssets/location.svg";
 
 }

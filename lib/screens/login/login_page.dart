@@ -3,7 +3,7 @@ import 'package:tech/core/const/colors.dart';
 import 'package:tech/core/const/assets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:tech/screens/home/client_home.dart';
+import 'package:tech/screens/clients/client_home/client_home.dart';
 import 'package:tech/screens/register/successPage.dart';
 import 'package:tech/screens/widgets/CustumInputs.dart';
 import 'package:tech/core/providers/auth_provider.dart';

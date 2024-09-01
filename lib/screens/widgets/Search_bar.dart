@@ -44,15 +44,15 @@ class SearchBarWidget extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
-                  margin: EdgeInsets.symmetric(horizontal: 8.0), // Marge autour du trait vertical
-                  width: 1.0, // Largeur du trait vertical
-                  height: 30.0, // Hauteur du trait vertical (ajustez si nécessaire)
-                  color: ColorsData.purple00A, // Couleur du trait vertical
+                  margin: EdgeInsets.symmetric(horizontal: 8.0),
+                  width: 2.0,
+                  height: 30.0,
+                  color: ColorsData.purple00A,
                 ),
                 SvgPicture.asset(
                   AssetsData.filterIcon,
                   fit: BoxFit.scaleDown,
-                  width: 20, // Largeur souhaitée
+                  width: 20,
                   height: 20,
                   color: ColorsData.purple00A,
                 ),
