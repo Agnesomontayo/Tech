@@ -5,11 +5,25 @@ import 'package:tech/core/const/assets.dart';
 import 'package:tech/core/const/colors.dart';
 
 class SearchBarWidget extends StatelessWidget {
-
+  final ValueChanged<String>? onChanged;
+  //final FormFieldValidator<String>? validator;
+  final TextEditingController? controller;
+  final void Function()? onTap;
+  final bool readonly;
+  final FocusNode? focusNode;
+  const SearchBarWidget ({
+    super.key,
+    this.onChanged,
+    //this.validator,
+    this.onTap,
+    this.readonly = false,
+    this.controller,
+    this.focusNode,
+});
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 15.0, vertical: 2.0), // Ajustez les marges selon vos besoins
+      padding: EdgeInsets.symmetric(horizontal: 15.0, vertical: 2.0),
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 5.0),
         decoration: BoxDecoration(
@@ -17,14 +31,19 @@ class SearchBarWidget extends StatelessWidget {
           color: ColorsData.purple260.withOpacity(0.7),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.0), // Couleur de l'ombre
-              spreadRadius: 1, // Étalement de l'ombre
-              blurRadius: 5, // Flou de l'ombre
-              offset: Offset(0, 5), // Décalage de l'ombre (position)
+              color: Colors.grey.withOpacity(0.0),
+              spreadRadius: 1,
+              blurRadius: 5,
+              offset: Offset(0, 5),
             ),
           ],
         ),
         child: TextField(
+          focusNode: focusNode,
+          onTap: onTap,
+          onChanged: onChanged,
+          controller: controller,
+          readOnly: readonly,
           style: GoogleFonts.karla(
             textStyle: TextStyle(
               color: Colors.black,
@@ -36,7 +55,7 @@ class SearchBarWidget extends StatelessWidget {
             prefixIcon: SvgPicture.asset(
               AssetsData.searchIcon,
               fit: BoxFit.scaleDown,
-              width: 15, // Largeur souhaitée
+              width: 15,
               height: 15,
               color: ColorsData.purple00A,
             ),

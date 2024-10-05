@@ -38,8 +38,8 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(20),
-                    topRight: Radius.circular(20),
+                    topLeft: Radius.circular(40.0),
+                    topRight: Radius.circular(40.0),
                   ),
                 ),
                 child: Column(
@@ -47,7 +47,7 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
                     Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(15), topRight: Radius.circular(15)),
+                            topLeft: Radius.circular(40.0), topRight: Radius.circular(40.0)),
                         color: ColorsData.white,
                       ),
                       padding: EdgeInsets.symmetric(horizontal: 10),
@@ -76,12 +76,14 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
                                     (context, index) {
                                   return WorkerPresentationCard(
                                     name: 'Abraham Monie $index',
-                                    rate: '4.5',
+                                    rate: 4.5,
                                     availability: 'Disponible',
                                     availabilityColor: Colors.green,
                                     distance: '500',
                                     unit: 'm',
                                     reviews: '250',
+                                    imagePath: AssetsData.best,
+                                    description: 'lhfzmoaijgapzhgpoakezngioznggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg',
                                   );
                                 },
                                 childCount: 20,
@@ -102,6 +104,7 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
             child: FloatingActionButton(
               backgroundColor: ColorsData.purple00A,
               shape: CircleBorder(),
+                heroTag: 'FAB_Location',
               onPressed: () {
                 // Action for the second FAB
               },
@@ -117,6 +120,7 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
           child: FloatingActionButton(
               backgroundColor: ColorsData.purple00A,
               shape: CircleBorder(),
+              heroTag: 'FAB_chat',
               onPressed: () => {},
               child: SvgPicture.asset(
                   AssetsData.chatIcon

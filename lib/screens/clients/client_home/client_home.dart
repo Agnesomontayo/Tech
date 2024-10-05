@@ -6,6 +6,7 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:tech/core/const/colors.dart';
 import 'package:tech/core/const/assets.dart';
 import 'package:tech/screens/clients/client_home/all_works.dart';
+import 'package:tech/screens/clients/client_home/search_page.dart';
 import 'package:tech/screens/clients/details/work_details.dart';
 import 'package:tech/screens/widgets/logo.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -17,6 +18,9 @@ import 'package:tech/core/providers/auth_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:tech/screens/widgets/WorkCardWidget.dart';
 import 'package:tech/screens/widgets/CustumAppBar.dart';
+import 'package:tech/screens/clients/client_home/search_page.dart';
+
+import '../../widgets/ServicePresentationCard.dart';
 
 
 class ClientHome extends StatefulWidget {
@@ -61,10 +65,6 @@ class _ClientHomeState extends State<ClientHome> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(''),
-        toolbarHeight: 5,
-      ),
       body: RefreshIndicator(
         onRefresh: _handleRefresh,
         child: SingleChildScrollView(
@@ -76,8 +76,8 @@ class _ClientHomeState extends State<ClientHome> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Card(
-                      color: ColorsData.purple233,
-                      surfaceTintColor: ColorsData.purple233,
+                      color: ColorsData.purple267,
+                      surfaceTintColor: ColorsData.purple267,
                       shadowColor: ColorsData.grey,
                       margin: EdgeInsetsDirectional.symmetric(horizontal: 15, vertical: 10 ),
                       shape: RoundedRectangleBorder(
@@ -128,8 +128,17 @@ class _ClientHomeState extends State<ClientHome> {
                     ],
                   ),
                 ),
-
-                SearchBarWidget(),
+               SearchBarWidget(
+                    readonly: true,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => SearchPage(),
+                        ),
+                      );
+                    },
+                  ),
                 //SizedBox(height: 20),
                 Padding(
                     padding: EdgeInsets.symmetric(horizontal: 10.0),
@@ -255,7 +264,27 @@ class _ClientHomeState extends State<ClientHome> {
                 //SizedBox(height: 20),
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
-                  child: TitleWidget(title: 'Les services populaires'),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      TitleWidget(title: 'Les services populaires'),
+                       GestureDetector(
+                            onTap: () {
+                              // Action à réaliser lors du clic
+                              print("Lien cliqué !");
+                            },
+                            child: Text(
+                              'Voir Tout',
+                              style: TextStyle(
+                                color: ColorsData.purple00A,
+                                fontWeight: FontWeight.w400
+                              ),
+                            ),
+                          )
+
+                    ],
+                  )
+                  
                 ),
                 Container(
                   height: 230,
@@ -272,88 +301,12 @@ class _ClientHomeState extends State<ClientHome> {
                                 controller: _scrollController,
                                 itemCount: 20,
                                 itemBuilder: (context, index) {
-                                  return Column(
-                                    children: [
-                                      Container(
-                                        width: 280,
-                                        height: 200,
-                                        margin: EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(10),
-                                          image: DecorationImage(
-                                            image: AssetImage(
-                                              AssetsData.menage,
-                                            ),
-                                            fit: BoxFit.cover,
-                                          ),
-                                        ),
-                                        child: Stack(
-                                          children: [
-                                            Positioned(
-                                              bottom: 15, // Positionne le conteneur en bas de l'image
-                                              left: 0,
-                                              right: 0,
-                                              child: Container(
-                                                padding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
-                                                margin: EdgeInsets.symmetric(horizontal: 15.0),
-                                                decoration: BoxDecoration(
-                                                  color: ColorsData.white, // Ajuste la couleur avec opacité
-                                                  borderRadius: BorderRadius.circular(10)
-                                                ),
-                                                child: Row(
-                                                  children: [
-                                                    Container(
-                                                      width: 30, // Largeur du point
-                                                      height: 30, // Hauteur du point
-                                                      decoration: BoxDecoration(
-                                                        color: ColorsData.purple255.withOpacity(0.3), // Couleur du point
-                                                        shape: BoxShape.circle, // Forme circulaire
-                                                      ),
-                                                      child: SvgPicture.asset(
-                                                        AssetsData.entretienIcon,
-                                                        fit: BoxFit.scaleDown,
-                                                        width: 15,
-                                                        height: 15,
-                                                      ),
-                                                    ),
-                                                    SizedBox(width: 10.0,),
-                                                    Column(
-                                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                                      children: [
-                                                        Text(
-                                                          'NETTOYAGE COMPLET $index',
-                                                          style: GoogleFonts.karla(
-                                                            textStyle: TextStyle(
-                                                              fontSize: 13,
-                                                              fontWeight: FontWeight.w800,
-                                                              //color: Colors.white,
-                                                            ),
-                                                          ),
-                                                          maxLines: 2,
-                                                          overflow: TextOverflow.ellipsis,
-                                                        ),
-                                                        Text(
-                                                          '1000 FCFA - 3000 FCFA',
-                                                          style: GoogleFonts.commissioner(
-                                                            textStyle: TextStyle(
-                                                              fontSize: 12,
-                                                              fontWeight: FontWeight.w400,
-                                                              color: ColorsData.purple00A,
-                                                              fontStyle: FontStyle.italic,
-                                                            ),
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ],
-                                                )
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  );
+                                  return ServicePresentationCard(
+                                      iconPath: AssetsData.entretienIcon,
+                                      imagePath: AssetsData.menage,
+                                      serviceName: 'Nettoyage complet $index',
+                                      priceRange: '1000FCFA-3000FCFA'
+                                  );;
 
                                 },
                               ),
@@ -538,6 +491,7 @@ class _ClientHomeState extends State<ClientHome> {
   @override
   void dispose() {
     _scrollController.dispose();
+    //focusNode.dispose();
     super.dispose();
   }
 }

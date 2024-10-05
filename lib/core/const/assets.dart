@@ -35,5 +35,12 @@ class AssetsData {
   static String mapIcon = "$iconAssets/map.svg";
   static String userIcon = "$iconAssets/user.svg";
   static String locationIcon = "$iconAssets/location.svg";
-
+  static String locationOnIcon = "$iconAssets/location_on.svg";
+  static String shareIcon = "$iconAssets/share.svg";
+  static String bellIcon = "$iconAssets/bell.svg";
+  static String menuSettingsIcon = "$iconAssets/filter.svg";
+  static String historyIcon = "$iconAssets/history.svg";
+  static String infoIcon = "$iconAssets/info.svg";
+  static String logoutIcon = "$iconAssets/logout.svg";
+  static String shieldIcon = "$iconAssets/shield.svg";
 }
