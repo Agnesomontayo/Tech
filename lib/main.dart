@@ -1,6 +1,7 @@
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:tech/screens/appTypes_page.dart';
 import 'package:tech/screens/clients/client_home/MainScreen.dart';
 import 'core/const/const.dart';
 import 'core/providers/auth_provider.dart';
@@ -41,7 +42,8 @@ class MyApp extends StatelessWidget {
       ),
       initialRoute: '/', // Route initiale, par exemple le splash screen
       routes: {
-         '/': (context) => MainScreen(),
+        '/': (context) => AppTypePage(),
+        // '/': (context) => MainScreen(),
         /*'/': (context) => SplashScreen(),
         '/login': (context) => LoginPage(),
         '/signup': (context) =>   RegisterPage(),*/

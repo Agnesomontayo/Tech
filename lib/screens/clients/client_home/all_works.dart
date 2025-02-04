@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:tech/screens/clients/details/work_details.dart';
 import '../../../../core/const/assets.dart';
-import 'package:tech/screens/widgets/CustumAppBar.dart';
+import 'package:tech/screens/clients/widgets/CustumAppBar.dart';
 
-import 'package:tech/screens/widgets/WorkCardWidget.dart';
+import 'package:tech/screens/clients/widgets/WorkCardWidget.dart';
 
 class AllWorksPage extends StatefulWidget {
   const AllWorksPage({super.key});

@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../../core/const/assets.dart';
-import '../../core/const/colors.dart';
+import '../../../core/const/assets.dart';
+import '../../../core/const/colors.dart';
 
 class RoundedWorkCard extends StatelessWidget {
   final String work;

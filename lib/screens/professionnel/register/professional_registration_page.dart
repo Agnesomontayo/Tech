@@ -8,13 +8,13 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:tech/core/models/profession.dart';
 import 'package:tech/core/models/profession.dart';
 import 'package:tech/screens/register/successPage.dart';
-import 'package:tech/screens/widgets/CustumInputs.dart';
-import 'package:tech/screens/widgets/CustumDropdown.dart';
+import 'package:tech/screens/clients/widgets/CustumInputs.dart';
+import 'package:tech/screens/clients/widgets/CustumDropdown.dart';
 import 'package:provider/provider.dart';
 import 'package:dio/dio.dart';
 import 'package:tech/core/providers/auth_provider.dart';
 
-import '../../core/models/profession.dart';
+import '../../../core/models/profession.dart';
 
 class ProfessionalRegistrationPage extends StatefulWidget {
   @override

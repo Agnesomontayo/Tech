@@ -3,8 +3,8 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../../core/const/assets.dart';
-import '../../core/const/colors.dart';
+import '../../../core/const/assets.dart';
+import '../../../core/const/colors.dart';
 
 class WorkerPresentationModal extends StatefulWidget {
   final String imagePath;
@@ -37,6 +37,7 @@ class WorkerPresentationModal extends StatefulWidget {
 
 class _WorkerPresentationModalState extends State<WorkerPresentationModal> {
   double currentRating = 0.0;
+  bool _isClicked = false;
 
   @override
   void initState() {
@@ -70,16 +71,18 @@ class _WorkerPresentationModalState extends State<WorkerPresentationModal> {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(43.0),
                         image: DecorationImage(
-                            image: AssetImage(widget.imagePath), fit: BoxFit.cover),
+                            image: AssetImage(widget.imagePath),
+                            fit: BoxFit.cover),
                       ),
                     ),
                     Container(
-                      padding: EdgeInsets.symmetric(horizontal: 30, vertical: 0.0),
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 30, vertical: 0.0),
                       child: Column(
                         children: [
                           Container(
-                            margin:
-                            EdgeInsets.symmetric(horizontal: 0, vertical: 15.0),
+                            margin: EdgeInsets.symmetric(
+                                horizontal: 0, vertical: 15.0),
                             child: Row(
                               children: [
                                 Container(
@@ -142,7 +145,8 @@ class _WorkerPresentationModalState extends State<WorkerPresentationModal> {
                                 allowHalfRating: true,
                                 itemCount: 5,
                                 itemSize: 18,
-                                itemPadding: EdgeInsets.symmetric(horizontal: 0.0),
+                                itemPadding:
+                                    EdgeInsets.symmetric(horizontal: 0.0),
                                 itemBuilder: (context, _) => Icon(
                                   Icons.star,
                                   color: Colors.amber,
@@ -171,18 +175,26 @@ class _WorkerPresentationModalState extends State<WorkerPresentationModal> {
                               Spacer(),
                               Column(
                                 children: [
-                                  Container(
-                                    padding: EdgeInsets.all(10.0),
-                                    height: 50,
-                                    width: 50,
-                                    decoration: BoxDecoration(
-                                        color: ColorsData.purple00C,
-                                        borderRadius: BorderRadius.circular(15.0)),
-                                    child: SvgPicture.asset(
-                                      AssetsData.favIcon,
-                                      color: ColorsData.white,
-                                      width: 23,
-                                      height: 25,
+                                  GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        _isClicked = !_isClicked; // Inverse l'état à chaque clic
+                                      });
+                                    },
+                                    child: Container(
+                                      padding: EdgeInsets.all(10.0),
+                                      height: 50,
+                                      width: 50,
+                                      decoration: BoxDecoration(
+                                          color: ColorsData.purple00C,
+                                          borderRadius:
+                                          BorderRadius.circular(15.0)),
+                                      child: SvgPicture.asset(
+                                        _isClicked ? AssetsData.favFullIcon  :  AssetsData.favIcon,
+                                        color:  Colors.white ,
+                                        width: 23,
+                                        height: 25,
+                                      ),
                                     ),
                                   ),
                                   Text(
@@ -209,7 +221,8 @@ class _WorkerPresentationModalState extends State<WorkerPresentationModal> {
                                   'Présentation du prestataire',
                                   style: GoogleFonts.karla(
                                     textStyle: TextStyle(
-                                        fontSize: 15, fontWeight: FontWeight.w600),
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w600),
                                   ),
                                 )
                               ],
@@ -251,7 +264,8 @@ class _WorkerPresentationModalState extends State<WorkerPresentationModal> {
                                   'Quelques clients',
                                   style: GoogleFonts.karla(
                                     textStyle: TextStyle(
-                                        fontSize: 15, fontWeight: FontWeight.w600),
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w600),
                                   ),
                                 )
                               ],
@@ -279,29 +293,32 @@ class _WorkerPresentationModalState extends State<WorkerPresentationModal> {
                                               color: Colors.transparent,
                                               child: Center(
                                                   child: Column(
-                                                    children: [
-                                                      Container(
-                                                          decoration: BoxDecoration(
-                                                            shape: BoxShape.circle,
-                                                          ),
-                                                          height: 110,
-                                                          width: 110,
-                                                          child: CircleAvatar(
-                                                            radius: 70,
-                                                            backgroundImage: AssetImage(
-                                                                AssetsData.best),
-                                                          )),
-                                                      Text(
-                                                        'Marie S. $index',
-                                                        style: GoogleFonts.karla(
-                                                          textStyle: TextStyle(
-                                                            fontSize: 13,
-                                                            fontWeight: FontWeight.w500,
-                                                          ),
-                                                        ),
+                                                children: [
+                                                  Container(
+                                                      decoration: BoxDecoration(
+                                                        shape: BoxShape.circle,
                                                       ),
-                                                    ],
-                                                  )),
+                                                      height: 110,
+                                                      width: 110,
+                                                      child: CircleAvatar(
+                                                        radius: 70,
+                                                        backgroundImage:
+                                                            AssetImage(
+                                                                AssetsData
+                                                                    .best),
+                                                      )),
+                                                  Text(
+                                                    'Marie S. $index',
+                                                    style: GoogleFonts.karla(
+                                                      textStyle: TextStyle(
+                                                        fontSize: 13,
+                                                        fontWeight:
+                                                            FontWeight.w500,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              )),
                                             );
                                           },
                                         ),
@@ -309,30 +326,32 @@ class _WorkerPresentationModalState extends State<WorkerPresentationModal> {
                                     ),
                                   )
                                 ],
-                              )
+                              )),
+                          SizedBox(
+                            height: 10.0,
                           ),
-                          SizedBox(height: 10.0,),
                           Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               GestureDetector(
                                 child: Container(
                                   padding: EdgeInsets.all(10.0),
                                   decoration: BoxDecoration(
-                                    color: ColorsData.purple00C,
-                                    borderRadius: BorderRadius.circular(20.0)
-                                  ),
+                                      color: ColorsData.purple00C,
+                                      borderRadius:
+                                          BorderRadius.circular(20.0)),
                                   child: Text(
                                     'Commander un service',
                                     style: GoogleFonts.karla(
                                       textStyle: TextStyle(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w500,
-                                        color: ColorsData.white
-                                      ),
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w500,
+                                          color: ColorsData.white),
                                     ),
                                   ),
                                 ),
                               ),
+/*
                               Spacer(),
                               GestureDetector(
                                 child: Container(
@@ -369,16 +388,18 @@ class _WorkerPresentationModalState extends State<WorkerPresentationModal> {
                                     ),
                                   )
                               )
+*/
                             ],
                           ),
-                          SizedBox(height: 50,)
+                          SizedBox(
+                            height: 50,
+                          )
                         ],
                       ),
                     ),
                   ],
                 ),
-              )
-          ),
+              )),
         );
       },
     );

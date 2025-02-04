@@ -5,7 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:tech/screens/clients/client_home/client_home.dart';
 import 'package:tech/screens/register/successPage.dart';
-import 'package:tech/screens/widgets/CustumInputs.dart';
+import 'package:tech/screens/clients/widgets/CustumInputs.dart';
 import 'package:tech/core/providers/auth_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/services.dart';

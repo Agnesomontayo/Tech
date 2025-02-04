@@ -8,19 +8,21 @@ import 'package:tech/core/const/assets.dart';
 import 'package:tech/screens/clients/client_home/all_works.dart';
 import 'package:tech/screens/clients/client_home/search_page.dart';
 import 'package:tech/screens/clients/details/work_details.dart';
-import 'package:tech/screens/widgets/logo.dart';
+import 'package:tech/screens/clients/widgets/logo.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:tech/screens/register/successPage.dart';
-import 'package:tech/screens/widgets/Search_bar.dart';
-import 'package:tech/screens/widgets/titleWidget.dart';
+import 'package:tech/screens/clients/widgets/Search_bar.dart';
+import 'package:tech/screens/clients/widgets/menuCirculaireWidget.dart';
+import 'package:tech/screens/clients/widgets/titleWidget.dart';
 import 'package:tech/core/providers/auth_provider.dart';
 import 'package:provider/provider.dart';
-import 'package:tech/screens/widgets/WorkCardWidget.dart';
-import 'package:tech/screens/widgets/CustumAppBar.dart';
+import 'package:tech/screens/clients/widgets/WorkCardWidget.dart';
+import 'package:tech/screens/clients/widgets/CustumAppBar.dart';
 import 'package:tech/screens/clients/client_home/search_page.dart';
 
-import '../../widgets/ServicePresentationCard.dart';
+import '../../clients/widgets/ServicePresentationCard.dart';
+import 'all_services.dart';
 
 
 class ClientHome extends StatefulWidget {
@@ -75,20 +77,30 @@ class _ClientHomeState extends State<ClientHome> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Card(
-                      color: ColorsData.purple267,
-                      surfaceTintColor: ColorsData.purple267,
-                      shadowColor: ColorsData.grey,
-                      margin: EdgeInsetsDirectional.symmetric(horizontal: 15, vertical: 10 ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
+                    GestureDetector(
+                      child: Card(
+                        color: ColorsData.purple267,
+                        surfaceTintColor: ColorsData.purple267,
+                        shadowColor: ColorsData.grey,
+                        margin: EdgeInsetsDirectional.symmetric(horizontal: 15, vertical: 10 ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: SvgPicture.asset(
+                          AssetsData.menuIcon,
+                          fit: BoxFit.scaleDown,
+                          width: 38, // Largeur souhaitée
+                          height: 37,
+                        ),
                       ),
-                      child: SvgPicture.asset(
-                        AssetsData.menuIcon,
-                        fit: BoxFit.scaleDown,
-                        width: 38, // Largeur souhaitée
-                        height: 37,
-                      ),
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return MenuCirculaireWidget();
+                          },
+                        );
+                      },
                     ),
                     Container(
                       margin: EdgeInsets.symmetric(horizontal: 15, vertical: 10 ),
@@ -270,8 +282,12 @@ class _ClientHomeState extends State<ClientHome> {
                       TitleWidget(title: 'Les services populaires'),
                        GestureDetector(
                             onTap: () {
-                              // Action à réaliser lors du clic
-                              print("Lien cliqué !");
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => AllServicesPage()
+                                  )
+                              );
                             },
                             child: Text(
                               'Voir Tout',

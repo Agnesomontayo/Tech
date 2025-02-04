@@ -3,11 +3,13 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:tech/screens/clients/client_home/search_page.dart';
-import 'package:tech/screens/widgets/ServicePresentationCard.dart';
-import 'package:tech/screens/widgets/titleWidget.dart';
+import 'package:tech/screens/clients/widgets/ServicePresentationCard.dart';
+import 'package:tech/screens/clients/widgets/titleWidget.dart';
 
 import '../../../core/const/assets.dart';
 import '../../../core/const/colors.dart';
+import '../../clients/widgets/menuCirculaireWidget.dart';
+import '../widgets/PageHeaderWidget.dart';
 
 class FavoritePage extends StatefulWidget {
   const FavoritePage({super.key});
@@ -59,58 +61,7 @@ class _FavoritePageState extends State<FavoritePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Card(
-                    color: ColorsData.purple267,
-                    surfaceTintColor: ColorsData.purple267,
-                    shadowColor: ColorsData.grey,
-                    margin: EdgeInsetsDirectional.symmetric(
-                        horizontal: 15, vertical: 10),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: SvgPicture.asset(
-                      AssetsData.menuIcon,
-                      fit: BoxFit.scaleDown,
-                      width: 38, // Largeur souhaitée
-                      height: 37,
-                    ),
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => SearchPage(),
-                            ),
-                          );
-                        },
-                        child: Card(
-                          color: ColorsData.purple267,
-                          surfaceTintColor: ColorsData.purple267,
-                          shadowColor: ColorsData.grey,
-                          margin: EdgeInsetsDirectional.symmetric(
-                              horizontal: 15, vertical: 10),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: SvgPicture.asset(
-                            AssetsData.searchIcon,
-                            fit: BoxFit.scaleDown,
-                            width: 38,
-                            height: 37,
-                          ),
-                        ),
-                      )
-                    ],
-                  ),
-                ],
-              ),
+              PageHeaderWidget(),
               Padding(
                   padding: EdgeInsets.symmetric(horizontal: 10.0),
                   child: Column(
@@ -289,7 +240,19 @@ class _FavoritePageState extends State<FavoritePage> {
           ),
         ),
       ),
+      floatingActionButton: Container(
+        margin: EdgeInsets.symmetric(vertical: 100.0),
+        child: FloatingActionButton(
+            backgroundColor: ColorsData.purple00A,
+            shape: CircleBorder(),
+            onPressed: () => {},
+            child: SvgPicture.asset(
+                AssetsData.chatIcon
+            )
+        ),
+      ),
     );
+
   }
 
   @override

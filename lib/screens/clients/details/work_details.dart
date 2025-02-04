@@ -3,8 +3,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:tech/core/const/colors.dart';
-import 'package:tech/screens/widgets/titleWidget.dart';
-import 'package:tech/screens/widgets/WorkerPresentationCard.dart';
+import 'package:tech/screens/clients/widgets/titleWidget.dart';
+import 'package:tech/screens/clients/widgets/WorkerPresentationCard.dart';
 
 import '../../../core/const/assets.dart';
 

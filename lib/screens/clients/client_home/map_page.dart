@@ -3,10 +3,12 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:tech/core/const/assets.dart';
 import 'package:tech/core/const/colors.dart';
 import 'package:tech/screens/clients/client_home/search_page.dart';
+import 'package:tech/screens/clients/widgets/PageHeaderWidget.dart';
 
-import '../../widgets/RoundedWorkCard.dart';
-import '../../widgets/WorkerPresentationCard.dart';
-import '../../widgets/titleWidget.dart';
+import '../../clients/widgets/RoundedWorkCard.dart';
+import '../../clients/widgets/WorkerPresentationCard.dart';
+import '../../clients/widgets/menuCirculaireWidget.dart';
+import '../../clients/widgets/titleWidget.dart';
 
 class MapPage extends StatefulWidget {
   const MapPage({super.key});
@@ -24,51 +26,7 @@ class _MapPageState extends State<MapPage> {
           SingleChildScrollView(
               child: Column(
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Card(
-                        color: ColorsData.purple267,
-                        surfaceTintColor: ColorsData.purple267,
-                        shadowColor: ColorsData.grey,
-                        margin: EdgeInsetsDirectional.symmetric(horizontal: 15, vertical: 10 ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: SvgPicture.asset(
-                          AssetsData.menuIcon,
-                          fit: BoxFit.scaleDown,
-                          width: 38, // Largeur souhaitée
-                          height: 37,
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => SearchPage(),
-                            ),
-                          );
-                        },
-                        child: Card(
-                          color: ColorsData.purple267,
-                          surfaceTintColor: ColorsData.purple267,
-                          shadowColor: ColorsData.grey,
-                          margin: EdgeInsetsDirectional.symmetric(horizontal: 15, vertical: 10 ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: SvgPicture.asset(
-                            AssetsData.searchIcon,
-                            fit: BoxFit.scaleDown,
-                            width: 38,
-                            height: 37,
-                          ),
-                        ),
-                      )
-                    ],
-                  ),
+                  PageHeaderWidget()
                 ],
               )
           ),
@@ -187,6 +145,17 @@ class _MapPageState extends State<MapPage> {
             ),
           )
         ],
+      ),
+      floatingActionButton: Container(
+        margin: EdgeInsets.symmetric(vertical: 100.0),
+        child: FloatingActionButton(
+            backgroundColor: ColorsData.purple00A,
+            shape: CircleBorder(),
+            onPressed: () => {},
+            child: SvgPicture.asset(
+                AssetsData.chatIcon
+            )
+        ),
       ),
     );
   }

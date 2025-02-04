@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 
-import '../../core/models/profession.dart';
+import '../../../core/models/profession.dart';
 
 class ProfessionDropdown extends StatefulWidget {
   @override

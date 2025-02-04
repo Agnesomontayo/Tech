@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:tech/screens/widgets/CustomBottomNavbar.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:tech/screens/clients/client_home/search_page.dart';
+import 'package:tech/screens/clients/widgets/CustomBottomNavbar.dart';
+import '../../../core/const/assets.dart';
+import '../../../core/const/colors.dart';
+import '../widgets/menuCirculaireWidget.dart';
 import 'client_home.dart';
 import 'favorite_page.dart';
 import 'map_page.dart';
@@ -44,7 +49,7 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        toolbarHeight: 2,
+       toolbarHeight: 2,
       ),
       body: getScreen(_selectedIndex),
       extendBody: true,

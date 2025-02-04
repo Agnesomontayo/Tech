@@ -15,9 +15,8 @@ class CustumAppBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return SafeArea(
         child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 10.0),
-          margin: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
-          height: 50,
+          padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 2),
+          margin: EdgeInsets.only(top: 15.0, left: 20.0, right: 20.0),
           decoration: BoxDecoration(
             color: ColorsData.purple260.withOpacity(0.7),
             borderRadius: BorderRadius.circular(30.0)
@@ -43,6 +42,7 @@ class CustumAppBar extends StatelessWidget {
                           fontWeight: FontWeight.w900,
                           color: ColorsData.purple00A,
                           fontSize: 20,
+                          height: 1.0
                         ),
                       ),
                     ),

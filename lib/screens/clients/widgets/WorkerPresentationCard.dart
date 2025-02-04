@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:tech/screens/widgets/titleWidget.dart';
-import '../../core/const/assets.dart';
-import '../../core/const/colors.dart';
-import '../../screens/widgets/WorkerPresentationModal.dart';
+import 'package:tech/screens/clients/widgets/titleWidget.dart';
+import '../../../core/const/assets.dart';
+import '../../../core/const/colors.dart';
+import '../../../screens/clients/widgets/WorkerPresentationModal.dart';
 
 class WorkerPresentationCard extends StatelessWidget {
   final String name;

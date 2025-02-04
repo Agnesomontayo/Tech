@@ -43,4 +43,11 @@ class AssetsData {
   static String infoIcon = "$iconAssets/info.svg";
   static String logoutIcon = "$iconAssets/logout.svg";
   static String shieldIcon = "$iconAssets/shield.svg";
+  static String pageIcon = "$iconAssets/page.svg";
+  static String starIcon = "$iconAssets/star.svg";
+  static String infoBullIcon = "$iconAssets/info_bulle.svg";
+  static String favFullIcon = "$iconAssets/fav_full.svg";
+  static String logBookIcon = "$iconAssets/book.svg";
+  static String groupsIcon = "$iconAssets/groups.svg";
+  static String ratesIcon = "$iconAssets/rates.svg";
 }
