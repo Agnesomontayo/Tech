@@ -11,6 +11,8 @@ import 'package:provider/provider.dart';
 import 'package:tech/core/providers/auth_provider.dart';
 import 'package:tech/screens/clients/widgets/CustumDropdown.dart';
 
+import '../client_home/MainScreen.dart';
+
 class ClientRegistrationPage extends StatefulWidget {
   @override
   _ClientRegistrationPageState createState() => _ClientRegistrationPageState();
@@ -22,7 +24,7 @@ class ClientRegistrationPage extends StatefulWidget {
     final TextEditingController cpasswordController = TextEditingController();
     final TextEditingController emailController = TextEditingController();
     final TextEditingController numberController = TextEditingController();
-    String signUpMessage = ''; // Ajoutez cette ligne pour stocker le message
+    String signUpMessage = '';
 
     bool? rememberMe = false;
     bool isButtonPressed = false;
@@ -31,11 +33,11 @@ class ClientRegistrationPage extends StatefulWidget {
 
     @override
     Widget build(BuildContext context) {
-      final authProvider = Provider.of<AuthProvider>(context, listen: false); // Obtenir une référence à AuthProvider
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
       return Scaffold(
         body: RefreshIndicator(
           onRefresh: _handleRefresh,
-          child: SingleChildScrollView( // Utiliser SingleChildScrollView pour éviter l'erreur "bottom overflowed"
+          child: SingleChildScrollView(
             child: Stack(
               children: [
                 Positioned(
@@ -152,7 +154,7 @@ class ClientRegistrationPage extends StatefulWidget {
                             hintText: '+229 XX-XX-XX-XX ',
                             controller: numberController,
                             obscureText: false,
-                            keyboardType: TextInputType.phone, // Utiliser TextInputType.phone pour le clavier numérique
+                            keyboardType: TextInputType.phone,
                             prefixIcon: Icon(
                               Icons.local_phone_outlined,
                               color: ColorsData.purple00A,
@@ -187,34 +189,31 @@ class ClientRegistrationPage extends StatefulWidget {
                         ),
                         ElevatedButton(
                           onPressed: () async{
-                            // Handle login button pressed
-                            String nom  =  nameController.text;
-                            String prenom = firstnameController.text;
+                            String lastName  =  nameController.text;
+                            String firstName = firstnameController.text;
                             String email = emailController.text;
                             String password = passwordController.text;
                             String cpassword = cpasswordController.text;
                             String phonenumber  =  numberController.text;
 
                             String signUpResult = await authProvider.signUpClient(
-                              nom,
-                              prenom,
+                              lastName,
+                              firstName,
                               email,
                               password,
                               phonenumber,
                             );
-                            // Traiter le résultat de l'inscription
+
                             if (signUpResult.isEmpty) {
-                              // L'inscription a réussi, vous pouvez naviguer vers une nouvelle page par exemple
-                              debugPrint('Inscription r\éussie: $signUpResult');
+                                debugPrint('Inscription r\éussie: $signUpResult');
                               Navigator.push(
                                 context,
-                                MaterialPageRoute(builder: (context) => SuccessPage()),
+                                MaterialPageRoute(builder: (context) => MainScreen()),
                               );
                             } else {
-                              // L'inscription a échoué, affichez un message d'erreur à l'utilisateur
-                              debugPrint('Échec de l\'inscription : $signUpResult');
+                               debugPrint('Échec de l\'inscription : $signUpResult');
                               setState(() {
-                                signUpMessage = signUpResult; // Mettre à jour le message
+                                signUpMessage = signUpResult;
                              //   isButtonPressed = !isButtonPressed; // Inverser la valeur de isButtonPressed
                               });
                             }
@@ -247,11 +246,11 @@ class ClientRegistrationPage extends StatefulWidget {
                             ),
                           ),
                         ),
-                        SizedBox(height: 10), // Ajoutez un espace vertical
+                        SizedBox(height: 10),
                         Text(
-                          signUpMessage, // Utilisez le message stocké dans l'état
+                          signUpMessage,
                           style: TextStyle(
-                            color: Colors.red, // Couleur du texte en fonction du type de message
+                            color: Colors.red,
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                           ),
@@ -264,12 +263,12 @@ class ClientRegistrationPage extends StatefulWidget {
               ],
             ),
           ),
-          displacement: 80, // Ajuster la distance de déplacement pour afficher l'indicateur de rafraîchissement (par défaut, c'est 40)
-          color: ColorsData.purple00A, // Couleur de l'indicateur de rafraîchissement circulaire
-          backgroundColor: Colors.white, // Couleur de fond de l'indicateur de rafraîchissement circulaire
-          strokeWidth: 2.5, // Épaisseur du cercle de chargement
-          semanticsLabel: "Pull to refresh", // Libellé pour les lecteurs d'écran
-          semanticsValue: "Refresh", // Valeur pour les lecteurs d'écran
+          displacement: 80,
+          color: ColorsData.purple00A,
+          backgroundColor: Colors.white,
+          strokeWidth: 2.5,
+          semanticsLabel: "Pull to refresh",
+          semanticsValue: "Refresh",
         ),
       );
     }
@@ -284,9 +283,8 @@ class ClientRegistrationPage extends StatefulWidget {
         signUpMessage = '';
       });
 
-      await Future.delayed(Duration(seconds: 1)); // Simule un chargement asynchrone de données
-
-      setState(() {}); // Pour signaler à Flutter que l'état de la page a changé
+      await Future.delayed(Duration(seconds: 1));
+      setState(() {});
     }
   }
 

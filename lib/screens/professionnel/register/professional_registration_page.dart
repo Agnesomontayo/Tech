@@ -15,6 +15,7 @@ import 'package:dio/dio.dart';
 import 'package:tech/core/providers/auth_provider.dart';
 
 import '../../../core/models/profession.dart';
+import '../professionnel_home/MainScreenProfessionnal.dart';
 
 class ProfessionalRegistrationPage extends StatefulWidget {
   @override
@@ -35,8 +36,8 @@ class _ProfessionalRegistrationPageState  extends State<ProfessionalRegistration
   String? selectedValue;
   String errorMessage = '';
   List<Profession> professions = [];
-  int? selectedProfessionId;// Liste des professions
-  //Profession? selectedProfession; // Utiliser le type Profession au lieu d'int
+  int? selectedProfessionId;
+  //Profession? selectedProfession;
 
   bool isRefreshing = false;
 
@@ -61,7 +62,7 @@ class _ProfessionalRegistrationPageState  extends State<ProfessionalRegistration
         print('Réponse non réussie. Code de statut : ${response.statusCode}');
       }
     } catch (error) {
-      // Gérer les erreurs
+
       print('Erreur lors de la récupération des professions : $error');
     }
   }
@@ -69,11 +70,11 @@ class _ProfessionalRegistrationPageState  extends State<ProfessionalRegistration
 
   @override
   Widget build(BuildContext context) {
-    final authProvider = Provider.of<AuthProvider>(context, listen: false); // Obtenir une référence à AuthProvider
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
     return Scaffold(
       body: RefreshIndicator(
         onRefresh: _handleRefresh,
-     child: SingleChildScrollView( // Utiliser SingleChildScrollView pour éviter l'erreur "bottom overflowed"
+     child: SingleChildScrollView(
         child: Stack(
           children: [
             Positioned(
@@ -190,7 +191,7 @@ class _ProfessionalRegistrationPageState  extends State<ProfessionalRegistration
                         hintText: '+229 XX-XX-XX-XX ',
                         controller: numberController,
                         obscureText: false,
-                        keyboardType: TextInputType.phone, // Utiliser TextInputType.phone pour le clavier numérique
+                        keyboardType: TextInputType.phone,
                         prefixIcon: Icon(
                           Icons.local_phone_outlined,
                           color: ColorsData.purple00A,
@@ -222,10 +223,9 @@ class _ProfessionalRegistrationPageState  extends State<ProfessionalRegistration
                     SizedBox(height: 10),
                     Builder(
                       builder: (BuildContext context) {
-                        // Utiliser un Builder pour envelopper le CustomDropdown
                         return
                           CustomDropdown(
-                            value: selectedProfessionId, // Utiliser null pour afficher une valeur vide pendant le rafraîchissement
+                            value: selectedProfessionId,
                             hintText: 'Select a profession',
                             prefixIcon: Icon(
                               Icons.work_outline_rounded,
@@ -235,13 +235,13 @@ class _ProfessionalRegistrationPageState  extends State<ProfessionalRegistration
                             onChanged: (value) {
                               final selectedProfession = professions.firstWhere((profession) => profession.id == value);
                               setState(() {
-                                selectedProfessionId = value;// Assurez-vous que value est de type Profession
+                                selectedProfessionId = value;
                               });
                             },
 
                             options: professions.map((Profession profession) {
                               return DropdownOption(
-                                value: profession.id,  // Assurez-vous que la valeur correspond à ce que vous attendez
+                                value: profession.id,
                                 label: profession.label,
                               );
                             }).toList(),
@@ -266,9 +266,8 @@ class _ProfessionalRegistrationPageState  extends State<ProfessionalRegistration
                     Text(errorMessage, style: TextStyle(color: Colors.red)),
                     ElevatedButton(
                       onPressed: () async {
-                        // Handle login button pressed
-                        String nom = nameController.text;
-                        String prenom = firstnameController.text;
+                        String lastName = nameController.text;
+                        String firstName = firstnameController.text;
                         String email = emailController.text;
                         String password = passwordController.text;
                         String cpassword = cpasswordController.text;
@@ -276,43 +275,32 @@ class _ProfessionalRegistrationPageState  extends State<ProfessionalRegistration
                         String experience = experienceController.text;
 
                         if (password == cpassword) {
-                          // Les mots de passe correspondent, procédez à l'inscription
-
-                          // Affichez un log avant l'inscription
                           debugPrint('Tentative d\'inscription...');
 
-                          print('Nom: $nom');
-                          print('Prénom: $prenom');
+                          print('Nom: $lastName');
+                          print('Prénom: $firstName');
                           print('Email: $email');
                           print('Numéro de téléphone: $phonenumber');
                           print('Expérience: $experience');
                           print('Profession ID: $selectedProfessionId');
 
                           String signUpResult = await authProvider.signUpProfessional(
-                            nom,
-                            prenom,
+                            lastName,
+                            firstName,
                             email,
                             password,
                             phonenumber,
                             experience,
                             selectedProfessionId.toString(),
                           );
-
-                          // Traitez le résultat de l'inscription
                           if (signUpResult.isEmpty) {
-                            // L'inscription a réussi
-
-                            // Affichez un log après l'inscription réussie
                             debugPrint('Inscription réussie');
 
                             Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (context) => SuccessPage()),
+                              MaterialPageRoute(builder: (context) => MainScreenProfessionnal()),
                             );
                           } else {
-                            // L'inscription a échoué
-
-                            // Affichez un log en cas d'échec d'inscription
                             debugPrint('Échec de l\'inscription : $signUpResult');
 
                             setState(() {
@@ -321,9 +309,6 @@ class _ProfessionalRegistrationPageState  extends State<ProfessionalRegistration
                             });
                           }
                         } else {
-                          // Les mots de passe ne correspondent pas
-
-                          // Affichez un log en cas de non-correspondance des mots de passe
                           debugPrint('Les mots de passe ne correspondent pas');
 
                           setState(() {
@@ -331,7 +316,7 @@ class _ProfessionalRegistrationPageState  extends State<ProfessionalRegistration
                           });
                         }
                         setState(() {
-                          isButtonPressed = !isButtonPressed; // Inverser la valeur de isButtonPressed
+                          isButtonPressed = !isButtonPressed;
                         });
                       },
                       /*style: ElevatedButton.styleFrom(
@@ -369,12 +354,12 @@ class _ProfessionalRegistrationPageState  extends State<ProfessionalRegistration
           ],
         ),
       ),
-        displacement: 80, // Ajuster la distance de déplacement pour afficher l'indicateur de rafraîchissement (par défaut, c'est 40)
-        color: ColorsData.purple00A, // Couleur de l'indicateur de rafraîchissement circulaire
-        backgroundColor: Colors.white, // Couleur de fond de l'indicateur de rafraîchissement circulaire
-        strokeWidth: 2.5, // Épaisseur du cercle de chargement
-        semanticsLabel: "Pull to refresh", // Libellé pour les lecteurs d'écran
-        semanticsValue: "Refresh", // Valeur pour les lecteurs d'écran
+        displacement: 80,
+        color: ColorsData.purple00A,
+        backgroundColor: Colors.white,
+        strokeWidth: 2.5,
+        semanticsLabel: "Pull to refresh",
+        semanticsValue: "Refresh",
       ),
     );
   }
@@ -386,11 +371,11 @@ class _ProfessionalRegistrationPageState  extends State<ProfessionalRegistration
     firstnameController.clear();
     numberController.clear();
     experienceController.clear();
-    //resetDropdown(); // Réinitialiser le dropdown
+    //resetDropdown();
 
 
-    await Future.delayed(Duration(seconds: 1)); // Simule un chargement asynchrone de données
+    await Future.delayed(Duration(seconds: 1));
 
-    setState(() {}); // Pour signaler à Flutter que l'état de la page a changé
+    setState(() {});
   }
 }

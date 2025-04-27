@@ -5,21 +5,21 @@ class Client extends User {
 
   Client({
     required int id,
-    required String nom,
-    required String prenom,
+    required String lastName,
+    required String firstName,
     required String phonenumber,
     required String email,
-    required String typeprofil,
-  }) : super(id: id, nom: nom, prenom: prenom, email: email, phonenumber: phonenumber,typeprofil: typeprofil);
+    required String typeprofile,
+  }) : super(id: id, lastName: lastName, firstName: firstName, email: email, phonenumber: phonenumber,typeprofile: typeprofile);
 
   factory Client.fromJson(Map<String, dynamic> json) {
     return Client(
       id: json['id'],
-      nom: json['nom'],
-      prenom: json['prenom'],
+      lastName: json['lastName'],
+      firstName: json['firstName'],
       phonenumber: json['phonenumber'],
       email: json['email'],
-      typeprofil: json['typeprofil'],
+      typeprofile: json['typeprofile'],
     );
   }
 }

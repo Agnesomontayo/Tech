@@ -6,12 +6,14 @@ import 'package:tech/screens/professionnel/widgets/menuCirsulaireWidget.dart';
 
 import '../../../core/const/assets.dart';
 import '../../../core/const/colors.dart';
+import '../../../core/providers/app_provider.dart';
 import '../../clients/client_home/all_services.dart';
 import '../../clients/client_home/all_works.dart';
 import '../../clients/details/work_details.dart';
 import '../../professionnel/widgets/ServicePresentationCard.dart';
 import '../../clients/widgets/WorkCardWidget.dart';
 import '../../clients/widgets/titleWidget.dart';
+import 'package:provider/provider.dart';
 
 class ProfessionnelHome extends StatefulWidget {
   const ProfessionnelHome({super.key});
@@ -25,10 +27,32 @@ class _ProfessionnelHomeState extends State<ProfessionnelHome> {
   bool _showLeftButton = false;
   bool _showRightButton = true;
 
+  Map<String, dynamic>? _profile;
+  bool _isLoading = true;
+
+
+  Future<void> _loadProfile() async {
+    try {
+      final appProvider = Provider.of<AppProvider>(context, listen: false);
+      final data = await appProvider.getProfile();
+      setState(() {
+        _profile = data;
+        _isLoading = false;
+      });
+    } catch (error) {
+      print('Erreur de chargement du profil : $error');
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_scrollListener);
+    _loadProfile();
   }
 
   void _scrollListener() {
@@ -113,7 +137,7 @@ class _ProfessionnelHomeState extends State<ProfessionnelHome> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Bonjour ',
+                          'Bonjour ${_profile!['lastname'] ?? ''} ' ,
                           style: GoogleFonts.commissioner(
                             textStyle: TextStyle(
                               color: ColorsData.purple13,

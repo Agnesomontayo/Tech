@@ -2,28 +2,28 @@ import 'package:flutter/cupertino.dart';
 
 class User {
   final int id;
-  final String nom;
-  final String prenom;
+  final String lastName;
+  final String firstName;
   final String email;
-  final String typeprofil;
+  final String typeprofile;
   final String phonenumber;
 
   User({
     required this.id,
-    required this.nom,
-    required this.prenom,
+    required this.lastName,
+    required this.firstName,
     required this.email,
-    required this.typeprofil,
+    required this.typeprofile,
     required this.phonenumber,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
       id: json['id'],
-      nom: json['nom'],
-      prenom: json['prenom'],
+      lastName: json['lastName'],
+      firstName: json['firstName'],
       email: json['email'],
-      typeprofil: json['typeprofil'],
+      typeprofile: json['typeprofile'],
       phonenumber: json['phonenumber'],
     );
 
@@ -31,11 +31,11 @@ class User {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'nom': nom,
-      'prenom': prenom,
+      'lastName': lastName,
+      'firstName': firstName,
       'email': email,
       'phonenumber': phonenumber,
-      'typeprofil': typeprofil,
+      'typeprofile': typeprofile,
     };
   }
 }

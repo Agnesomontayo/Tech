@@ -4,11 +4,15 @@ import 'package:tech/core/const/assets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:tech/screens/clients/client_home/client_home.dart';
+import 'package:tech/screens/professionnel/professionnel_home/professionnel_home.dart';
 import 'package:tech/screens/register/successPage.dart';
 import 'package:tech/screens/clients/widgets/CustumInputs.dart';
 import 'package:tech/core/providers/auth_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/services.dart';
+
+import '../clients/client_home/MainScreen.dart';
+import '../professionnel/professionnel_home/MainScreenProfessionnal.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -19,7 +23,6 @@ class _LoginPageState extends State<LoginPage> {
   @override
   void initState() {
     super.initState();
-    // Activer le mode immersif lorsque la page est affichée
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   }
   final TextEditingController emailController = TextEditingController();
@@ -27,16 +30,16 @@ class _LoginPageState extends State<LoginPage> {
   bool? rememberMe = false;
   bool isButtonPressed = false;
   bool isLinkPressed = false;
-  bool LinkPressed = false; // État pour indiquer si le lien a été cliqué
+  bool LinkPressed = false;
   String errorMessage = '';
 
   @override
   Widget build(BuildContext context) {
-    final authProvider = Provider.of<AuthProvider>(context, listen: false); // Obtenir une référence à AuthProvider
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
     return Scaffold(
       body: RefreshIndicator(
         onRefresh: _handleRefresh,
-        child: SingleChildScrollView( // Utiliser SingleChildScrollView pour éviter l'erreur "bottom overflowed"
+        child: SingleChildScrollView(
         child: Stack(
           children: [
             Positioned(
@@ -175,9 +178,8 @@ class _LoginPageState extends State<LoginPage> {
                         GestureDetector(
                           onTap: () {
                             setState(() {
-                              LinkPressed = !LinkPressed; // Inverser l'état du lien lorsqu'il est cliqué
+                              LinkPressed = !LinkPressed;
                             });
-                            // Ajouter ici la navigation vers la page d'inscription
                           },
                           child: RichText(
                             text: TextSpan(
@@ -186,7 +188,7 @@ class _LoginPageState extends State<LoginPage> {
                                 color: ColorsData.purple00A,
                                 fontWeight: FontWeight.w700,
                                 fontSize: 12,
-                                decoration: LinkPressed ? TextDecoration.underline : TextDecoration.none, // Souligner le texte si le lien est cliqué
+                                decoration: LinkPressed ? TextDecoration.underline : TextDecoration.none,
                               ),
                             ),
                           ),
@@ -199,38 +201,40 @@ class _LoginPageState extends State<LoginPage> {
                     Text(errorMessage, style: TextStyle(color: Colors.red)),
                     ElevatedButton(
                       onPressed: () async {
-                        // Handle login button pressed
                         String email = emailController.text;
                         String password = passwordController.text;
-                        // Perform login operation
+
                         debugPrint('Connexion...');
-                        String logInResult = await authProvider.logIn(
-                          email,
-                          password,
-                        );
+                        final loginResult = await authProvider.logIn(email, password);
 
-                        if (logInResult.isEmpty) {
-                          // L'inscription a réussi
+                        final errorMessage = loginResult['error'];
+                        final profileType = loginResult['profileType'];
 
-                          // Affichez un log après l'inscription réussie
+                        if (errorMessage.isEmpty) {
                           debugPrint('Connexion réussie');
 
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => ClientHome()),
-                          );
-                        } else {
-                          // L'inscription a échoué
+                          if (profileType == 'client') {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => MainScreen()),
+                            );
+                          } else if (profileType == 'professional') {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => MainScreenProfessionnal()),
+                            );
+                          } else {
+                            debugPrint('Type de profil inconnu : $profileType');
+                          }
 
-                          // Affichez un log en cas d'échec d'inscription
-                          debugPrint('Échec de connexion : $logInResult');
+                        } else {
+                          debugPrint('Échec de connexion : $errorMessage');
 
                           setState(() {
-                            errorMessage = 'Mot de passe ou e-mail incorrect';
+                            this.errorMessage = 'Mot de passe ou e-mail incorrect';
                             isButtonPressed = !isButtonPressed;
                           });
                         }
-
                       },
 
                       child: Container(
@@ -265,11 +269,9 @@ class _LoginPageState extends State<LoginPage> {
                     GestureDetector(
                       onTap: () {
                         setState(() {
-                          isLinkPressed = !isLinkPressed; // Inverser l'état du lien lorsqu'il est cliqué
+                          isLinkPressed = !isLinkPressed;
                         });
-                        // Ajouter ici la navigation vers la page d'inscription
-                        // Par exemple, si vous utilisez les routes nommées, vous pouvez utiliser :
-                        Navigator.pushNamed(context, '/signup');
+                       Navigator.pushNamed(context, '/signup');
                       },
                       child: RichText(
                         text: TextSpan(
@@ -301,12 +303,12 @@ class _LoginPageState extends State<LoginPage> {
           ],
         ),
       ),
-        displacement: 80, // Ajuster la distance de déplacement pour afficher l'indicateur de rafraîchissement (par défaut, c'est 40)
-        color: ColorsData.purple00A, // Couleur de l'indicateur de rafraîchissement circulaire
-        backgroundColor: Colors.white, // Couleur de fond de l'indicateur de rafraîchissement circulaire
-        strokeWidth: 2.5, // Épaisseur du cercle de chargement
-        semanticsLabel: "Pull to refresh", // Libellé pour les lecteurs d'écran
-        semanticsValue: "Refresh", // Valeur pour les lecteurs d'écran
+        displacement: 80,
+        color: ColorsData.purple00A,
+        backgroundColor: Colors.white,
+        strokeWidth: 2.5,
+        semanticsLabel: "Pull to refresh",
+        semanticsValue: "Refresh",
       ),
 
     );
@@ -315,8 +317,8 @@ class _LoginPageState extends State<LoginPage> {
     emailController.clear();
     passwordController.clear();
 
-    await Future.delayed(Duration(seconds: 1)); // Simule un chargement asynchrone de données
+    await Future.delayed(Duration(seconds: 1));
 
-    setState(() {}); // Pour signaler à Flutter que l'état de la page a changé
+    setState(() {});
   }
 }

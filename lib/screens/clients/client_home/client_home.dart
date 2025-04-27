@@ -21,6 +21,8 @@ import 'package:tech/screens/clients/widgets/WorkCardWidget.dart';
 import 'package:tech/screens/clients/widgets/CustumAppBar.dart';
 import 'package:tech/screens/clients/client_home/search_page.dart';
 
+import '../../../core/helpers/apiHelpers.dart';
+import '../../../core/providers/app_provider.dart';
 import '../../clients/widgets/ServicePresentationCard.dart';
 import 'all_services.dart';
 
@@ -35,10 +37,33 @@ class _ClientHomeState extends State<ClientHome> {
   bool _showLeftButton = false;
   bool _showRightButton = true;
 
+  Map<String, dynamic>? _profile;
+  bool _isLoading = true;
+  String baseImageUrl = '';//await ApiHelper.getApiUrl();
+
+
+  Future<void> _loadProfile() async {
+    try {
+      baseImageUrl = await ApiHelper.getApiUrl();
+      final appProvider = Provider.of<AppProvider>(context, listen: false);
+      final data = await appProvider.getProfile();
+      setState(() {
+        _profile = data;
+        _isLoading = false;
+      });
+    } catch (error) {
+      print('Erreur de chargement du profil : $error');
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_scrollListener);
+    _loadProfile();
   }
 
   void _scrollListener() {
@@ -67,7 +92,9 @@ class _ClientHomeState extends State<ClientHome> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: RefreshIndicator(
+      body: _profile == null
+          ? Center(child: CircularProgressIndicator())
+          : RefreshIndicator(
         onRefresh: _handleRefresh,
         child: SingleChildScrollView(
           child:  Container(
@@ -103,12 +130,16 @@ class _ClientHomeState extends State<ClientHome> {
                       },
                     ),
                     Container(
-                      margin: EdgeInsets.symmetric(horizontal: 15, vertical: 10 ),
+                      margin: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
                       child: CircleAvatar(
                         radius: 20,
-                        backgroundImage: AssetImage(AssetsData.p,),
+                        backgroundImage: _profile != null
+                            ? (_profile!['avatar'] != null
+                            ? NetworkImage('${baseImageUrl}/${_profile!['avatar']}')
+                            : NetworkImage(_profile!['profile_photo_url']))
+                            : AssetImage(AssetsData.p) as ImageProvider,
                       ),
-                    )
+                    ),
                   ],
                 ),
                 Padding(
@@ -117,7 +148,7 @@ class _ClientHomeState extends State<ClientHome> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Bonjour ',
+                        'Bonjour ${_profile!['lastname'] ?? ''} ',
                         style: GoogleFonts.commissioner(
                           textStyle: TextStyle(
                             color: ColorsData.purple13,
@@ -159,7 +190,7 @@ class _ClientHomeState extends State<ClientHome> {
                       children: [
                         Padding(
                           padding: EdgeInsets.symmetric(horizontal: 15.0, vertical: 8.0),
-                          child: TitleWidget(title: 'Métiers'),
+                          child: TitleWidget(title: 'Métiers par catégories'),
                         ),
                         Container(
                           height: 200,

@@ -28,7 +28,7 @@ class WorkCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(15.0),
               color: ColorsData.purple260.withOpacity(0.7),
             ),
-            child: SvgPicture.asset(
+            child: SvgPicture.network(
               iconPath,
               fit: BoxFit.scaleDown,
               width: 15,

@@ -9,12 +9,13 @@ import 'package:tech/core/models/client.dart';
 import 'package:tech/core/services/dio_service.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:tech/core/const/const.dart';
+import 'package:tech/core/helpers/apiHelpers.dart';
 
 class AuthProvider with ChangeNotifier {
   final DioService _connectedUserServices = DioService(baseUrl: ConstData.urlBase, token: ''); // Assurez-vous que la valeur est correcte
 
   String _token = '';
-  User _user = User(id: -1, nom: '', prenom: '', email: '', phonenumber: '', typeprofil: '');
+  User _user = User(id: -1, lastName: '', firstName: '', email: '', phonenumber: '', typeprofile: '');
 
   final storage = FlutterSecureStorage();
   /*bool get isAuthenticated {
@@ -27,12 +28,14 @@ class AuthProvider with ChangeNotifier {
 
   void setUser(User user) {
     _user = user;
-    notifyListeners(); // Notifier les auditeurs que l'état a changé
+    notifyListeners();
   }
-  Future<String> logIn(String email, String password) async {
+
+  Future<Map<String, dynamic>> logIn(String email, String password) async {
     try {
+      String baseUrl = await ApiHelper.getApiUrl();
       final responseData = await _connectedUserServices.logIn(
-        url: '${ConstData.urlBase}login',
+        url: '$baseUrl/login',
         body: {
           'email': email,
           'password': password,
@@ -40,59 +43,74 @@ class AuthProvider with ChangeNotifier {
       );
       print('Response Data: $responseData');
 
-      if (responseData is Map<String, dynamic> && responseData.containsKey('token') && responseData['token'] != null) {
+      if (responseData is Map<String, dynamic> && responseData.containsKey('token') && responseData.containsKey('user')) {
         final token = responseData['token'];
+        final user = responseData['user'];
 
-        // Stockez le token de manière sécurisée
         await storage.write(key: 'authToken', value: token);
 
-        return ''; // Authentification réussie
-      } else {
-        // Si l'API renvoie un message d'erreur explicite, utilisez-le
-        if (responseData is Map<String, dynamic> && responseData.containsKey('message')) {
-          // Affichez le message d'erreur à l'utilisateur
-          final apiError = responseData['message'];
-          return apiError;
-        }
+        await storage.write(key: 'userId', value: user['id'].toString());
+        await storage.write(key: 'typeprofile', value: user['typeprofile']);
+        await storage.write(key: 'email', value: user['email']);
 
-        // Sinon, affichez un message générique
-        return 'Mot de passe ou e-mail incorrect';
+        notifyListeners();
+        return {
+          'error': '',
+          'profileType': user['typeprofile'],
+        };
+      } else {
+        final apiError = responseData['message'] ?? 'Mot de passe ou e-mail incorrect';
+        return {
+          'error': apiError,
+          'profileType': '',
+        };
       }
     } catch (error) {
-      // En cas d'erreur réseau ou autre, affichez l'erreur complète
       print('Erreur lors de l\'authentification : $error');
-      return 'Erreur lors de l\'authentification : $error';
+      return {
+        'error': 'Erreur lors de l\'authentification : $error',
+        'profileType': '',
+      };
     }
   }
-  Future<void> logOut() async {
-    // Appelez votre API de déconnexion
-    // Effacez également les données du token et de l'utilisateur ici
 
+  Future<void> logOut() async {
     notifyListeners();
   }
 
 
-  Future<String> signUpClient(String nom, String prenom, String email, String password, String phonenumber) async {
+  Future<String> signUpClient(String firstName, String lastName, String email, String password, String phonenumber) async {
     try {
+      String baseUrl = await ApiHelper.getApiUrl();
       final responseData = await _connectedUserServices.signUp(
-        url: '${ConstData.urlBase}register',
+        url: '$baseUrl/register',
         body: {
-          'nom': nom,
-          'prenom': prenom,
+          'firstName': firstName,
+          'lastName': lastName,
           'email': email,
           'password': password,
           'phonenumber': phonenumber,
-          'typeprofil': 'client',
+          'typeprofile': 'client',
         },
       );
 
-      print('Response Data: $responseData'); // Affichez la réponse renvoyée par l'API dans la console
+      print('Response Data: $responseData');
       if (responseData != null) {
-        if (responseData['success'] != null && responseData['success'] is bool && responseData['success']) {
-          if (responseData['token'] != null) { // Vérifiez la présence du champ "token"
-            _token = responseData['token'];
+        if (responseData['success'] != null && responseData['success'] == true) {
+          if (responseData['token'] != null) {
+            final token = responseData['token'];
+            final user = responseData['user'];
+
+            await storage.write(key: 'authToken', value: token);
+
+            await storage.write(key: 'userId', value: user['id'].toString());
+            await storage.write(key: 'profileType', value: user['typeprofile']);
+            await storage.write(key: 'email', value: user['email']);
+
+            _token = token;
             notifyListeners();
-            return ''; // Inscription réussie
+
+            return '';
           } else {
             return 'La réponse ne contient pas de jeton (token)';
           }
@@ -107,18 +125,18 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  Future<String> signUpProfessional(String nom, String prenom, String email, String password, String phonenumber, String experience, String profession) async {
+  Future<String> signUpProfessional(String firstName, String lastName, String email, String password, String phonenumber, String experience, String profession) async {
     try {
-
+      String baseUrl = await ApiHelper.getApiUrl();
       final responseData = await _connectedUserServices.signUp(
-        url: '${ConstData.urlBase}register',
+        url: '$baseUrl/register',
         body: {
-          'nom': nom,
-          'prenom': prenom,
+          'firstName': firstName,
+          'lastName': lastName,
           'email': email,
           'password': password,
           'phonenumber': phonenumber,
-          'typeprofil': 'professionnel',
+          'typeprofile': 'professionnel',
           'experience': experience,
           'profession': profession,
         },
@@ -128,9 +146,18 @@ class AuthProvider with ChangeNotifier {
       if (responseData != null){
         if(responseData['success'] != null && responseData['success'] is bool && responseData['success']){
           if (responseData['token'] != null){
-            _token = responseData['token'];
+            final token = responseData['token'];
+            final user = responseData['user'];
+
+            await storage.write(key: 'authToken', value: token);
+
+            await storage.write(key: 'userId', value: user['id'].toString());
+            await storage.write(key: 'profileType', value: user['typeprofile']);
+            await storage.write(key: 'email', value: user['email']);
+
+            _token = token;
             notifyListeners();
-            return ''; // Inscription réussie
+            return '';
           }else {
             return 'La réponse ne contient pas de jeton (token)';
           }

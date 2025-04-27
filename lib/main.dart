@@ -4,6 +4,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:tech/screens/appTypes_page.dart';
 import 'package:tech/screens/clients/client_home/MainScreen.dart';
 import 'core/const/const.dart';
+import 'core/providers/app_provider.dart';
 import 'core/providers/auth_provider.dart';
 import 'core/services/dio_service.dart';
 import 'screens/splashscreen.dart';
@@ -21,8 +22,15 @@ void main() {
       [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown])
       .then((value) {
     initializeDateFormatting().then((_) =>  runApp(
-      ChangeNotifierProvider(
+      /*ChangeNotifierProvider(
         create: (context) => AuthProvider(),
+        child: MyApp(),
+      ),*/
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (_) => AuthProvider()),
+          ChangeNotifierProvider(create: (_) => AppProvider()),
+        ],
         child: MyApp(),
       ),
     ));
@@ -42,11 +50,11 @@ class MyApp extends StatelessWidget {
       ),
       initialRoute: '/', // Route initiale, par exemple le splash screen
       routes: {
-        '/': (context) => AppTypePage(),
+        //'/': (context) => AppTypePage(),
         // '/': (context) => MainScreen(),
-        /*'/': (context) => SplashScreen(),
+        '/': (context) => SplashScreen(),
         '/login': (context) => LoginPage(),
-        '/signup': (context) =>   RegisterPage(),*/
+        '/signup': (context) =>   RegisterPage(),
 
       },
 
