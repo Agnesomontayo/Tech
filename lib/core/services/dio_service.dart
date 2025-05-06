@@ -32,7 +32,7 @@ class DioService {
   }
 
 
-  Future<dynamic> _handleError(dynamic error) async {
+  Future<dynamic> handleError(dynamic error) async {
     if (error is DioError) {
       if (error.response != null) {
         print('Erreur dans la réponse de l\'API. Code de statut : ${error
@@ -66,28 +66,10 @@ class DioService {
       final response = await _dio.get(url);
       return response.data;
     } catch (error) {
-      return _handleError(error);
+      return handleError(error);
     }
   }
 
-  Future<dynamic> getMany({
-    required String url
-  }) async {
-    try {
-      String? token = await _getToken();
-
-      if (token == null || token.isEmpty) {
-        return {'error': 'Token non trouvé'};
-      }
-
-      _dio.options.headers['Authorization'] = 'Bearer $token';
-
-      final response = await _dio.get(url);
-      return response.data.data;
-    } catch (error) {
-      return _handleError(error);
-    }
-  }
 
   Future<dynamic> post({
     required String url,
@@ -114,7 +96,7 @@ class DioService {
                 .statusCode}');
       }
     } catch (error) {
-      return _handleError(error);
+      return handleError(error);
     }
   }
 
@@ -142,7 +124,7 @@ class DioService {
                 .statusCode}');
       }
     } catch(error) {
-        return _handleError(error);
+        return handleError(error);
     }
   }
 
@@ -159,22 +141,119 @@ class DioService {
       final response = await _dio.delete(url);
       return response.data;
     } catch (error) {
-      return _handleError(error);
+      return handleError(error);
     }
   }
+
+  Future<dynamic> postFormData({
+    required String url,
+    required FormData formData,
+  }) async {
+    try {
+      String? token = await _getToken();
+
+      if (token == null || token.isEmpty) {
+        return {'error': 'Token non trouvé'};
+      }
+
+      _dio.options.headers['Authorization'] = 'Bearer $token';
+      _dio.options.headers['Content-Type'] = 'multipart/form-data';
+      _dio.options.headers['Accept'] = 'application/json';
+
+      final response = await _dio.post(
+        url,
+        data: formData,
+        options: Options(
+          followRedirects: false,
+          validateStatus: (status) => status != null && status < 500,
+        ),
+      );
+
+      print('response ${formData}');
+
+      if (response.statusCode == 200 && response.data is Map && response.data['success'] == true) {
+        return response.data;
+      } else {
+        print('Erreur HTTP: ${response.statusCode}');
+        return {'error': 'Erreur HTTP ${response.statusCode}', 'body': response.data};
+      }
+    } catch (error) {
+      print('Erreur réseau : $error');
+      return {'error': 'Exception réseau : $error'};
+    }
+  }
+
+
 
   Future<dynamic> signUp({
     required String url,
     required Map<String, dynamic> body,
   }) async {
-    return post(url: url, body: body);
+    try {
+      final response = await _dio.post(url, data: body);
+
+      if (response.statusCode == 200) {
+        return response.data;
+      } else {
+        print('Erreur lors de l\'inscription. Code de statut : ${response
+            .statusCode}');
+        throw Exception(
+            'Erreur lors de l\'inscription. Code de statut : ${response
+                .statusCode}');
+      }
+    } catch (error) {
+      return handleError(error);
+    }
   }
 
   Future<dynamic> logIn({
     required String url,
     required Map<String, dynamic> body,
   }) async {
-    return post(url: url, body: body);
+    try {
+      final response = await _dio.post(url, data: body);
+
+      if (response.statusCode == 200) {
+        return response.data;
+      } else {
+        print('Erreur lors de la connexion. Code de statut : ${response
+            .statusCode}');
+        throw Exception(
+            'Erreur lors de la connexion. Code de statut : ${response
+                .statusCode}');
+      }
+    } catch (error) {
+      return handleError(error);
+    }
   }
 
+  Future<bool> logout(String url) async {
+    try {
+      String? token = await _getToken();
+      final storage = FlutterSecureStorage();
+      print('token ${token}');
+
+      if (token == null || token.isEmpty) {
+        print('Token non trouvé');
+        return false;
+      }
+
+      _dio.options.headers['Authorization'] = 'Bearer $token';
+      _dio.options.headers['Accept'] = 'application/json';
+
+      final response = await _dio.post(
+        url,
+      );
+
+      if (response.statusCode == 200) {
+        await storage.delete(key: 'authToken');
+        return true;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      print('Erreur logout : $e');
+      return false;
+    }
+  }
 }

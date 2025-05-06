@@ -9,8 +9,10 @@ import 'package:tech/screens/clients/user_infos/notifications_page.dart';
 import 'package:tech/screens/clients/user_infos/safety_page.dart';
 import 'package:tech/screens/clients/user_infos/settings_page.dart';
 import 'package:tech/screens/clients/widgets/PageHeaderWidget.dart';
-
+import 'package:provider/provider.dart';
 import '../../../core/const/assets.dart';
+import '../../../core/helpers/apiHelpers.dart';
+import '../../../core/providers/app_provider.dart';
 import '../../clients/widgets/menuCirculaireWidget.dart';
 
 class UserPage extends StatefulWidget {
@@ -21,9 +23,49 @@ class UserPage extends StatefulWidget {
 }
 
 class _UserPageState extends State<UserPage> {
+  String baseImageUrl = '';
+  Map<String, dynamic>? _profile;
+
+  @override
+  Future<void> _loadProfile() async {
+    try {
+      baseImageUrl = await ApiHelper.getApiUrl();
+      final appProvider = Provider.of<AppProvider>(context, listen: false);
+      final data = await appProvider.getProfile();
+      setState(() {
+        _profile = data;
+      });
+    } catch (error) {
+      print('Erreur de chargement du profil : $error');
+    }
+  }
+
+  void handleLogout() async {
+    final appProvider = Provider.of<AppProvider>(context, listen: false);
+    final success = await appProvider.logout();
+
+    if (!mounted) return;
+
+    if (success) {
+      Navigator.pushReplacementNamed(context, '/login');
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Échec de la déconnexion')),
+      );
+    }
+  }
+
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfile();
+  }
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return _profile == null
+        ? Center(child: CircularProgressIndicator())
+        : Scaffold(
       body: Column(
         children: [
           PageHeaderWidget(),
@@ -46,15 +88,16 @@ class _UserPageState extends State<UserPage> {
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           image: DecorationImage(
-                            image: AssetImage(
-                              AssetsData.p,
-                            ),
-                            // Remplacez par votre image
+                            image: _profile != null
+                                ? (_profile!['avatar'] != null
+                                ? NetworkImage('${baseImageUrl}/${_profile!['avatar']}')
+                                : NetworkImage(_profile!['profile_photo_url']))
+                                : AssetImage(AssetsData.p) as ImageProvider,
                             fit: BoxFit.cover,
                           ),
                         ),
                       ),
-                    ),
+                    ),/*
                     Positioned(
                       bottom: 20,
                       right: 15,
@@ -75,7 +118,7 @@ class _UserPageState extends State<UserPage> {
                           size: 15,
                         ),
                       ),
-                    ),
+                    ),*/
                   ],
                 ),
                 Container(
@@ -119,14 +162,26 @@ class _UserPageState extends State<UserPage> {
                                   )
                                 ],
                               ),
-                              onTap: () {
-                                Navigator.push(
+                              onTap: () async {
+                                final result = await Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) =>
-                                        UserInformationsPage(),
+                                        UserInformationsPage(
+                                          firstName: _profile!['firstName'],
+                                          lastName: _profile!['lastName'],
+                                          phonenumber: _profile!['phonenumber'],
+                                          email: _profile!['email'],
+                                          imageUrl: _profile!['avatar'] != null && _profile!['avatar'].toString().isNotEmpty
+                                                    ? '${baseImageUrl}/${_profile!['avatar']}'
+                                                    : _profile!['profile_photo_url'],
+                                        ),
                                   ),
+
                                 );
+                                if (result == true) {
+                                  _loadProfile();
+                                }
                               },
                             ),
                             GestureDetector(
@@ -290,7 +345,30 @@ class _UserPageState extends State<UserPage> {
                                   )
                                 ],
                               ),
-                              onTap: () {},
+                              onTap: () {
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                      title: Text('Confirmation'),
+                                      content: Text('Êtes-vous sûr de vouloir vous déconnecter ?'),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () => Navigator.of(context).pop(),
+                                          child: Text('Annuler'),
+                                        ),
+                                        TextButton(
+                                          onPressed: () {
+                                            Navigator.of(context).pop();
+                                            handleLogout();
+                                          },
+                                          child: Text('Déconnexion'),
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
+                              },
                             ),
                           ],
                         ),

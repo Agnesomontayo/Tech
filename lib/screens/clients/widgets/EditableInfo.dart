@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 class EditableInfoWidget extends StatefulWidget {
   final String label;
   final String initialValue;
+  final bool isEditable;
   final TextInputType? keyBoardType;
   final ValueChanged<String> onSave;
 
@@ -10,6 +11,7 @@ class EditableInfoWidget extends StatefulWidget {
     super.key,
     required this.label,
     required this.initialValue,
+    required this.isEditable,
     this.keyBoardType,
     required this.onSave,
   });
@@ -19,14 +21,14 @@ class EditableInfoWidget extends StatefulWidget {
 }
 
 class _EditableInfoWidgetState extends State<EditableInfoWidget> {
-  late String _currentValue; // La valeur actuelle
-  bool _isEditing = false; // Si le champ est en mode édition
+  late String _currentValue;
   final TextEditingController _controller = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     _currentValue = widget.initialValue;
+    print('initial value ${widget.initialValue}');
     _controller.text = _currentValue;
   }
 
@@ -36,19 +38,17 @@ class _EditableInfoWidgetState extends State<EditableInfoWidget> {
     super.dispose();
   }
 
-  void _toggleEditing() {
+ /* void _toggleEditing() {
     setState(() {
-      if (_isEditing) {
-        // Sauvegarder le texte modifié
+      if (widget.isEditable) {
         _currentValue = _controller.text;
         widget.onSave(_currentValue);
       } else {
-        // Entrer en mode édition
         _controller.text = _currentValue;
       }
-      _isEditing = !_isEditing;
+      widget.isEditable = !widget.isEditable;
     });
-  }
+  }*/
 
   @override
   Widget build(BuildContext context) {
@@ -69,15 +69,22 @@ class _EditableInfoWidgetState extends State<EditableInfoWidget> {
                   ),
                 ),
                 SizedBox(height: 4),
-                _isEditing
-                    ? TextField(
+                widget.isEditable
+                    ? TextFormField(
                   controller: _controller,
+                  validator: (value) =>
+                  value == null || value.isEmpty ? 'Champ requis' : null,
                   decoration: InputDecoration(
                     border: OutlineInputBorder(),
                     contentPadding: EdgeInsets.symmetric(
                         vertical: 8, horizontal: 8),
                   ),
                   keyboardType: widget.keyBoardType,
+                  onSaved: (newValue) {
+                    if (newValue != null) {
+                      widget.onSave(newValue);
+                    }
+                  },
                   autofocus: true,
                 )
                     : Text(
@@ -87,10 +94,10 @@ class _EditableInfoWidgetState extends State<EditableInfoWidget> {
               ],
             ),
           ),
-          IconButton(
-            icon: Icon(_isEditing ? Icons.check : Icons.edit),
+         /* IconButton(
+            icon: Icon(widget.isEditable ? Icons.check : Icons.edit),
             onPressed: _toggleEditing,
-          ),
+          ),*/
         ],
       ),
     );

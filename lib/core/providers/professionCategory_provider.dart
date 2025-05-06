@@ -33,8 +33,12 @@ class ProfessioncategoryProvider with ChangeNotifier {
         url: '${baseUrl}/profession_categories',
       );
 
-      if (responseData != null && responseData is List) {
-        return responseData;
+      if (responseData != null && responseData is Map<String, dynamic>) {
+        if (responseData.containsKey('data')) {
+          return responseData['data'];
+        } else {
+          throw Exception('Clé "categories" non trouvée dans la réponse');
+        }
       } else {
         throw Exception('Données de catégorie invalides');
       }

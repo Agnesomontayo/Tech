@@ -33,8 +33,12 @@ class ProfessionProvider with ChangeNotifier {
         url: '${baseUrl}/professions',
       );
 
-      if (responseData != null && responseData is List) {
-        return responseData;
+      if (responseData != null && responseData is Map<String, dynamic>) {
+        if (responseData.containsKey('data')) {
+          return responseData['data'];
+        } else {
+          throw Exception('Clé "professions" non trouvée dans la réponse');
+        }
       } else {
         throw Exception('Données de professions invalides');
       }

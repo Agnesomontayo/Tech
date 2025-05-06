@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'dart:async';
 import 'dart:convert';
@@ -15,8 +18,9 @@ import 'package:tech/core/helpers/apiHelpers.dart';
 class AppProvider with ChangeNotifier {
   final DioService _connectedUserServices = DioService(baseUrl: ConstData.urlBase, token: '');
   String _token = '';
-  Future<String?> getToken() async {
-    return await storage.read(key: 'authToken');
+  Future<String?> _getToken() async {
+    final storage = FlutterSecureStorage();
+    return await storage.read(key: 'authToken'); // Récupérer le token
   }
   User _user = User(id: -1, lastName: '', firstName: '', email: '', phonenumber: '', typeprofile: '');
 
@@ -44,4 +48,53 @@ class AppProvider with ChangeNotifier {
     }
   }
 
+  // update user profil
+
+  Future<dynamic> updateUserProfile({
+    required FormData formData,
+  }) async {
+    try {
+      String baseUrl = await ApiHelper.getApiUrl();
+      String? token = await _getToken();
+
+      if (token == null || token.isEmpty) {
+        return {'error': 'Token non trouvé'};
+      }
+
+      final response = await _connectedUserServices.postFormData(
+        url: '$baseUrl/user/update-profile',
+        formData: formData,
+      );
+
+      if (response != null && response is Map && response['success'] == true) {
+        return response;
+      } else {
+        print('Erreur réponse: $response');
+        return {'error': 'Erreur réponse: $response'};
+      }
+    } catch (error) {
+      print('Erreur updateUserProfile: $error');
+      return {'error': 'Exception updateUserProfile: $error'};
+    }
+  }
+
+  // déconnexion
+
+  Future<bool> logout() async {
+    try {
+      String baseUrl = await ApiHelper.getApiUrl();
+      String? token = await _getToken();
+
+      final response = await _connectedUserServices.logout('$baseUrl/logout');
+
+      if (response == true) {
+        return true;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      print('Erreur logout : $e');
+      return false;
+    }
+  }
 }

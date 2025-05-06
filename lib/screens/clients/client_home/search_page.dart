@@ -100,13 +100,13 @@ class _SearchPageState extends State<SearchPage> {
                                   name: 'Abraham Monie $index',
                                   rate: 4.5,
                                   availability: 'Disponible',
-                                  availabilityColor: Colors.green,
                                   distance: '500',
                                   unit: 'm',
                                   reviews: '250',
                                   imagePath: AssetsData.best,
-                                  description:
+                                  biography:
                                       'lhfzmoaijgapzhgpoakezngioznggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg',
+                                  profession: 'profesiion',
                                 );
                               },
                               childCount: 20,

@@ -38,7 +38,7 @@ class RoundedWorkCard extends StatelessWidget {
                   child: CircleAvatar(
                     radius: 70,
                     backgroundColor: ColorsData.purple267,
-                    child: SvgPicture.asset(
+                    child: SvgPicture.network(
                         workIcon,
                         fit: BoxFit.cover,
                         height: 20,

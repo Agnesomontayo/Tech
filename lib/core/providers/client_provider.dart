@@ -1,67 +1,124 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:tech/core/models/client.dart';
 import 'package:tech/core/services/dio_service.dart';
 import 'package:tech/core/providers/auth_provider.dart';
 import 'package:tech/core/const/const.dart';
 
+import '../helpers/apiHelpers.dart';
+
 class ClientProvider with ChangeNotifier {
   final DioService _dioService = DioService(baseUrl: ConstData.urlBase, token: '');
-  final AuthProvider _authProvider;
+  String _token = '';
+  Future<String?> getToken() async {
+    return await storage.read(key: 'authToken');
+  }
+ // User _user = User(id: -1, lastName: '', firstName: '', email: '', phonenumber: '', typeprofile: '');
 
-  ClientProvider(this._authProvider);
+  final storage = FlutterSecureStorage();
 
-  Future<Map<String, dynamic>> logIn(String email, String password) async {
+  // liste des clients
+
+  Future<List<dynamic>> getManyClients() async {
     try {
-      final result = await _dioService.post(
-        url: '${ConstData.urlBase}login',
-        body: {
-          'email': email,
-          'password': password,
-        },
+      String baseUrl = await ApiHelper.getApiUrl();
+      final responseData = await _dioService.get(
+        url: '${baseUrl}/users/clients',
       );
 
-      if (result['success']) {
-        final clientData = result['data']['user'];
-        final client = Client.fromJson(clientData);
-        _authProvider.setUser(client);
+      if (responseData != null && responseData is Map<String, dynamic>) {
+        if (responseData.containsKey('data')) {
+          return responseData['data'];
+        } else {
+          throw Exception('clients non trouvés dans la réponse');
+        }
+      } else {
+        throw Exception('Données de services invalides');
       }
-
-      return result;
     } catch (error) {
-      return {'success': false, 'message': 'Une erreur s\'est produite lors de la connexion.'};
+      print('Erreur lors de la récupération des services: $error');
+      throw Exception('Impossible de récupérer les services');
     }
   }
 
-  Future<Map<String, dynamic>> signUp(
-      String nom,
-      String prenom,
-      String email,
-      String telephone,
-      String password,
-      ) async {
+  // récupérer un client
+
+  Future<Map<String, dynamic>> getOneClient (int clientId) async {
     try {
-      final result = await _dioService.post(
-        url: '${ConstData.urlBase}register',
-        body: {
-          'nom': nom,
-          'prenom': prenom,
-          'email': email,
-          'telephone': telephone,
-          'password': password,
-        },
+      String baseUrl = await ApiHelper.getApiUrl();
+      final responseData = await _dioService.get(
+        url: '${baseUrl}/users/clients/${clientId}',
       );
+      print('client info $responseData');
 
-      if (result['success']) {
-        final clientData = result['data']['user'];
-        final client = Client.fromJson(clientData);
-        _authProvider.setUser(client);
+      if (responseData != null) {
+        return responseData;
+      } else {
+        throw Exception('Ce client n\'existe pas');
       }
-
-      return result;
     } catch (error) {
-      return {'success': false, 'message': 'Une erreur s\'est produite lors de l\'inscription.'};
+      print('Erreur lors de la récupération le client: $error');
+      throw Exception('Impossible de récupérer le client');
     }
   }
 
-// Ajoutez d'autres méthodes spécifiques au client si nécessaire
+// modifier un client
+
+
+
+// supprimer un compte client
+
+// récupérer les clients qui peeuvent réaliser un service
+
+/*
+  Future<List<dynamic>> getClientsByService(int serviceId) async {
+    try {
+      String baseUrl = await ApiHelper.getApiUrl();
+      final responseData = await _dioService.get(
+        url: '${baseUrl}/professionals/by-service/${serviceId}',
+      );
+
+      if (responseData != null && responseData is Map<String, dynamic>) {
+        print('service professional ${responseData}');
+        if (responseData.containsKey('professionals')) {
+          return responseData['professionals'];
+        } else {
+          throw Exception('Clé "professionals" non trouvée dans la réponse');
+        }
+      } else {
+        throw Exception('Données de clients invalides');
+      }
+    } catch (error) {
+      print('Erreur lors de la récupération des clients: $error');
+      throw Exception('Impossible de récupérer les clients');
+    }
+  }
+
+  // récupérer les clients en fonction des catégories de services
+
+  Future<List<dynamic>> getClientsByCategory(int categoryId) async {
+    try {
+      String baseUrl = await ApiHelper.getApiUrl();
+      final responseData = await _dioService.get(
+        url: '${baseUrl}/professionals/by-category/${categoryId}',
+      );
+
+      if (responseData != null && responseData is Map<String, dynamic>) {
+        print('service professionals ${responseData}');
+        if (responseData.containsKey('professionals')) {
+          return responseData['professionals'];
+        } else {
+          throw Exception('Clé "professionals" non trouvée dans la réponse');
+        }
+      } else {
+        throw Exception('Données de clients invalides');
+      }
+    } catch (error) {
+      print('Erreur lors de la récupération des clients: $error');
+      throw Exception('Impossible de récupérer les clients');
+    }
+  }
+*/
+
+
 }

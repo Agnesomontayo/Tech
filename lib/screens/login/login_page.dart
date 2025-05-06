@@ -218,7 +218,7 @@ class _LoginPageState extends State<LoginPage> {
                               context,
                               MaterialPageRoute(builder: (context) => MainScreen()),
                             );
-                          } else if (profileType == 'professional') {
+                          } else if (profileType == 'professionnel') {
                             Navigator.push(
                               context,
                               MaterialPageRoute(builder: (context) => MainScreenProfessionnal()),

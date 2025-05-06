@@ -91,11 +91,12 @@ class _FavoritePageState extends State<FavoritePage> {
                                       itemCount: 20,
                                       itemBuilder: (context, index) {
                                         return ServicePresentationCard(
-                                            iconPath: AssetsData.entretienIcon,
+                                            //iconPath: AssetsData.entretienIcon,
                                             imagePath: AssetsData.menage,
                                             serviceName:
                                                 'Nettoyage complet $index',
-                                            priceRange: '1000FCFA-3000FCFA');
+                                            //priceRange: '1000FCFA-3000FCFA'
+                                        );
                                       },
                                     ),
                                     Positioned(

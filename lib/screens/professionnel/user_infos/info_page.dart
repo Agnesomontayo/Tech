@@ -16,6 +16,8 @@ class UserInformationsPage extends StatefulWidget {
 }
 
 class _UserInformationsPageState extends State<UserInformationsPage> {
+  bool _isEditable = false;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -66,6 +68,7 @@ class _UserInformationsPageState extends State<UserInformationsPage> {
                   EditableInfoWidget(
                     label: "Prénom",
                     initialValue: "John",
+                    isEditable: _isEditable,
                     onSave: (value) {
                       print("Prénom sauvegardé : $value");
                     },
@@ -73,6 +76,7 @@ class _UserInformationsPageState extends State<UserInformationsPage> {
                   EditableInfoWidget(
                     label: "Nom",
                     initialValue: "DOE",
+                    isEditable: _isEditable,
                     onSave: (value) {
                       print("Nom sauvegardé : $value");
                     },
@@ -80,6 +84,7 @@ class _UserInformationsPageState extends State<UserInformationsPage> {
                   EditableInfoWidget(
                     label: "Profession",
                     initialValue: "Menuisier",
+                    isEditable: _isEditable,
                     onSave: (value) {
                       print("Profession sauvegardée : $value");
                     },
@@ -87,6 +92,7 @@ class _UserInformationsPageState extends State<UserInformationsPage> {
                   EditableInfoWidget(
                     label: "Numéro de téléphone",
                     initialValue: "+229 67338615",
+                    isEditable: _isEditable,
                     onSave: (value) {
                       print("Numéro de téléphone sauvegardé : $value");
                     },
@@ -94,6 +100,7 @@ class _UserInformationsPageState extends State<UserInformationsPage> {
                   EditableInfoWidget(
                     label: "Email",
                     initialValue: "john.doe@example.com",
+                    isEditable: _isEditable,
                     onSave: (value) {
                       print("Email sauvegardé : $value");
                     },

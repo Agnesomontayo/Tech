@@ -6,6 +6,7 @@ import 'package:tech/screens/professionnel/widgets/menuCirsulaireWidget.dart';
 
 import '../../../core/const/assets.dart';
 import '../../../core/const/colors.dart';
+import '../../../core/helpers/apiHelpers.dart';
 import '../../../core/providers/app_provider.dart';
 import '../../clients/client_home/all_services.dart';
 import '../../clients/client_home/all_works.dart';
@@ -28,11 +29,14 @@ class _ProfessionnelHomeState extends State<ProfessionnelHome> {
   bool _showRightButton = true;
 
   Map<String, dynamic>? _profile;
+  String baseImageUrl = '';
+
   bool _isLoading = true;
 
 
   Future<void> _loadProfile() async {
     try {
+      baseImageUrl = await ApiHelper.getApiUrl();
       final appProvider = Provider.of<AppProvider>(context, listen: false);
       final data = await appProvider.getProfile();
       setState(() {
@@ -82,7 +86,9 @@ class _ProfessionnelHomeState extends State<ProfessionnelHome> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: RefreshIndicator(
+        body: _profile == null
+            ? Center(child: CircularProgressIndicator())
+            : RefreshIndicator(
           onRefresh: _handleRefresh,
           child: SingleChildScrollView(
             child: Container(
@@ -137,7 +143,7 @@ class _ProfessionnelHomeState extends State<ProfessionnelHome> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Bonjour ${_profile!['lastname'] ?? ''} ' ,
+                          'Bonjour ${_profile!['lastName'] ?? ''}' ,
                           style: GoogleFonts.commissioner(
                             textStyle: TextStyle(
                               color: ColorsData.purple13,
@@ -188,7 +194,6 @@ class _ProfessionnelHomeState extends State<ProfessionnelHome> {
                                               borderRadius:
                                                   BorderRadius.circular(20.0)),
                                           alignment: Alignment.center,
-                                          // Centrer le texte
                                           child: Column(
                                             children: [
                                               Row(
@@ -241,7 +246,6 @@ class _ProfessionnelHomeState extends State<ProfessionnelHome> {
                                           )),
                                     ),
                                     SizedBox(width: 5),
-                                    // Espacement entre les deux conteneurs
                                     Expanded(
                                       child: Container(
                                           padding: EdgeInsets.symmetric(
@@ -252,7 +256,6 @@ class _ProfessionnelHomeState extends State<ProfessionnelHome> {
                                               borderRadius:
                                                   BorderRadius.circular(20.0)),
                                           alignment: Alignment.center,
-                                          // Centrer le texte
                                           child: Column(
                                             children: [
                                               Row(
@@ -338,7 +341,6 @@ class _ProfessionnelHomeState extends State<ProfessionnelHome> {
                               // Le cercle de gauche
                               Transform.translate(
                                 offset: Offset(-90, 10),
-                                // Décalage pour positionner le cercle à gauche
                                 child: Container(
                                   width: 90,
                                   height: 90,
@@ -351,11 +353,8 @@ class _ProfessionnelHomeState extends State<ProfessionnelHome> {
                                   ),
                                 ),
                               ),
-
-                              // Le cercle de droite
                               Transform.translate(
                                 offset: Offset(85, 10),
-                                // Décalage pour positionner le cercle à droite
                                 child: Container(
                                   width: 90,
                                   height: 90,
@@ -406,10 +405,8 @@ class _ProfessionnelHomeState extends State<ProfessionnelHome> {
                           child: Stack(
                             alignment: Alignment.center,
                             children: [
-                              // Le cercle de gauche
                               Transform.translate(
                                 offset: Offset(-110, 0),
-                                // Décalage pour positionner le cercle à gauche
                                 child: Container(
                                   width: 70,
                                   height: 70,
@@ -455,11 +452,8 @@ class _ProfessionnelHomeState extends State<ProfessionnelHome> {
                                   ),
                                 ),
                               ),
-
-                              // Le cercle de droite
                               Transform.translate(
                                 offset: Offset(55, 0),
-                                // Décalage pour positionner le cercle à droite
                                 child: Container(
                                   width: 70,
                                   height: 70,

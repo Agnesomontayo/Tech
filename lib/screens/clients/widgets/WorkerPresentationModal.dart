@@ -5,29 +5,33 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/const/assets.dart';
 import '../../../core/const/colors.dart';
+import '../../../core/helpers/utils.dart';
 
 class WorkerPresentationModal extends StatefulWidget {
   final String imagePath;
   final String name;
   final String availability;
-  final Color availabilityColor;
+
+  //final Color availabilityColor;
   final String distance;
   final String unit;
   final double rate;
   final String reviews;
-  final String description;
+  final String biography;
+  final String profession;
 
   const WorkerPresentationModal({
     super.key,
     required this.imagePath,
     required this.name,
     required this.availability,
-    required this.availabilityColor,
+    // required this.availabilityColor,
     required this.distance,
     required this.unit,
     required this.rate,
     required this.reviews,
-    required this.description,
+    required this.biography,
+    required this.profession,
   });
 
   @override
@@ -38,11 +42,13 @@ class WorkerPresentationModal extends StatefulWidget {
 class _WorkerPresentationModalState extends State<WorkerPresentationModal> {
   double currentRating = 0.0;
   bool _isClicked = false;
+  List<dynamic> clients = [];
+
 
   @override
   void initState() {
     super.initState();
-    currentRating = widget.rate; // Initialise avec la note initiale
+    currentRating = widget.rate;
   }
 
   @override
@@ -71,7 +77,11 @@ class _WorkerPresentationModalState extends State<WorkerPresentationModal> {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(43.0),
                         image: DecorationImage(
-                            image: AssetImage(widget.imagePath),
+                            image: widget.imagePath != null &&
+                                    widget.imagePath.isNotEmpty
+                                ? NetworkImage(widget.imagePath)
+                                : AssetImage(AssetsData.menage)
+                                    as ImageProvider,
                             fit: BoxFit.cover),
                       ),
                     ),
@@ -89,9 +99,14 @@ class _WorkerPresentationModalState extends State<WorkerPresentationModal> {
                                   padding: EdgeInsets.symmetric(
                                       horizontal: 20, vertical: 7),
                                   decoration: BoxDecoration(
-                                      color: widget.availabilityColor,
+                                      color: widget.availability == 'available'
+                                          ? Colors.green
+                                          : Colors.red,
                                       borderRadius: BorderRadius.circular(20)),
-                                  child: Text(widget.availability,
+                                  child: Text(
+                                      widget.availability == 'available'
+                                          ? 'Disponibble'
+                                          : 'Indisponible',
                                       style: GoogleFonts.karla(
                                         textStyle: TextStyle(
                                             fontWeight: FontWeight.w400,
@@ -116,6 +131,58 @@ class _WorkerPresentationModalState extends State<WorkerPresentationModal> {
                                           fontSize: 14,
                                           color: ColorsData.grey),
                                     )),
+                                   /* RatingBar.builder(
+                                      initialRating: widget.rate,
+                                      minRating: 1,
+                                      direction: Axis.horizontal,
+                                      allowHalfRating: true,
+                                      itemCount: 5,
+                                      itemSize: 18,
+                                      itemPadding: EdgeInsets.symmetric(
+                                          horizontal: 0.0),
+                                      itemBuilder: (context, _) => Icon(
+                                        Icons.star,
+                                        color: Colors.amber,
+                                      ),
+                                      onRatingUpdate: (rating) {
+                                        setState(() {
+                                          currentRating = rating;
+                                        });
+                                      },
+                                    ),*/
+                                /* SizedBox(width: 10),
+                                    Text(
+                                      currentRating.toStringAsFixed(1),
+                                      style: TextStyle(fontSize: 14),
+                                    ),*/
+                                SizedBox(
+                                  width: 10.0,
+                                ),
+                                Icon(
+                                  Icons.star,
+                                  color: Colors.amber,
+                                  size: 14,
+                                ),
+                                Text(
+                                    widget.rate.toString(),
+                                    style: GoogleFonts.karla(
+                                      textStyle: TextStyle(
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 16,
+                                      ),
+                                    )
+                                ),
+
+                                    SizedBox(
+                                      width: 10.0,
+                                    ),
+                                    Text(' ${widget.reviews} avis',
+                                        style: GoogleFonts.karla(
+                                          textStyle: TextStyle(
+                                              fontWeight: FontWeight.w400,
+                                              fontSize: 14,
+                                              color: ColorsData.purple00C),
+                                        )),
                               ],
                             ),
                           ),
@@ -124,7 +191,7 @@ class _WorkerPresentationModalState extends State<WorkerPresentationModal> {
                               mainAxisAlignment: MainAxisAlignment.start,
                               children: [
                                 Text(
-                                  widget.name,
+                                  capitalizeEachWord(widget.name),
                                   style: GoogleFonts.karla(
                                     textStyle: TextStyle(
                                       fontWeight: FontWeight.w600,
@@ -138,47 +205,39 @@ class _WorkerPresentationModalState extends State<WorkerPresentationModal> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
-                              RatingBar.builder(
-                                initialRating: widget.rate,
-                                minRating: 1,
-                                direction: Axis.horizontal,
-                                allowHalfRating: true,
-                                itemCount: 5,
-                                itemSize: 18,
-                                itemPadding:
-                                    EdgeInsets.symmetric(horizontal: 0.0),
-                                itemBuilder: (context, _) => Icon(
-                                  Icons.star,
-                                  color: Colors.amber,
-                                ),
-                                onRatingUpdate: (rating) {
-                                  setState(() {
-                                    currentRating = rating;
-                                  });
-                                },
+                              Column(
+                                children: [
+                                  Container(
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: 12, vertical: 8),
+                                    decoration: BoxDecoration(
+                                      color:
+                                          ColorsData.purple260.withOpacity(0.5),
+                                      //border: Border.all(color: Colors.deepPurple),
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: Text(
+                                      capitalizeFirstLetter(widget.profession),
+                                      style: GoogleFonts.karla(
+                                        textStyle: TextStyle(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w600,
+                                          color: ColorsData.purple00C,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+
+                                ],
                               ),
-                              SizedBox(width: 10),
-                              Text(
-                                currentRating.toStringAsFixed(1),
-                                style: TextStyle(fontSize: 14),
-                              ),
-                              SizedBox(
-                                width: 10.0,
-                              ),
-                              Text(' ${widget.reviews} avis',
-                                  style: GoogleFonts.karla(
-                                    textStyle: TextStyle(
-                                        fontWeight: FontWeight.w400,
-                                        fontSize: 14,
-                                        color: ColorsData.purple00C),
-                                  )),
                               Spacer(),
                               Column(
                                 children: [
                                   GestureDetector(
                                     onTap: () {
                                       setState(() {
-                                        _isClicked = !_isClicked; // Inverse l'état à chaque clic
+                                        _isClicked =
+                                            !_isClicked; // Inverse l'état à chaque clic
                                       });
                                     },
                                     child: Container(
@@ -188,10 +247,12 @@ class _WorkerPresentationModalState extends State<WorkerPresentationModal> {
                                       decoration: BoxDecoration(
                                           color: ColorsData.purple00C,
                                           borderRadius:
-                                          BorderRadius.circular(15.0)),
+                                              BorderRadius.circular(15.0)),
                                       child: SvgPicture.asset(
-                                        _isClicked ? AssetsData.favFullIcon  :  AssetsData.favIcon,
-                                        color:  Colors.white ,
+                                        _isClicked
+                                            ? AssetsData.favFullIcon
+                                            : AssetsData.favIcon,
+                                        color: Colors.white,
                                         width: 23,
                                         height: 25,
                                       ),
@@ -237,7 +298,7 @@ class _WorkerPresentationModalState extends State<WorkerPresentationModal> {
                               children: [
                                 Expanded(
                                   child: Text(
-                                    widget.description,
+                                   widget.biography,
                                     style: GoogleFonts.karla(
                                       textStyle: TextStyle(
                                         fontSize: 13,
@@ -281,10 +342,11 @@ class _WorkerPresentationModalState extends State<WorkerPresentationModal> {
                                   Expanded(
                                     child: Stack(
                                       children: [
+                                        clients.isNotEmpty ?
                                         ListView.builder(
                                           padding: EdgeInsets.all(10),
                                           scrollDirection: Axis.horizontal,
-                                          itemCount: 20,
+                                          itemCount: clients.length,
                                           itemBuilder: (context, index) {
                                             return Container(
                                               width: 150,
@@ -321,6 +383,14 @@ class _WorkerPresentationModalState extends State<WorkerPresentationModal> {
                                               )),
                                             );
                                           },
+                                        ) : Center(
+                                          child: Text(
+                                            "Aucun client trouvé 😢",
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              color: Colors.grey,
+                                            ),
+                                          ),
                                         ),
                                       ],
                                     ),

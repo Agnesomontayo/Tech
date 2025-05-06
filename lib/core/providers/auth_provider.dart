@@ -34,6 +34,7 @@ class AuthProvider with ChangeNotifier {
   Future<Map<String, dynamic>> logIn(String email, String password) async {
     try {
       String baseUrl = await ApiHelper.getApiUrl();
+      print('Appel à : $baseUrl/login');
       final responseData = await _connectedUserServices.logIn(
         url: '$baseUrl/login',
         body: {

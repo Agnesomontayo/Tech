@@ -23,6 +23,8 @@ import 'package:tech/screens/clients/client_home/search_page.dart';
 
 import '../../../core/helpers/apiHelpers.dart';
 import '../../../core/providers/app_provider.dart';
+import '../../../core/providers/professionCategory_provider.dart';
+import '../../../core/providers/services_provider.dart';
 import '../../clients/widgets/ServicePresentationCard.dart';
 import 'all_services.dart';
 
@@ -38,6 +40,8 @@ class _ClientHomeState extends State<ClientHome> {
   bool _showRightButton = true;
 
   Map<String, dynamic>? _profile;
+  List<dynamic> categories = [];
+  List<dynamic> services = [];
   bool _isLoading = true;
   String baseImageUrl = '';//await ApiHelper.getApiUrl();
 
@@ -47,6 +51,8 @@ class _ClientHomeState extends State<ClientHome> {
       baseImageUrl = await ApiHelper.getApiUrl();
       final appProvider = Provider.of<AppProvider>(context, listen: false);
       final data = await appProvider.getProfile();
+      _fetchCategories();
+      fetchServices();
       setState(() {
         _profile = data;
         _isLoading = false;
@@ -56,6 +62,34 @@ class _ClientHomeState extends State<ClientHome> {
       setState(() {
         _isLoading = false;
       });
+    }
+  }
+  Future<void> _fetchCategories() async {
+    try {
+      final categoriesProvider = Provider.of<ProfessioncategoryProvider>(context, listen: false);
+      final responseData = await categoriesProvider.getManyCategories();
+
+      setState(() {
+        categories = responseData;
+        _isLoading = false;
+      });
+    } catch (error) {
+      print('Erreur: $error');
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> fetchServices() async {
+    try {
+      final serviceProvider = Provider.of<ServicesProvider>(context, listen: false);
+      final data = await serviceProvider.getManyServices();
+      setState(() {
+        services = data.take(20).toList();
+      });
+    } catch (e) {
+      print('Erreur: $e');
     }
   }
 
@@ -148,7 +182,7 @@ class _ClientHomeState extends State<ClientHome> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Bonjour ${_profile!['lastname'] ?? ''} ',
+                        'Bonjour ${_profile!['lastName'] ?? ''} ',
                         style: GoogleFonts.commissioner(
                           textStyle: TextStyle(
                             color: ColorsData.purple13,
@@ -195,110 +229,44 @@ class _ClientHomeState extends State<ClientHome> {
                         Container(
                           height: 200,
                           //flex: 0,
-                          child: GridView.count(
+                          child: _isLoading
+                              ? Center(child: CircularProgressIndicator())
+                              : GridView.count(
                             primary: false,
                             padding: const EdgeInsets.all(20),
                             crossAxisSpacing: 10,
                             mainAxisSpacing: 15,
                             crossAxisCount: 4,
-                            children:  <Widget>[
-                              WorkCard(
-                                  iconPath: AssetsData.mecanicienIcon,
-                                  title: 'Mécanique',
-                                  onTap: (){
-                                    Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) => WorkDetailPage()
-                                        )
-                                    );
-                                  }
-                              ),
-                              WorkCard(
-                                  iconPath: AssetsData.menuisierIcon,
-                                  title: 'Menuiserie',
-                                  onTap: (){
-                                    Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) => WorkDetailPage()
-                                        )
-                                    );
-                                  }
-                              ),
-                              WorkCard(
-                                  iconPath: AssetsData.entretienIcon,
-                                  title: 'Entretien',
-                                  onTap: (){
-                                    Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) => WorkDetailPage()
-                                        )
-                                    );
-                                  }
-                              ),
-                              WorkCard(
-                                  iconPath: AssetsData.coutureIcon,
-                                  title: 'Couture',
-                                  onTap: (){
-                                    Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) => WorkDetailPage()
-                                        )
-                                    );
-                                  }
-                              ),
-                              WorkCard(
-                                  iconPath: AssetsData.electricienIcon,
-                                  title: 'Electricité',
-                                  onTap: (){
-                                    Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) => WorkDetailPage()
-                                        )
-                                    );
-                                  }
-                              ),
-                              WorkCard(
-                                  iconPath: AssetsData.coiffeurIcon,
-                                  title: 'Coiffure',
-                                  onTap: (){
-                                    Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) => WorkDetailPage()
-                                        )
-                                    );
-                                  }
-                              ),
-                              WorkCard(
-                                  iconPath: AssetsData.maconIcon,
-                                  title: 'Maçonnerie',
-                                  onTap: (){
-                                    Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) => WorkDetailPage()
-                                        )
-                                    );
-                                  }
-                              ),
-                              WorkCard(
-                                  iconPath: AssetsData.plusIcon,
-                                  title: 'Plus',
-                                  onTap: (){
-                                    Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) => AllWorksPage()
-                                        )
-                                    );
-                                  }
-                              ),
-                            ],
+                            children: List.generate(
+                              categories.length > 5 ? 6 : categories.length,
+                                  (index) {
+                                if (index == 5) {
+                                  return WorkCard(
+                                    iconPath: AssetsData.plusIcon,
+                                    title: 'Plus',
+                                    onTap: () {
+                                      Navigator.push(context, MaterialPageRoute(
+                                        builder: (context) => AllWorksPage(),
+                                      ));
+                                    },
+                                  );
+                                }
+                                final category = categories[index];
+                                return WorkCard(
+                                  iconPath: ('${baseImageUrl}/${category['image']}'),
+                                  title: category['label'],
+                                  onTap: () {
+                                    Navigator.push(context, MaterialPageRoute(
+                                      builder: (context) => WorkDetailPage(
+                                        categoryId: category['id'],
+                                        name: category['label'],
+                                        imageUrl: ('${baseImageUrl}/${category['image']}'),
+                                      ),
+                                    ));
+                                  },
+                                );
+                              },
+                            ),
                           ),
                         ),
                       ],
@@ -346,15 +314,15 @@ class _ClientHomeState extends State<ClientHome> {
                                 padding: EdgeInsets.all(10),
                                 scrollDirection: Axis.horizontal,
                                 controller: _scrollController,
-                                itemCount: 20,
+                                itemCount: services.length,
                                 itemBuilder: (context, index) {
+                                  final service = services[index];
                                   return ServicePresentationCard(
-                                      iconPath: AssetsData.entretienIcon,
-                                      imagePath: AssetsData.menage,
-                                      serviceName: 'Nettoyage complet $index',
-                                      priceRange: '1000FCFA-3000FCFA'
-                                  );;
-
+                                    //iconPath: AssetsData.entretienIcon,
+                                    imagePath: ('${baseImageUrl}/${service['image']}'),
+                                    serviceName: service['label'] ?? 'Nom inconnu',
+                                    //priceRange: '1000FCFA - 3000FCFA', // ou utiliser service['prix'] si dispo
+                                  );
                                 },
                               ),
                               Positioned(

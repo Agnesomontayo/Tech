@@ -6,6 +6,7 @@ import 'package:tech/screens/clients/widgets/titleWidget.dart';
 import '../../../core/const/assets.dart';
 import '../../../core/const/colors.dart';
 import '../../../screens/clients/widgets/WorkerPresentationModal.dart';
+import 'package:tech/core/helpers/utils.dart';
 
 class WorkerPresentationCard extends StatelessWidget {
   final String name;
@@ -14,9 +15,9 @@ class WorkerPresentationCard extends StatelessWidget {
   final String availability;
   final String distance;
   final String unit;
-  final Color availabilityColor;
   final String imagePath ;
-  final String description;
+  final String biography;
+  final String profession;
   const WorkerPresentationCard ({
     super.key,
     required this.name,
@@ -25,9 +26,9 @@ class WorkerPresentationCard extends StatelessWidget {
     required this.availability,
     required this.distance,
     required this.unit,
-    required this.availabilityColor,
     required this.imagePath,
-    required this.description,
+    required this.biography,
+    required this.profession,
   });
   @override
   Widget build(BuildContext context) {
@@ -37,7 +38,7 @@ class WorkerPresentationCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
           color: ColorsData.purple255.withOpacity(0.1),
         ),
-        height: 111,
+        height: 140,
         margin: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
         padding: EdgeInsets.symmetric(vertical: 8, horizontal: 10),
         child: Row(
@@ -49,9 +50,9 @@ class WorkerPresentationCard extends StatelessWidget {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(20),
                 image: DecorationImage(
-                    image: AssetImage(
-                        imagePath
-                    ),
+                    image: imagePath != null
+                        ? NetworkImage(imagePath)
+                        : AssetImage(AssetsData.best) as ImageProvider,
                     fit: BoxFit.fill
                 ),
               ),
@@ -61,11 +62,25 @@ class WorkerPresentationCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    name,
+                    capitalizeEachWord(name),
+                    style: GoogleFonts.karla(
+                      textStyle: TextStyle(
+                        fontWeight: FontWeight.w900,
+                        fontSize: 15,
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 5,),
+                  Text(
+                    capitalizeFirstLetter(profession),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 2,
                     style: GoogleFonts.karla(
                       textStyle: TextStyle(
                         fontWeight: FontWeight.w700,
                         fontSize: 15,
+                        color: ColorsData.purple00C,
+                        height: 1,
                       ),
                     ),
                   ),
@@ -114,11 +129,15 @@ class WorkerPresentationCard extends StatelessWidget {
                       Container(
                         padding: EdgeInsets.symmetric(horizontal: 10, vertical: 2),
                         decoration: BoxDecoration(
-                            color: availabilityColor,
+                            color: availability == 'available'
+                                ? Colors.green
+                                : Colors.red,
                             borderRadius: BorderRadius.circular(20)
                         ),
                         child: Text(
-                            availability,
+                            availability == 'available'
+                                ? 'Disponibble'
+                                : 'Indisponible',
                             style: GoogleFonts.karla(
                               textStyle: TextStyle(
                                   fontWeight: FontWeight.w400,
@@ -162,12 +181,12 @@ class WorkerPresentationCard extends StatelessWidget {
               name: name,
               rate: rate,
               availability: availability,
-              availabilityColor: availabilityColor,
               distance: distance,
               unit: unit,
               imagePath: imagePath,
               reviews: reviews,
-              description: description,
+              biography: biography,
+              profession: profession,
             );
           },
         );

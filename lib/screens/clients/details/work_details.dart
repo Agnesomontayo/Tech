@@ -3,19 +3,70 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:tech/core/const/colors.dart';
+import 'package:tech/core/providers/professionnal_provider.dart';
 import 'package:tech/screens/clients/widgets/titleWidget.dart';
 import 'package:tech/screens/clients/widgets/WorkerPresentationCard.dart';
-
+import 'package:provider/provider.dart';
 import '../../../core/const/assets.dart';
+import '../../../core/helpers/apiHelpers.dart';
 
 class WorkDetailPage extends StatefulWidget {
-  const WorkDetailPage({super.key});
+  final int categoryId;
+  final String name;
+  final String imageUrl;
+  const WorkDetailPage({
+    super.key,
+    required this.categoryId,
+    required this.name,
+    required this.imageUrl,
+  });
 
   @override
   State<WorkDetailPage> createState() => _WorkDetailPageState();
 }
 
 class _WorkDetailPageState extends State<WorkDetailPage> {
+  List<dynamic> professionals = [];
+  String baseImageUrl = '';
+  bool _isLoading = true;
+
+  Future<void> _loadInfos() async {
+    try {
+      baseImageUrl = await ApiHelper.getApiUrl();
+      _fetchProfessionalsByCategory();
+      setState(() {
+        _isLoading = false;
+      });
+    } catch (error) {
+      print('Erreur de chargement des infos : $error');
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+  Future<void> _fetchProfessionalsByCategory() async {
+    try {
+      final professionalsProvider = Provider.of<ProfessionalProvider>(context, listen: false);
+      final responseData = await professionalsProvider.getProfessionalsByCategory(widget.categoryId);
+
+      setState(() {
+        professionals = responseData;
+        _isLoading = false;
+      });
+    } catch (error) {
+      print('Erreur: $error');
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadInfos();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -24,10 +75,23 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
       ),
       body: Stack(
         children: [
-          SvgPicture.asset(
-            AssetsData.carpenter,
-            fit: BoxFit.cover,
-           // width: double.infinity,
+          widget.imageUrl != null
+          ?Align(
+            alignment: Alignment.topCenter,
+            child: SvgPicture.network(
+              widget.imageUrl,
+              fit: BoxFit.cover,
+              width: 200,
+              height: 200,
+            ),
+          )
+          : Align(
+            alignment: Alignment.topCenter,
+            child: SvgPicture.asset(
+              AssetsData.carpenter,
+              fit: BoxFit.cover,
+              // width: double.infinity,
+            ),
           ),
           DraggableScrollableSheet(
             initialChildSize: 0.75,
@@ -64,7 +128,7 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
                             },
                           ),
                           SizedBox(width: 60),
-                          Expanded(child: TitleWidget(title: 'Menuiserie')),
+                          Expanded(child: TitleWidget(title: widget.name)),
                         ],
                       ),
                     ),
@@ -74,19 +138,22 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
                             SliverList(
                               delegate: SliverChildBuilderDelegate(
                                     (context, index) {
+                                      final professional = professionals[index];
                                   return WorkerPresentationCard(
-                                    name: 'Abraham Monie $index',
+                                    name: professional['user']['lastName'] + ' ' + professional['user']['firstName'],
                                     rate: 4.5,
-                                    availability: 'Disponible',
-                                    availabilityColor: Colors.green,
+                                    availability: professional['availability'],
                                     distance: '500',
                                     unit: 'm',
                                     reviews: '250',
-                                    imagePath: AssetsData.best,
-                                    description: 'lhfzmoaijgapzhgpoakezngioznggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg',
+                                    imagePath: professional['user']['avatar'] != null
+                                        ? baseImageUrl + '/' + professional['user']['avatar']
+                                        : professional['user']['profile_photo_url'],
+                                    biography: professional['biography'] != null ?professional['biography'] : 'Rien sur ce profil',
+                                    profession: professional['profession']['label'],
                                   );
                                 },
-                                childCount: 20,
+                                childCount: professionals.length,
                               ),
                             ),
                           ],

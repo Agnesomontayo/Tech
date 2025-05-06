@@ -33,8 +33,12 @@ class ServicesProvider with ChangeNotifier {
         url: '${baseUrl}/services',
       );
 
-      if (responseData != null && responseData is List) {
-        return responseData;
+      if (responseData != null && responseData is Map<String, dynamic>) {
+        if (responseData.containsKey('data')) {
+          return responseData['data'];
+        } else {
+          throw Exception('Clé "services" non trouvée dans la réponse');
+        }
       } else {
         throw Exception('Données de services invalides');
       }
@@ -65,7 +69,30 @@ class ServicesProvider with ChangeNotifier {
     }
   }
 
-// ajouter une profession
+// récupérer les professions liées a un service
+
+  Future<List<dynamic>> getServiceProfessions(int serviceId) async {
+    try {
+      String baseUrl = await ApiHelper.getApiUrl();
+      final responseData = await _connectedUserServices.get(
+        url: '${baseUrl}/services/${serviceId}/professions',
+      );
+
+      if (responseData != null && responseData is Map<String, dynamic>) {
+        print('service profession ${responseData}');
+        if (responseData.containsKey('professions')) {
+          return responseData['professions'];
+        } else {
+          throw Exception('Clé "professions" non trouvée dans la réponse');
+        }
+      } else {
+        throw Exception('Données de professions invalides');
+      }
+    } catch (error) {
+      print('Erreur lors de la récupération des professions: $error');
+      throw Exception('Impossible de récupérer les professions');
+    }
+  }
 
 // modifier une profession
 

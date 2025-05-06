@@ -2,6 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shimmer/shimmer.dart';
+import 'package:tech/screens/clients/widgets/ServicePresentationModal.dart';
 
 import '../../../core/const/assets.dart';
 import '../../../core/const/colors.dart';
@@ -21,6 +23,7 @@ class ServicePresentationListItem extends StatefulWidget {
   final String iconPath;
   final String description;
   final String priceRange;
+  final int serviceId;
 
   const ServicePresentationListItem({
     super.key,
@@ -37,6 +40,7 @@ class ServicePresentationListItem extends StatefulWidget {
     required this.workIcon,
     required this.priceRange,
     required this.description,
+    required this.serviceId,
   });
 
   @override
@@ -76,10 +80,25 @@ class _ServicePresentationListItemState
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: AspectRatio(
-                        aspectRatio: 1.4, // Ajustez le ratio pour adapter l'image à l'espace
+                        aspectRatio: 1.5,
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(20),
-                          child: Image.asset(
+                          child:  widget.imagePath.startsWith('http')
+                              ? Image.network(
+                            widget.imagePath,
+                            fit: BoxFit.fill,
+                            loadingBuilder: (context, child, loadingProgress) {
+                              if (loadingProgress == null) return child;
+                              return Shimmer.fromColors(
+                                baseColor: Colors.grey[300]!,
+                                highlightColor: Colors.grey[100]!,
+                                child: Container(
+                                  color: Colors.white,
+                                ),
+                              );
+                            },
+                          )
+                              : Image.asset(
                             widget.imagePath,
                             fit: BoxFit.cover,
                           ),
@@ -92,50 +111,6 @@ class _ServicePresentationListItemState
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      IntrinsicHeight(
-                        child: Container(
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 3, vertical: 1),
-                          width: 100,
-                          decoration: BoxDecoration(
-                            color: ColorsData.purple260.withOpacity(0.5),
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                          child: Row(
-                            children: [
-                              Container(
-                                padding: EdgeInsets.all(3.5),
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: ColorsData.purple255.withOpacity(0.2),
-                                ),
-                                height: 20,
-                                width: 20,
-                                child: SvgPicture.asset(
-                                  widget.workIcon,
-                                  fit: BoxFit.cover,
-                                  height: 20,
-                                  width: 20,
-                                ),
-                              ),
-                              SizedBox(width: 2),
-                              Expanded(
-                                  child:  Text(
-                                    widget.work,
-                                    style: GoogleFonts.brunoAce(
-                                      textStyle: TextStyle(
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w400,
-                                        color: ColorsData.purple00A,
-                                      ),
-                                    ),
-                                  ),
-                              )
-
-                            ],
-                          ),
-                        ),
-                      ),
                       Text(
                         widget.serviceName,
                         style: GoogleFonts.karla(
@@ -148,20 +123,10 @@ class _ServicePresentationListItemState
                         softWrap: true,
                         overflow: TextOverflow.visible,
                       ),
-                      Text(
-                        widget.priceRange,
-                        style: GoogleFonts.commissioner(
-                          textStyle: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w400,
-                            color: ColorsData.purple00A,
-                            fontStyle: FontStyle.italic,
-                          ),
-                        ),
-                      ),
                       SizedBox(height: 6,),
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
+                       // mainAxisAlignment: MainAxisAlignment.end,
+                        crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           GestureDetector(
                             child: Container(
@@ -224,8 +189,8 @@ class _ServicePresentationListItemState
           isScrollControlled: true,
           backgroundColor: Colors.transparent,
           builder: (BuildContext context) {
-            return WorkerPresentationModal(
-              name: widget.serviceName,
+            return ServicePresentationModal(
+              label: widget.serviceName,
               rate: widget.rate,
               availability: widget.availability,
               availabilityColor: widget.availabilityColor,
@@ -234,6 +199,7 @@ class _ServicePresentationListItemState
               imagePath: widget.imagePath,
               reviews: widget.reviews,
               description: widget.description,
+              serviceId: widget.serviceId,
             );
           },
         );

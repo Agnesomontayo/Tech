@@ -4,11 +4,15 @@ import 'package:tech/core/const/assets.dart';
 import 'package:tech/core/const/colors.dart';
 import 'package:tech/screens/clients/client_home/search_page.dart';
 import 'package:tech/screens/clients/widgets/PageHeaderWidget.dart';
-
+import 'package:provider/provider.dart';
+import '../../../core/helpers/apiHelpers.dart';
+import '../../../core/providers/professionCategory_provider.dart';
+import '../../../core/providers/professionnal_provider.dart';
 import '../../clients/widgets/RoundedWorkCard.dart';
 import '../../clients/widgets/WorkerPresentationCard.dart';
 import '../../clients/widgets/menuCirculaireWidget.dart';
 import '../../clients/widgets/titleWidget.dart';
+import '../details/map_modal_draggable_bottom_sheet.dart';
 
 class MapPage extends StatefulWidget {
   const MapPage({super.key});
@@ -18,6 +22,65 @@ class MapPage extends StatefulWidget {
 }
 
 class _MapPageState extends State<MapPage> {
+  List<dynamic> categories = [];
+  List<dynamic> professionals = [];
+  bool _isLoading = true;
+  String baseImageUrl = '';
+
+  Future<void> _loadInfos() async {
+    try {
+      baseImageUrl = await ApiHelper.getApiUrl();
+      _fetchCategories();
+    } catch (error) {
+      print('Erreur de chargement des infos : $error');
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+  Future<void> _fetchCategories() async {
+    try {
+      final categoriesProvider = Provider.of<ProfessioncategoryProvider>(context, listen: false);
+      final responseData = await categoriesProvider.getManyCategories();
+
+      setState(() {
+        categories = responseData;
+        _isLoading = false;
+      });
+    } catch (error) {
+      print('Erreur: $error');
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+ /* Future<void> _fetchProfessionals(categoryId) async {
+    try {
+      baseImageUrl = await ApiHelper.getApiUrl();
+      final professionalsProvider = Provider.of<ProfessionalProvider>(context, listen: false);
+      final responseData = await professionalsProvider.getProfessionalsByCategory(categoryId);
+      //print('responseData ${responseData}');
+      setState(() {
+       professionals = responseData;
+        _isLoading = false;
+      });
+    } catch (error) {
+      print('Erreur: $error');
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+*/
+
+
+  @override
+  void initState() {
+    super.initState();
+    _loadInfos();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -38,8 +101,9 @@ class _MapPageState extends State<MapPage> {
               child: ListView.builder(
                 padding: EdgeInsets.all(10),
                 scrollDirection: Axis.horizontal,
-                itemCount: 20,
+                itemCount: categories.length,
                 itemBuilder: (context, index) {
+                  final category = categories[index];
                   return Container(
                       margin: EdgeInsets.symmetric(horizontal: 5),
                       decoration: BoxDecoration(
@@ -56,83 +120,20 @@ class _MapPageState extends State<MapPage> {
                       ),
                       child: GestureDetector(
                           child: RoundedWorkCard(
-                            work: 'Menuisier',
-                            workIcon: AssetsData.menuisierIcon,
+                            work: category['label'],
+                            workIcon: ('${baseImageUrl}/${category['image']}'),
                           ),
                           onTap: () {
+                            final categoryId = category['id'];
+                            final categoryName = category['label'];
                             showModalBottomSheet(
                                 context: context,
                                 isScrollControlled: true,
                                 backgroundColor: Colors.transparent,
-                                builder: (BuildContext contex){
-                                  return DraggableScrollableSheet(
-                                    initialChildSize: 0.7,
-                                    minChildSize: 0.2,
-                                    maxChildSize: 0.9,
-                                    builder: (BuildContext context, ScrollController scrollController) {
-                                      return Container(
-                                          decoration: BoxDecoration(
-                                            color: Colors.white,
-                                            borderRadius: BorderRadius.only(
-                                              topLeft: Radius.circular(47.0),
-                                              topRight: Radius.circular(47.0),
-                                            ),
-                                          ),
-                                          child: Column(
-                                            children: [
-                                              Container(
-                                                decoration: BoxDecoration(
-                                                  borderRadius: BorderRadius.only(
-                                                      topLeft: Radius.circular(47.0), topRight: Radius.circular(47.0)),
-                                                  color: ColorsData.white,
-                                                ),
-                                                padding: EdgeInsets.symmetric(horizontal: 10),
-                                                child: Row(
-                                                  children: [
-                                                    IconButton(
-                                                      icon: Icon(
-                                                        Icons.chevron_left,
-                                                        color: ColorsData.purple00A,
-                                                        size: 30,
-                                                      ),
-                                                      onPressed: () {
-                                                        Navigator.pop(context);
-                                                      },
-                                                    ),
-                                                    SizedBox(width: 60),
-                                                    Expanded(child: TitleWidget(title: 'Menuiserie')),
-                                                  ],
-                                                ),
-                                              ),
-                                              Expanded(
-                                                child: CustomScrollView(
-                                                  slivers: [
-                                                    SliverList(
-                                                      delegate: SliverChildBuilderDelegate(
-                                                            (context, index) {
-                                                          return WorkerPresentationCard(
-                                                            name: 'Abraham Monie $index',
-                                                            rate: 4.5,
-                                                            availability: 'Disponible',
-                                                            availabilityColor: Colors.green,
-                                                            distance: '500',
-                                                            unit: 'm',
-                                                            reviews: '250',
-                                                            imagePath: AssetsData.best,
-                                                            description: 'lhfzmoaijgapzhgpoakezngioznggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg',
-                                                          );
-                                                        },
-                                                        childCount: 20,
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                              SizedBox(height: 50,)
-                                            ],
-                                          )
-                                      );
-                                    },
+                                builder: (BuildContext context){
+                                  return MapModalDraggableBottomSheet(
+                                    categoryId: categoryId,
+                                    categoryName: categoryName,
                                   );
                                 }
                             );
