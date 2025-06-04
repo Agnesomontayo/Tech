@@ -9,3 +9,10 @@ import 'package:tech/core/const/const.dart';
 import 'package:tech/core/const/string.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+String formatDate(String rawDate) {
+  DateTime dateTime = DateTime.parse(rawDate);
+
+  String formatted = DateFormat("EEE, d MMM yy 'à' HH:mm", 'fr_FR').format(dateTime);
+  return formatted;
+}

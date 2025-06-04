@@ -3,17 +3,49 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:tech/screens/clients/details/work_details.dart';
 import '../../../../core/const/assets.dart';
 import 'package:tech/screens/clients/widgets/CustumAppBar.dart';
-
 import 'package:tech/screens/clients/widgets/WorkCardWidget.dart';
+import 'package:provider/provider.dart';
+
+import '../../../core/providers/professionCategory_provider.dart';
 
 class AllWorksPage extends StatefulWidget {
-  const AllWorksPage({super.key});
+  final int clientId;
+  final String clientName;
+  const AllWorksPage({
+    super.key,
+    required this.clientId,
+    required this.clientName,
+  });
 
   @override
   State<AllWorksPage> createState() => _AllWorksPageState();
 }
 
 class _AllWorksPageState extends State<AllWorksPage> {
+  List<dynamic> categories = [];
+  bool _isLoading = true;
+  String baseImageUrl = '';
+  Future<void> _fetchCategories() async {
+    try {
+      final categoriesProvider = Provider.of<ProfessioncategoryProvider>(context, listen: false);
+      final responseData = await categoriesProvider.getManyCategories();
+
+      setState(() {
+        categories = responseData;
+        _isLoading = false;
+      });
+    } catch (error) {
+      print('Erreur: $error');
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+  @override
+  void initState() {
+    super.initState();
+    _fetchCategories();
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -63,21 +95,29 @@ class _AllWorksPageState extends State<AllWorksPage> {
                             crossAxisSpacing: 10,
                             mainAxisSpacing: 15,
                             crossAxisCount: 4,
-                            children: <Widget>[
-                              WorkCard(
-                                iconPath: AssetsData.mecanicienIcon,
-                                title: 'Mécanique',
-                                onTap: () {
-                                 /* Navigator.push(
-                                    context,
-                                   MaterialPageRoute(
-                                      builder: (context) => WorkDetailPage(),
-                                    ),
-                                  );*/
-                                },
-                              ),
-
-                            ],
+                            children: List.generate(
+                                categories.length,
+                                (index) {
+                                  final category = categories[index];
+                                  return WorkCard(
+                                      iconPath: ('${baseImageUrl}/${category['image']}'),
+                                      title: category['label'],
+                                      onTap: () {
+                                        Navigator.push(
+                                            context, MaterialPageRoute(
+                                          builder: (context) =>
+                                              WorkDetailPage(
+                                                categoryId: category['id'],
+                                                name: category['label'],
+                                                clientId: widget.clientId,
+                                                clientName: widget.clientName,
+                                                imageUrl: ('${baseImageUrl}/${category['image']}'),
+                                              ),
+                                        ));
+                                      }
+                                  );
+                                }
+                            ),
                           ),
                         ],
                       ),

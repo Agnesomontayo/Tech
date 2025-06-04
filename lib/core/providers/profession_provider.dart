@@ -48,6 +48,30 @@ class ProfessionProvider with ChangeNotifier {
     }
   }
 
+  // récupérer les professions sans connexion
+
+  Future<List<dynamic>> getManyAvailableProfessions() async {
+    try {
+      String baseUrl = await ApiHelper.getApiUrl();
+      final responseData = await _connectedUserServices.get(
+        url: '${baseUrl}/professions-available',
+      );
+
+      if (responseData != null && responseData is Map<String, dynamic>) {
+        if (responseData.containsKey('data')) {
+          return responseData['data'];
+        } else {
+          throw Exception('Clé "professions" non trouvée dans la réponse');
+        }
+      } else {
+        throw Exception('Données de professions invalides');
+      }
+    } catch (error) {
+      print('Erreur lors de la récupération des professions: $error');
+      throw Exception('Impossible de récupérer les professions');
+    }
+  }
+
   // récupérer une profession
 
   Future<Map<String, dynamic>> getOneProfession (int professionId) async {

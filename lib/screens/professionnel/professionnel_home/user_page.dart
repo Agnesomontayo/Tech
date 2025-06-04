@@ -3,9 +3,11 @@ import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:tech/screens/professionnel/details/notification_page.dart';
 import 'package:tech/screens/professionnel/widgets/ProfessionnalNotificationCard.dart';
-
+import 'package:provider/provider.dart';
 import '../../../core/const/assets.dart';
 import '../../../core/const/colors.dart';
+import '../../../core/helpers/apiHelpers.dart';
+import '../../../core/providers/app_provider.dart';
 import '../user_infos/history_page.dart';
 import '../user_infos/info_page.dart';
 import '../user_infos/notifications_page.dart';
@@ -21,9 +23,49 @@ class ProfessionnalUserPage extends StatefulWidget {
 }
 
 class _ProfessionnalUserPageState extends State<ProfessionnalUserPage> {
+  String baseImageUrl = '';
+  Map<String, dynamic>? _profile;
+
+  @override
+  Future<void> _loadProfile() async {
+    try {
+      baseImageUrl = await ApiHelper.getApiUrl();
+      final appProvider = Provider.of<AppProvider>(context, listen: false);
+      final data = await appProvider.getProfile();
+      setState(() {
+        _profile = data;
+      });
+    } catch (error) {
+      print('Erreur de chargement du profil : $error');
+    }
+  }
+
+  void handleLogout() async {
+    final appProvider = Provider.of<AppProvider>(context, listen: false);
+    final success = await appProvider.logout();
+
+    if (!mounted) return;
+
+    if (success) {
+      Navigator.pushReplacementNamed(context, '/login');
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Échec de la déconnexion')),
+      );
+    }
+  }
+
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfile();
+  }
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return _profile == null
+        ? Center(child: CircularProgressIndicator())
+        : Scaffold(
       body: Column(
         children: [
           Row(
@@ -75,16 +117,17 @@ class _ProfessionnalUserPageState extends State<ProfessionnalUserPage> {
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               image: DecorationImage(
-                                image: AssetImage(
-                                  AssetsData.p,
-                                ),
-                                // Remplacez par votre image
+                                image: _profile != null
+                                    ? (_profile!['avatar'] != null
+                                    ? NetworkImage('${baseImageUrl}/${_profile!['avatar']}')
+                                    : NetworkImage(_profile!['profile_photo_url']))
+                                    : AssetImage(AssetsData.p) as ImageProvider,
                                 fit: BoxFit.cover,
                               ),
                             ),
                           ),
                         ),
-                        Positioned(
+                        /*Positioned(
                           bottom: 20,
                           right: 15,
                           child: Container(
@@ -104,7 +147,7 @@ class _ProfessionnalUserPageState extends State<ProfessionnalUserPage> {
                               size: 15,
                             ),
                           ),
-                        ),
+                        ),*/
                       ],
                     ),
 
@@ -149,14 +192,29 @@ class _ProfessionnalUserPageState extends State<ProfessionnalUserPage> {
                                       )
                                     ],
                                   ),
-                                  onTap: () {
-                                    Navigator.push(
+                                  onTap: () async {
+                                    final result = await Navigator.push(
                                       context,
                                       MaterialPageRoute(
                                         builder: (context) =>
-                                            UserInformationsPage(),
+                                            UserInformationsPage(
+                                              firstName: _profile!['firstName'],
+                                              lastName: _profile!['lastName'],
+                                              phonenumber: _profile!['phonenumber'],
+                                              email: _profile!['email'],
+                                              imageUrl: _profile!['avatar'] != null && _profile!['avatar'].toString().isNotEmpty
+                                                  ? '${baseImageUrl}/${_profile!['avatar']}'
+                                                  : _profile!['profile_photo_url'],
+                                              professionId: _profile!['profession']['id'],
+                                              experience: _profile!['experience'],
+                                              biography: _profile!['biography'] == null ? '' : _profile!['biography'],
+                                              //professionName: _profile!['profession']['label'],
+                                            ),
                                       ),
                                     );
+                                    if (result == true) {
+                                      _loadProfile();
+                                    }
                                   },
                                 ),
                                 GestureDetector(
@@ -320,7 +378,30 @@ class _ProfessionnalUserPageState extends State<ProfessionnalUserPage> {
                                       )
                                     ],
                                   ),
-                                  onTap: () {},
+                                  onTap: () {
+                                    showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return AlertDialog(
+                                          title: Text('Confirmation'),
+                                          content: Text('Êtes-vous sûr de vouloir vous déconnecter ?'),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () => Navigator.of(context).pop(),
+                                              child: Text('Annuler'),
+                                            ),
+                                            TextButton(
+                                              onPressed: () {
+                                                Navigator.of(context).pop();
+                                                handleLogout();
+                                              },
+                                              child: Text('Déconnexion'),
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                    );
+                                  },
                                 ),
                               ],
                             ),

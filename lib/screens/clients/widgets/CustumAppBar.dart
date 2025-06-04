@@ -28,7 +28,7 @@ class CustumAppBar extends StatelessWidget {
                     Icons.chevron_left,
                     color: ColorsData.purple00A,
                     size: 30,
-                ), // Icône de retour
+                ),
                 onPressed: () {
                   Navigator.of(context).pop();
                 },

@@ -14,10 +14,15 @@ class WorkDetailPage extends StatefulWidget {
   final int categoryId;
   final String name;
   final String imageUrl;
+  final int clientId;
+  final String clientName;
+
   const WorkDetailPage({
     super.key,
     required this.categoryId,
     required this.name,
+    required this.clientId,
+    required this.clientName,
     required this.imageUrl,
   });
 
@@ -133,7 +138,8 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
                       ),
                     ),
                     Expanded(
-                        child: CustomScrollView(
+                        child: professionals.isNotEmpty
+                            ? CustomScrollView(
                           slivers: [
                             SliverList(
                               delegate: SliverChildBuilderDelegate(
@@ -151,12 +157,24 @@ class _WorkDetailPageState extends State<WorkDetailPage> {
                                         : professional['user']['profile_photo_url'],
                                     biography: professional['biography'] != null ?professional['biography'] : 'Rien sur ce profil',
                                     profession: professional['profession']['label'],
+                                    clientId: widget.clientId,
+                                    clientName: widget.clientName,
+                                    professionalId: professional['id'],
                                   );
                                 },
                                 childCount: professionals.length,
                               ),
                             ),
                           ],
+                        )
+                            : Center(
+                          child: Text(
+                            "Aucun professionnel trouvé",
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.grey,
+                            ),
+                          ),
                         ),
                     ),
                     SizedBox(height: 50,)

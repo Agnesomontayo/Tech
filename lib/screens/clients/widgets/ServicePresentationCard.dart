@@ -7,10 +7,15 @@ import '../../../core/const/assets.dart';
 import '../../../core/const/colors.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
+import '../client_forms/new_request_form.dart';
+
 class ServicePresentationCard extends StatefulWidget {
   //final String iconPath;
   final String serviceName;
   final String imagePath;
+  final int clientId;
+  final String? clientName;
+  final int? serviceId;
   //final String priceRange;
 
   const ServicePresentationCard({
@@ -18,6 +23,9 @@ class ServicePresentationCard extends StatefulWidget {
     //required this.iconPath,
     required this.imagePath,
     required this.serviceName,
+    required this.clientId,
+    this.clientName,
+    this.serviceId,
    // required this.priceRange,
   });
 
@@ -28,6 +36,13 @@ class ServicePresentationCard extends StatefulWidget {
 
 class _ServicePresentationCardState extends State<ServicePresentationCard> {
   bool _isClicked = false;
+
+  void _openFormModal(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (_) => NewRequestFormModal(clientId: widget.clientId, clientName: widget.clientName, serviceId: widget.serviceId, serviceLabel: widget.serviceName),
+    );
+  }
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -158,6 +173,7 @@ class _ServicePresentationCardState extends State<ServicePresentationCard> {
           right: 25,
           child: GestureDetector(
             onTap: () {
+              _openFormModal(context);
               print('bla');
             },
             child: Container(

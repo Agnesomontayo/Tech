@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:tech/screens/professionnel/professionnel_home/professional_chat_page.dart';
 import 'package:tech/screens/professionnel/widgets/menuCirsulaireWidget.dart';
 
 import '../../../core/const/assets.dart';
@@ -125,15 +126,16 @@ class _ProfessionnelHomeState extends State<ProfessionnelHome> {
                         },
                       ),
                       Container(
-                        margin:
-                            EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                        margin: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
                         child: CircleAvatar(
                           radius: 20,
-                          backgroundImage: AssetImage(
-                            AssetsData.p,
-                          ),
+                          backgroundImage: _profile != null
+                              ? (_profile!['avatar'] != null
+                              ? NetworkImage('${baseImageUrl}/${_profile!['avatar']}')
+                              : NetworkImage(_profile!['profile_photo_url']))
+                              : AssetImage(AssetsData.p) as ImageProvider,
                         ),
-                      )
+                      ),
                     ],
                   ),
                   Padding(
@@ -146,7 +148,7 @@ class _ProfessionnelHomeState extends State<ProfessionnelHome> {
                           'Bonjour ${_profile!['lastName'] ?? ''}' ,
                           style: GoogleFonts.commissioner(
                             textStyle: TextStyle(
-                              color: ColorsData.purple13,
+                              color: ColorsData.purple00A,
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
                             ),
@@ -438,7 +440,6 @@ class _ProfessionnelHomeState extends State<ProfessionnelHome> {
                               // Le cercle de droite
                               Transform.translate(
                                 offset: Offset(110, 0),
-                                // Décalage pour positionner le cercle à droite
                                 child: Container(
                                   width: 70,
                                   height: 70,
@@ -495,10 +496,10 @@ class _ProfessionnelHomeState extends State<ProfessionnelHome> {
                           TitleWidget(title: 'Services tendances'),
                           GestureDetector(
                             onTap: () {
-                              Navigator.push(
+                              /*Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (context) => AllServicesPage()));
+                                      builder: (context) => AllServicesPage()));*/
                             },
                             child: Text(
                               'Voir Tout',
@@ -658,7 +659,18 @@ class _ProfessionnelHomeState extends State<ProfessionnelHome> {
           child: FloatingActionButton(
               backgroundColor: ColorsData.purple00A,
               shape: CircleBorder(),
-              onPressed: () => {},
+              onPressed: () => {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => ProfessionalChatPage(
+                        currentUserProfileImage: _profile!['avatar'] != null && _profile!['avatar'].toString().isNotEmpty
+                            ? '${baseImageUrl}/${_profile!['avatar']}'
+                            : _profile!['profile_photo_url'],
+                        currentUserId: _profile?['id'],
+                      )),
+                ),
+              },
               child: SvgPicture.asset(AssetsData.chatIcon)),
         ));
   }

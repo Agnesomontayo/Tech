@@ -4,8 +4,18 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:tech/core/const/assets.dart';
 
 import '../../../core/const/colors.dart';
+import '../client_home/client_chat_page.dart';
 
 class MenuCirculaireWidget extends StatefulWidget {
+  final int userId;
+  final String imageUrl;
+
+  const MenuCirculaireWidget({
+    super.key,
+    required this.userId,
+    required this.imageUrl,
+  });
+
   @override
   _MenuCirculaireWidgetState createState() => _MenuCirculaireWidgetState();
 }
@@ -98,7 +108,16 @@ class _MenuCirculaireWidgetState extends State<MenuCirculaireWidget>
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         GestureDetector(
-                          onTap: () {},
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => ClientChatPage(
+                                    currentUserId: widget.userId,
+                                    currentUserProfileImage: widget.imageUrl,
+                                  )),
+                            );
+                          },
                           child: Row(
                             children: [
                               SvgPicture.asset(

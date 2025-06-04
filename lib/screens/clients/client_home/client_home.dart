@@ -6,8 +6,10 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:tech/core/const/colors.dart';
 import 'package:tech/core/const/assets.dart';
 import 'package:tech/screens/clients/client_home/all_works.dart';
+import 'package:tech/screens/clients/client_home/client_chat_page.dart';
 import 'package:tech/screens/clients/client_home/search_page.dart';
 import 'package:tech/screens/clients/details/work_details.dart';
+import 'package:tech/screens/clients/widgets/chat_button_widget.dart';
 import 'package:tech/screens/clients/widgets/logo.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -30,6 +32,13 @@ import 'all_services.dart';
 
 
 class ClientHome extends StatefulWidget {
+  final Map<String, dynamic> profile;
+  final String baseImageUrl;
+  const ClientHome({
+    super.key,
+    required this.profile,
+    required this.baseImageUrl,
+  });
   @override
   _ClientHomeState createState() => _ClientHomeState();
 }
@@ -39,22 +48,16 @@ class _ClientHomeState extends State<ClientHome> {
   bool _showLeftButton = false;
   bool _showRightButton = true;
 
-  Map<String, dynamic>? _profile;
   List<dynamic> categories = [];
   List<dynamic> services = [];
   bool _isLoading = true;
-  String baseImageUrl = '';//await ApiHelper.getApiUrl();
 
 
-  Future<void> _loadProfile() async {
+  Future<void> _loadInfos() async {
     try {
-      baseImageUrl = await ApiHelper.getApiUrl();
-      final appProvider = Provider.of<AppProvider>(context, listen: false);
-      final data = await appProvider.getProfile();
       _fetchCategories();
       fetchServices();
       setState(() {
-        _profile = data;
         _isLoading = false;
       });
     } catch (error) {
@@ -97,7 +100,7 @@ class _ClientHomeState extends State<ClientHome> {
   void initState() {
     super.initState();
     _scrollController.addListener(_scrollListener);
-    _loadProfile();
+    _loadInfos();
   }
 
   void _scrollListener() {
@@ -125,8 +128,9 @@ class _ClientHomeState extends State<ClientHome> {
 
   @override
   Widget build(BuildContext context) {
+    final actualProfil = widget.profile;
     return Scaffold(
-      body: _profile == null
+      body: actualProfil == null
           ? Center(child: CircularProgressIndicator())
           : RefreshIndicator(
         onRefresh: _handleRefresh,
@@ -140,8 +144,8 @@ class _ClientHomeState extends State<ClientHome> {
                   children: [
                     GestureDetector(
                       child: Card(
-                        color: ColorsData.purple267,
-                        surfaceTintColor: ColorsData.purple267,
+                        color: ColorsData.purple260,
+                        surfaceTintColor: ColorsData.purple260,
                         shadowColor: ColorsData.grey,
                         margin: EdgeInsetsDirectional.symmetric(horizontal: 15, vertical: 10 ),
                         shape: RoundedRectangleBorder(
@@ -158,7 +162,12 @@ class _ClientHomeState extends State<ClientHome> {
                         showDialog(
                           context: context,
                           builder: (BuildContext context) {
-                            return MenuCirculaireWidget();
+                            return MenuCirculaireWidget(
+                              userId: actualProfil['id'],
+                              imageUrl: actualProfil['avatar'] != null && actualProfil['avatar'].toString().isNotEmpty
+                                  ? '${widget.baseImageUrl}/${actualProfil['avatar']}'
+                                  : actualProfil['profile_photo_url'],
+                            );
                           },
                         );
                       },
@@ -167,10 +176,10 @@ class _ClientHomeState extends State<ClientHome> {
                       margin: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
                       child: CircleAvatar(
                         radius: 20,
-                        backgroundImage: _profile != null
-                            ? (_profile!['avatar'] != null
-                            ? NetworkImage('${baseImageUrl}/${_profile!['avatar']}')
-                            : NetworkImage(_profile!['profile_photo_url']))
+                        backgroundImage: actualProfil != null
+                            ? (actualProfil['avatar'] != null
+                            ? NetworkImage('${widget.baseImageUrl}/${actualProfil['avatar']}')
+                            : NetworkImage(actualProfil['profile_photo_url']))
                             : AssetImage(AssetsData.p) as ImageProvider,
                       ),
                     ),
@@ -182,10 +191,10 @@ class _ClientHomeState extends State<ClientHome> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Bonjour ${_profile!['lastName'] ?? ''} ',
+                        'Bonjour ${actualProfil['lastName'] ?? ''} ',
                         style: GoogleFonts.commissioner(
                           textStyle: TextStyle(
-                            color: ColorsData.purple13,
+                            color: ColorsData.purple00A,
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
                           ),
@@ -246,21 +255,26 @@ class _ClientHomeState extends State<ClientHome> {
                                     title: 'Plus',
                                     onTap: () {
                                       Navigator.push(context, MaterialPageRoute(
-                                        builder: (context) => AllWorksPage(),
+                                        builder: (context) => AllWorksPage(
+                                          clientId: actualProfil['clientId'],
+                                          clientName: actualProfil['lastName']+' '+actualProfil['firstName'],
+                                        ),
                                       ));
                                     },
                                   );
                                 }
                                 final category = categories[index];
                                 return WorkCard(
-                                  iconPath: ('${baseImageUrl}/${category['image']}'),
+                                  iconPath: ('${widget.baseImageUrl}/${category['image']}'),
                                   title: category['label'],
                                   onTap: () {
                                     Navigator.push(context, MaterialPageRoute(
                                       builder: (context) => WorkDetailPage(
                                         categoryId: category['id'],
                                         name: category['label'],
-                                        imageUrl: ('${baseImageUrl}/${category['image']}'),
+                                        clientId: actualProfil['clientId'],
+                                        clientName: actualProfil['lastName']+' '+actualProfil['firstName'],
+                                        imageUrl: ('${widget.baseImageUrl}/${category['image']}'),
                                       ),
                                     ));
                                   },
@@ -284,7 +298,10 @@ class _ClientHomeState extends State<ClientHome> {
                               Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (context) => AllServicesPage()
+                                      builder: (context) => AllServicesPage(
+                                        clientId: actualProfil['clientId'],
+                                        clientName: actualProfil['lastName']+' '+actualProfil['firstName'],
+                                      )
                                   )
                               );
                             },
@@ -319,8 +336,11 @@ class _ClientHomeState extends State<ClientHome> {
                                   final service = services[index];
                                   return ServicePresentationCard(
                                     //iconPath: AssetsData.entretienIcon,
-                                    imagePath: ('${baseImageUrl}/${service['image']}'),
+                                    imagePath: ('${widget.baseImageUrl}/${service['image']}'),
                                     serviceName: service['label'] ?? 'Nom inconnu',
+                                    clientId: actualProfil['clientId'],
+                                    clientName: actualProfil['lastName']+' '+actualProfil['firstName'],
+                                    serviceId: service['id'],
                                     //priceRange: '1000FCFA - 3000FCFA', // ou utiliser service['prix'] si dispo
                                   );
                                 },
@@ -483,16 +503,11 @@ class _ClientHomeState extends State<ClientHome> {
         semanticsValue: "Refresh",
       ),
        // extendBody: true,
-        floatingActionButton: Container(
-          margin: EdgeInsets.symmetric(vertical: 100.0),
-          child: FloatingActionButton(
-            backgroundColor: ColorsData.purple00A,
-            shape: CircleBorder(),
-            onPressed: () => {},
-            child: SvgPicture.asset(
-              AssetsData.chatIcon
-            )
-          ),
+        floatingActionButton: ChatButtonWidget(
+          currentUserProfileImage: actualProfil['avatar'] != null && actualProfil['avatar'].toString().isNotEmpty
+              ? '${widget.baseImageUrl}/${actualProfil['avatar']}'
+              : actualProfil['profile_photo_url'],
+          currentUserId: actualProfil['id'],
         )
     );
   }

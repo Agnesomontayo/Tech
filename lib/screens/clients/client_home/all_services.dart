@@ -11,7 +11,13 @@ import '../details/work_details.dart';
 import 'package:provider/provider.dart';
 
 class AllServicesPage extends StatefulWidget {
-  const AllServicesPage({super.key});
+  final int clientId;
+  final String? clientName;
+  const AllServicesPage({
+    super.key,
+    required this.clientId,
+    this.clientName,
+  });
 
   @override
   State<AllServicesPage> createState() => _AllServicesPageState();
@@ -85,8 +91,10 @@ class _AllServicesPageState extends State<AllServicesPage> {
                                 workIcon: AssetsData.menuisierIcon,
                                 work: 'Menuiserie',
                                 priceRange: '1000FCFA-3000FCFA',
-                                description: service['description'],
+                                description: service['description'] != null ? service['description'] : 'il n\'y a pas de description' ,
                                 serviceId: service['id'],
+                                clientId: widget.clientId,
+                                clientName: widget.clientName,
                               );
                             },
                             childCount: services.length,

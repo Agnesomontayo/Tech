@@ -7,6 +7,7 @@ import 'package:tech/screens/clients/widgets/ServicePresentationModal.dart';
 
 import '../../../core/const/assets.dart';
 import '../../../core/const/colors.dart';
+import '../client_forms/new_request_form.dart';
 import 'WorkerPresentationModal.dart';
 
 class ServicePresentationListItem extends StatefulWidget {
@@ -24,6 +25,8 @@ class ServicePresentationListItem extends StatefulWidget {
   final String description;
   final String priceRange;
   final int serviceId;
+  final int clientId;
+  final String? clientName;
 
   const ServicePresentationListItem({
     super.key,
@@ -41,6 +44,8 @@ class ServicePresentationListItem extends StatefulWidget {
     required this.priceRange,
     required this.description,
     required this.serviceId,
+    required this.clientId,
+    this.clientName,
   });
 
   @override
@@ -51,6 +56,14 @@ class ServicePresentationListItem extends StatefulWidget {
 class _ServicePresentationListItemState
     extends State<ServicePresentationListItem> {
   bool _isClicked = false;
+
+  /*@override
+  void _openFormModal(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (_) => NewRequestFormModal(serviceId: widget.serviceId),
+    );
+  }*/
 
   @override
   Widget build(BuildContext context) {
@@ -124,7 +137,29 @@ class _ServicePresentationListItemState
                         overflow: TextOverflow.visible,
                       ),
                       SizedBox(height: 6,),
-                      Row(
+                      Container(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                widget.description,
+                                style: GoogleFonts.karla(
+                                  textStyle: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w500,
+                                    color: Color(0x55050505),
+                                  ),
+                                ),
+                                textAlign: TextAlign.justify,
+                                maxLines: null,
+                                overflow: TextOverflow.visible,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      /*Row(
                        // mainAxisAlignment: MainAxisAlignment.end,
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
@@ -146,11 +181,12 @@ class _ServicePresentationListItemState
                               ),
                             ),
                             onTap: () {
+                              _openFormModal(context);
                               print('bla');
                             },
                           )
                         ],
-                      )
+                      )*/
                     ],
                   ),
                 ),
@@ -163,7 +199,7 @@ class _ServicePresentationListItemState
             child: GestureDetector(
               onTap: () {
                 setState(() {
-                  _isClicked = !_isClicked; // Inverse l'état à chaque clic
+                  _isClicked = !_isClicked;
                 });
               },
               child: Container(
@@ -200,6 +236,8 @@ class _ServicePresentationListItemState
               reviews: widget.reviews,
               description: widget.description,
               serviceId: widget.serviceId,
+              clientId: widget.clientId,
+              clientName: widget.clientName,
             );
           },
         );

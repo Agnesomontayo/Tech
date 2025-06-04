@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../core/const/assets.dart';
 import '../../../core/const/colors.dart';
 import '../../../core/helpers/utils.dart';
+import '../client_forms/new_request_form.dart';
 
 class WorkerPresentationModal extends StatefulWidget {
   final String imagePath;
@@ -19,6 +20,9 @@ class WorkerPresentationModal extends StatefulWidget {
   final String reviews;
   final String biography;
   final String profession;
+  final int clientId;
+  final String clientName;
+  final int professionalId;
 
   const WorkerPresentationModal({
     super.key,
@@ -32,6 +36,10 @@ class WorkerPresentationModal extends StatefulWidget {
     required this.reviews,
     required this.biography,
     required this.profession,
+    required this.clientId,
+    required this.clientName,
+    required this.professionalId,
+
   });
 
   @override
@@ -44,6 +52,12 @@ class _WorkerPresentationModalState extends State<WorkerPresentationModal> {
   bool _isClicked = false;
   List<dynamic> clients = [];
 
+  void _openFormModal(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (_) => NewRequestFormModal(clientId: widget.clientId, clientName: widget.clientName, professionalId: widget.professionalId, professionalName: widget.name,),
+    );
+  }
 
   @override
   void initState() {
@@ -87,7 +101,7 @@ class _WorkerPresentationModalState extends State<WorkerPresentationModal> {
                     ),
                     Container(
                       padding:
-                          EdgeInsets.symmetric(horizontal: 30, vertical: 0.0),
+                          EdgeInsets.symmetric(horizontal: 20, vertical: 0.0),
                       child: Column(
                         children: [
                           Container(
@@ -409,12 +423,37 @@ class _WorkerPresentationModalState extends State<WorkerPresentationModal> {
                                   decoration: BoxDecoration(
                                       color: ColorsData.purple00C,
                                       borderRadius:
-                                          BorderRadius.circular(20.0)),
+                                      BorderRadius.circular(20.0)),
                                   child: Text(
-                                    'Commander un service',
+                                    'Commander le service',
                                     style: GoogleFonts.karla(
                                       textStyle: TextStyle(
                                           fontSize: 15,
+                                          fontWeight: FontWeight.w500,
+                                          color: ColorsData.white),
+                                    ),
+                                  ),
+                                ),
+                                onTap: () {
+                                  _openFormModal(context);
+                                  print('bla');
+                                },
+                              ),
+                              SizedBox(
+                                width: 5.0,
+                              ),
+                              GestureDetector(
+                                child: Container(
+                                  padding: EdgeInsets.all(10.0),
+                                  decoration: BoxDecoration(
+                                      color: ColorsData.purple00C,
+                                      borderRadius:
+                                      BorderRadius.circular(20.0)),
+                                  child: Text(
+                                    'Noter mes performances',
+                                    style: GoogleFonts.karla(
+                                      textStyle: TextStyle(
+                                          fontSize: 14,
                                           fontWeight: FontWeight.w500,
                                           color: ColorsData.white),
                                     ),

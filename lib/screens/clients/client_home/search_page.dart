@@ -107,6 +107,9 @@ class _SearchPageState extends State<SearchPage> {
                                   biography:
                                       'lhfzmoaijgapzhgpoakezngioznggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg',
                                   profession: 'profesiion',
+                                  clientId: 1,
+                                  clientName: 'Abraham Monie',
+                                  professionalId: 1,
                                 );
                               },
                               childCount: 20,

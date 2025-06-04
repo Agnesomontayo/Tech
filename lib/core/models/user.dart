@@ -7,6 +7,8 @@ class User {
   final String email;
   final String typeprofile;
   final String phonenumber;
+  final String? avatar;
+  final String? profile_photo_url;
 
   User({
     required this.id,
@@ -15,6 +17,8 @@ class User {
     required this.email,
     required this.typeprofile,
     required this.phonenumber,
+    this.avatar,
+    this.profile_photo_url,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -25,6 +29,8 @@ class User {
       email: json['email'],
       typeprofile: json['typeprofile'],
       phonenumber: json['phonenumber'],
+      avatar: json['avatar'],
+      profile_photo_url: json['profile_photo_url'],
     );
 
   }
@@ -36,6 +42,8 @@ class User {
       'email': email,
       'phonenumber': phonenumber,
       'typeprofile': typeprofile,
+      'avatar': avatar,
+      'profile_photo_url': profile_photo_url,
     };
   }
 }

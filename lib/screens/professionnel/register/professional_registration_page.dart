@@ -14,8 +14,11 @@ import 'package:provider/provider.dart';
 import 'package:dio/dio.dart';
 import 'package:tech/core/providers/auth_provider.dart';
 
+import '../../../core/helpers/apiHelpers.dart';
 import '../../../core/models/profession.dart';
+import '../../../core/providers/profession_provider.dart';
 import '../professionnel_home/MainScreenProfessionnal.dart';
+import 'package:provider/provider.dart';
 
 class ProfessionalRegistrationPage extends StatefulWidget {
   @override
@@ -35,35 +38,36 @@ class _ProfessionalRegistrationPageState  extends State<ProfessionalRegistration
   bool isLinkPressed = false;
   String? selectedValue;
   String errorMessage = '';
-  List<Profession> professions = [];
+  List<dynamic> professions = [];
   int? selectedProfessionId;
   //Profession? selectedProfession;
 
   bool isRefreshing = false;
+  String baseImageUrl = '';
 
 
 
   @override
   void initState() {
     super.initState();
-    fetchProfessions();
+    _fetchProfessions();
   }
 
-  Future<void> fetchProfessions() async {
+  Future<void> _fetchProfessions() async {
     try {
-      final response = await Dio().get('http://192.168.116.185:8000/api/professions');
-      if (response.statusCode == 200) {
-        List<dynamic> data = response.data;
-        List<Profession> professionList = data.map((item) => Profession.fromJson(item)).toList();
-        setState(() {
-          professions = professionList;
-        });
-      } else {
-        print('Réponse non réussie. Code de statut : ${response.statusCode}');
-      }
-    } catch (error) {
+      baseImageUrl = await ApiHelper.getApiUrl();
+      final professionsProvider = Provider.of<ProfessionProvider>(context, listen: false);
+      final responseData = await professionsProvider.getManyAvailableProfessions();
 
-      print('Erreur lors de la récupération des professions : $error');
+      setState(() {
+        professions = responseData;
+       // _isLoading = false;
+      });
+    } catch (error) {
+      print('Erreur: $error');
+      setState(() {
+        //_isLoading = false;
+      });
     }
   }
 
@@ -156,7 +160,7 @@ class _ProfessionalRegistrationPageState  extends State<ProfessionalRegistration
                     CustomTextInput(
                         hintText: 'NOM',
                         controller: nameController,
-                        keyboardType: TextInputType.emailAddress,
+                        keyboardType: TextInputType.name,
                         obscureText: false,
                         prefixIcon: Icon(
                           Icons.person_outline_rounded,
@@ -167,7 +171,7 @@ class _ProfessionalRegistrationPageState  extends State<ProfessionalRegistration
                     CustomTextInput(
                         hintText: 'Prénoms',
                         controller: firstnameController,
-                        keyboardType: TextInputType.emailAddress,
+                        keyboardType: TextInputType.name,
                         obscureText: false,
                         prefixIcon: Icon(
                           Icons.person_outline_rounded,
@@ -179,6 +183,7 @@ class _ProfessionalRegistrationPageState  extends State<ProfessionalRegistration
                     CustomTextInput(
                         hintText: 'Email',
                         controller: emailController,
+                        keyboardType: TextInputType.emailAddress,
                         obscureText: false,
                         prefixIcon: Icon(
                           Icons.mail_outline_rounded,
@@ -188,7 +193,7 @@ class _ProfessionalRegistrationPageState  extends State<ProfessionalRegistration
                     ),
                     SizedBox(height: 10),
                     CustomTextInput(
-                        hintText: '+229 XX-XX-XX-XX ',
+                        hintText: '+229 XX-XX-XX-XX-XX ',
                         controller: numberController,
                         obscureText: false,
                         keyboardType: TextInputType.phone,
@@ -202,6 +207,7 @@ class _ProfessionalRegistrationPageState  extends State<ProfessionalRegistration
                     CustomTextInput(
                         hintText: 'Mot de passe',
                         controller: passwordController,
+                        keyboardType: TextInputType.visiblePassword,
                         obscureText: true,
                         prefixIcon: Icon(
                           Icons.lock_outline_rounded,
@@ -213,6 +219,7 @@ class _ProfessionalRegistrationPageState  extends State<ProfessionalRegistration
                     CustomTextInput(
                         hintText: ' Confirmation ',
                         controller: cpasswordController,
+                        keyboardType: TextInputType.visiblePassword,
                         obscureText: true,
                         prefixIcon: Icon(
                           Icons.lock_outline_rounded,
@@ -233,16 +240,17 @@ class _ProfessionalRegistrationPageState  extends State<ProfessionalRegistration
                               size: 22,
                             ),
                             onChanged: (value) {
-                              final selectedProfession = professions.firstWhere((profession) => profession.id == value);
+                              final selectedProfession = professions.firstWhere((profession) => profession['id'] == value);
                               setState(() {
                                 selectedProfessionId = value;
                               });
                             },
 
-                            options: professions.map((Profession profession) {
+                            options: professions.map((profession) {
                               return DropdownOption(
-                                value: profession.id,
-                                label: profession.label,
+                                value: profession['id'],
+                                label: profession['label'],
+                                imageUrl: ('${baseImageUrl}/${profession['profession_category']['image']}'),
                               );
                             }).toList(),
                           );

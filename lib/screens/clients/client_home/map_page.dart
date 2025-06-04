@@ -6,6 +6,7 @@ import 'package:tech/screens/clients/client_home/search_page.dart';
 import 'package:tech/screens/clients/widgets/PageHeaderWidget.dart';
 import 'package:provider/provider.dart';
 import '../../../core/helpers/apiHelpers.dart';
+import '../../../core/providers/app_provider.dart';
 import '../../../core/providers/professionCategory_provider.dart';
 import '../../../core/providers/professionnal_provider.dart';
 import '../../clients/widgets/RoundedWorkCard.dart';
@@ -13,9 +14,17 @@ import '../../clients/widgets/WorkerPresentationCard.dart';
 import '../../clients/widgets/menuCirculaireWidget.dart';
 import '../../clients/widgets/titleWidget.dart';
 import '../details/map_modal_draggable_bottom_sheet.dart';
+import '../widgets/chat_button_widget.dart';
+import 'client_chat_page.dart';
 
 class MapPage extends StatefulWidget {
-  const MapPage({super.key});
+  final Map<String, dynamic> profile;
+  final String baseImageUrl;
+  const MapPage({
+    super.key,
+    required this.profile,
+    required this.baseImageUrl,
+  });
 
   @override
   State<MapPage> createState() => _MapPageState();
@@ -25,11 +34,9 @@ class _MapPageState extends State<MapPage> {
   List<dynamic> categories = [];
   List<dynamic> professionals = [];
   bool _isLoading = true;
-  String baseImageUrl = '';
 
   Future<void> _loadInfos() async {
     try {
-      baseImageUrl = await ApiHelper.getApiUrl();
       _fetchCategories();
     } catch (error) {
       print('Erreur de chargement des infos : $error');
@@ -38,6 +45,7 @@ class _MapPageState extends State<MapPage> {
       });
     }
   }
+
   Future<void> _fetchCategories() async {
     try {
       final categoriesProvider = Provider.of<ProfessioncategoryProvider>(context, listen: false);
@@ -55,26 +63,6 @@ class _MapPageState extends State<MapPage> {
     }
   }
 
- /* Future<void> _fetchProfessionals(categoryId) async {
-    try {
-      baseImageUrl = await ApiHelper.getApiUrl();
-      final professionalsProvider = Provider.of<ProfessionalProvider>(context, listen: false);
-      final responseData = await professionalsProvider.getProfessionalsByCategory(categoryId);
-      //print('responseData ${responseData}');
-      setState(() {
-       professionals = responseData;
-        _isLoading = false;
-      });
-    } catch (error) {
-      print('Erreur: $error');
-      setState(() {
-        _isLoading = false;
-      });
-    }
-  }
-*/
-
-
   @override
   void initState() {
     super.initState();
@@ -83,13 +71,21 @@ class _MapPageState extends State<MapPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    final actualProfil = widget.profile;
+    return actualProfil == null
+        ? Center(child: CircularProgressIndicator())
+        : Scaffold(
       body:  Stack(
         children: [
           SingleChildScrollView(
               child: Column(
                 children: [
-                  PageHeaderWidget()
+                  PageHeaderWidget(
+                    userId: actualProfil['id'],
+                    imageUrl: actualProfil['avatar'] != null && actualProfil['avatar'].toString().isNotEmpty
+                        ? '${widget.baseImageUrl}/${actualProfil['avatar']}'
+                        : actualProfil['profile_photo_url'],
+                  )
                 ],
               )
           ),
@@ -121,7 +117,7 @@ class _MapPageState extends State<MapPage> {
                       child: GestureDetector(
                           child: RoundedWorkCard(
                             work: category['label'],
-                            workIcon: ('${baseImageUrl}/${category['image']}'),
+                            workIcon: ('${widget.baseImageUrl}/${category['image']}'),
                           ),
                           onTap: () {
                             final categoryId = category['id'];
@@ -134,6 +130,8 @@ class _MapPageState extends State<MapPage> {
                                   return MapModalDraggableBottomSheet(
                                     categoryId: categoryId,
                                     categoryName: categoryName,
+                                    clientName: actualProfil['name'],
+                                    clientId: actualProfil['id'],
                                   );
                                 }
                             );
@@ -147,16 +145,11 @@ class _MapPageState extends State<MapPage> {
           )
         ],
       ),
-      floatingActionButton: Container(
-        margin: EdgeInsets.symmetric(vertical: 100.0),
-        child: FloatingActionButton(
-            backgroundColor: ColorsData.purple00A,
-            shape: CircleBorder(),
-            onPressed: () => {},
-            child: SvgPicture.asset(
-                AssetsData.chatIcon
-            )
-        ),
+      floatingActionButton: ChatButtonWidget(
+        currentUserProfileImage: actualProfil['avatar'] != null && actualProfil['avatar'].toString().isNotEmpty
+            ? '${widget.baseImageUrl}/${actualProfil['avatar']}'
+            : actualProfil['profile_photo_url'],
+        currentUserId: actualProfil['id'],
       ),
     );
   }

@@ -10,6 +10,7 @@ import '../../../core/helpers/apiHelpers.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/providers/services_provider.dart';
+import '../client_forms/new_request_form.dart';
 
 class ServicePresentationModal extends StatefulWidget {
   final String imagePath;
@@ -22,6 +23,8 @@ class ServicePresentationModal extends StatefulWidget {
   final String reviews;
   final String description;
   final int serviceId;
+  final int clientId;
+  final String? clientName;
 
   const ServicePresentationModal({
     super.key,
@@ -35,6 +38,8 @@ class ServicePresentationModal extends StatefulWidget {
     required this.reviews,
     required this.description,
     required this.serviceId,
+    required this.clientId,
+    this.clientName,
   });
 
   @override
@@ -94,6 +99,13 @@ class _ServicePresentationModalState extends State<ServicePresentationModal> {
         _isLoading = false;
       });
     }
+  }
+
+  void _openFormModal(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (_) => NewRequestFormModal(clientId: widget.clientId, clientName: widget.clientName, serviceId: widget.serviceId, serviceLabel: widget.label),
+    );
   }
 
   @override
@@ -331,6 +343,11 @@ class _ServicePresentationModalState extends State<ServicePresentationModal> {
                                       ? baseImageUrl + '/' + professional['user']['avatar']
                                       : professional['user']['profile_photo_url'],
                                   profession: professional['profession']['label'],
+                                  serviceId: widget.serviceId,
+                                  clientId: widget.clientId,
+                                  clientName: widget.clientName,
+                                  serviceLabel: widget.label,
+                                  professionalId: professional['id'],
                                 );
                               },
                             )
@@ -355,7 +372,7 @@ class _ServicePresentationModalState extends State<ServicePresentationModal> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              GestureDetector(
+                              /*GestureDetector(
                                 child: Container(
                                   padding: EdgeInsets.all(10.0),
                                   decoration: BoxDecoration(
@@ -372,8 +389,12 @@ class _ServicePresentationModalState extends State<ServicePresentationModal> {
                                     ),
                                   ),
                                 ),
-                              ),
-/*
+                                onTap: () {
+                                  _openFormModal(context);
+                                  print('bla');
+                                },
+                              ),*/
+                              /*
                               Spacer(),
                               GestureDetector(
                                 child: Container(

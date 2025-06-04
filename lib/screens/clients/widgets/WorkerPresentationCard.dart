@@ -18,6 +18,10 @@ class WorkerPresentationCard extends StatelessWidget {
   final String imagePath ;
   final String biography;
   final String profession;
+  final int clientId;
+  final String clientName;
+  final int professionalId;
+
   const WorkerPresentationCard ({
     super.key,
     required this.name,
@@ -29,6 +33,9 @@ class WorkerPresentationCard extends StatelessWidget {
     required this.imagePath,
     required this.biography,
     required this.profession,
+    required this.clientId,
+    required this.clientName,
+    required this.professionalId,
   });
   @override
   Widget build(BuildContext context) {
@@ -187,6 +194,9 @@ class WorkerPresentationCard extends StatelessWidget {
               reviews: reviews,
               biography: biography,
               profession: profession,
+              clientId: clientId,
+              clientName: clientName,
+              professionalId: professionalId,
             );
           },
         );

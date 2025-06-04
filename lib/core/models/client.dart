@@ -10,7 +10,9 @@ class Client extends User {
     required String phonenumber,
     required String email,
     required String typeprofile,
-  }) : super(id: id, lastName: lastName, firstName: firstName, email: email, phonenumber: phonenumber,typeprofile: typeprofile);
+    required String? avatar,
+    required String? profile_photo_url,
+  }) : super(id: id, lastName: lastName, firstName: firstName, email: email, phonenumber: phonenumber,typeprofile: typeprofile, avatar: avatar, profile_photo_url: profile_photo_url);
 
   factory Client.fromJson(Map<String, dynamic> json) {
     return Client(
@@ -20,6 +22,8 @@ class Client extends User {
       phonenumber: json['phonenumber'],
       email: json['email'],
       typeprofile: json['typeprofile'],
+      avatar: json['avatar'],
+      profile_photo_url: json['profile_photo_url'],
     );
   }
 }

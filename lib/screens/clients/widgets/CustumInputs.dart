@@ -81,56 +81,44 @@ class CustomTextInput extends StatelessWidget {
                 child: prefixIcon!,
               ),
               Expanded(
-                child: TextFormField(
-                  enableInteractiveSelection: false, // Désactiver la sélection de texte
-                  readOnly: readOnly, //|| isInputFocused,
-                  obscureText: obscureText,
-                  onTap: onTap,
-                  initialValue: initialValue,
-                  controller: controller,
-                  keyboardType: keyboardType,
-                  onSaved: onSaved,
-                  onChanged: onChanged,
-                  validator: validator,
-                  maxLines: maxLine,
-                  decoration: maxLine! > 1
-                      ? InputDecoration(
-                    hintText: hintText,
-                    filled: true,
-                    fillColor: const Color(0xFFF4F4F4),
-                    border: InputBorder.none,
-                    focusedBorder: InputBorder.none,
-                    prefixIcon: null, // Supprimez ceci pour empêcher l'icône de se répéter
-                    suffixIcon: suffix, // Ajoutez l'icône souhaitée à droite
-                  )
-                      : InputDecoration(
-                    border: InputBorder.none,
-                    enabledBorder: InputBorder.none,
-                    focusedBorder: InputBorder.none,
-                    prefixIcon: null, // Supprimez ceci pour empêcher l'icône de se répéter
-                    suffixIcon: suffix, // Ajoutez l'icône souhaitée à droite
-                   /* enabledBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(
-                        color: ColorsData.purple00A,
-                        width: 2,
+                child: Container(
+                  height: maxLine! > 1 ? height ?? 120 : null, // hauteur fixe pour textarea
+                  child: TextFormField(
+                    enableInteractiveSelection: false,
+                    readOnly: readOnly,
+                    obscureText: obscureText,
+                    onTap: onTap,
+                    initialValue: initialValue,
+                    controller: controller,
+                    keyboardType: keyboardType,
+                    onSaved: onSaved,
+                    onChanged: onChanged,
+                    validator: validator,
+                    maxLines: maxLine! > 1 ? null : 1, // null = illimité si maxLine > 1
+                    minLines: maxLine! > 1 ? maxLine : 1,
+                    expands: false, // ne pas prendre toute la hauteur
+                    decoration: InputDecoration(
+                      hintText: hintText,
+                      filled: maxLine! > 1,
+                      fillColor: maxLine! > 1 ? const Color(0xFFF4F4F4) : null,
+                      border: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      prefixIcon: null,
+                      suffixIcon: suffix,
+                      hintStyle: hintStyle,
+                      errorText: errorText,
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                    ),
+                    style: GoogleFonts.karla(
+                      textStyle: const TextStyle(
+                        color: Colors.black,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
                       ),
-                    ),*/
-                    hintText: hintText,
-                    hintStyle: hintStyle,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 0,
                     ),
+                    cursorColor: ColorsData.black,
+                    onFieldSubmitted: onFieldSubmitted,
                   ),
-                  style: GoogleFonts.karla(
-                    textStyle: TextStyle(
-                      color: Colors.black,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  cursorColor: ColorsData.black,
-                  onFieldSubmitted: onFieldSubmitted,
                 ),
               ),
 

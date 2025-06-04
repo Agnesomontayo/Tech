@@ -14,6 +14,7 @@ import '../../../core/const/assets.dart';
 import '../../../core/helpers/apiHelpers.dart';
 import '../../../core/providers/app_provider.dart';
 import '../../clients/widgets/menuCirculaireWidget.dart';
+import 'client_chat_page.dart';
 
 class UserPage extends StatefulWidget {
   const UserPage({super.key});
@@ -68,7 +69,12 @@ class _UserPageState extends State<UserPage> {
         : Scaffold(
       body: Column(
         children: [
-          PageHeaderWidget(),
+          PageHeaderWidget(
+            userId: _profile?['id'],
+            imageUrl: _profile!['avatar'] != null && _profile!['avatar'].toString().isNotEmpty
+          ? '${baseImageUrl}/${_profile!['avatar']}'
+          : _profile!['profile_photo_url'],
+          ),
           Expanded(
             child: Center(
                 child: Column(
@@ -384,7 +390,18 @@ class _UserPageState extends State<UserPage> {
         child: FloatingActionButton(
             backgroundColor: ColorsData.purple00A,
             shape: CircleBorder(),
-            onPressed: () => {},
+            onPressed: () => {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => ClientChatPage(
+                      currentUserProfileImage: _profile!['avatar'] != null && _profile!['avatar'].toString().isNotEmpty
+                          ? '${baseImageUrl}/${_profile!['avatar']}'
+                          : _profile!['profile_photo_url'],
+                      currentUserId: _profile?['id'],
+                    )),
+              ),
+            },
             child: SvgPicture.asset(AssetsData.chatIcon)),
       ),
     );

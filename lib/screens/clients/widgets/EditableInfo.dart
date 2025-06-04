@@ -6,6 +6,7 @@ class EditableInfoWidget extends StatefulWidget {
   final bool isEditable;
   final TextInputType? keyBoardType;
   final ValueChanged<String> onSave;
+  final bool isMultiline;
 
   const EditableInfoWidget({
     super.key,
@@ -14,6 +15,7 @@ class EditableInfoWidget extends StatefulWidget {
     required this.isEditable,
     this.keyBoardType,
     required this.onSave,
+    this.isMultiline = false,
   });
 
   @override
@@ -52,6 +54,7 @@ class _EditableInfoWidgetState extends State<EditableInfoWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final isMultiline = widget.isMultiline;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
@@ -74,18 +77,24 @@ class _EditableInfoWidgetState extends State<EditableInfoWidget> {
                   controller: _controller,
                   validator: (value) =>
                   value == null || value.isEmpty ? 'Champ requis' : null,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(),
-                    contentPadding: EdgeInsets.symmetric(
-                        vertical: 8, horizontal: 8),
-                  ),
-                  keyboardType: widget.keyBoardType,
+                  keyboardType: widget.isMultiline
+                      ? TextInputType.multiline
+                      : widget.keyBoardType,
+                  minLines: widget.isMultiline ? 5 : 1,
+                  maxLines: widget.isMultiline ? 5 : 1,
+                  scrollPhysics: const BouncingScrollPhysics(),
+                  expands: false, // ne pas étendre au parent
                   onSaved: (newValue) {
                     if (newValue != null) {
                       widget.onSave(newValue);
                     }
                   },
                   autofocus: true,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                    contentPadding: EdgeInsets.symmetric(
+                        vertical: 8, horizontal: 8),
+                  ),
                 )
                     : Text(
                   _currentValue,

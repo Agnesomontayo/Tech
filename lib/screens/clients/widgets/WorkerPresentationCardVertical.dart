@@ -6,6 +6,7 @@ import 'package:tech/screens/clients/widgets/titleWidget.dart';
 import '../../../core/const/assets.dart';
 import '../../../core/const/colors.dart';
 import '../../../screens/clients/widgets/WorkerPresentationModal.dart';
+import '../client_forms/new_request_form.dart';
 
 class WorkerPresentationCardVertical extends StatefulWidget {
   final String name;
@@ -17,6 +18,12 @@ class WorkerPresentationCardVertical extends StatefulWidget {
   final Color availabilityColor;
   final String imagePath ;
   final String profession;
+  final int serviceId;
+  final int clientId;
+  final String? clientName;
+  final String serviceLabel;
+  final int professionalId;
+
   const WorkerPresentationCardVertical({
     super.key,
     required this.name,
@@ -28,6 +35,11 @@ class WorkerPresentationCardVertical extends StatefulWidget {
     required this.availabilityColor,
     required this.imagePath,
     required this.profession,
+    required this.serviceId,
+    required this.clientId,
+    this.clientName,
+    required this.serviceLabel,
+    required this.professionalId,
   });
 
   @override
@@ -35,6 +47,13 @@ class WorkerPresentationCardVertical extends StatefulWidget {
 }
 
 class _WorkerPresentationCardVerticalState extends State<WorkerPresentationCardVertical> {
+
+  void _openFormModal(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (_) => NewRequestFormModal(clientId: widget.clientId, clientName: widget.clientName, serviceId: widget.serviceId, serviceLabel: widget.serviceLabel, professionalId: widget.professionalId, professionalName: widget.name,),
+    );
+  }
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -98,24 +117,29 @@ class _WorkerPresentationCardVerticalState extends State<WorkerPresentationCardV
                       ),
                     ),
                   ),
-                  SizedBox(height: 8,),
-                  Container(
-                        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 2),
-                        decoration: BoxDecoration(
-                            color: ColorsData.purple00C,
-                            borderRadius: BorderRadius.circular(20)
-                        ),
-                        child: Text(
-                            'Choisir',
-                            style: GoogleFonts.karla(
-                              textStyle: TextStyle(
-                                  fontWeight: FontWeight.w400,
-                                  fontSize: 15,
-                                  color: ColorsData.white
-                              ),
-                            )
-                        ),
+                  SizedBox(height: 2,),
+                  GestureDetector(
+                    child:  Container(
+                      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                      decoration: BoxDecoration(
+                          color: ColorsData.purple00C,
+                          borderRadius: BorderRadius.circular(20)
                       ),
+                      child: Text(
+                          'Choisir ce prestataire',
+                          style: GoogleFonts.karla(
+                            textStyle: TextStyle(
+                                fontWeight: FontWeight.w400,
+                                fontSize: 14,
+                                color: ColorsData.white
+                            ),
+                          )
+                      ),
+                    ),
+                    onTap: () {
+                      _openFormModal(context);
+                    },
+                  )
                 ],
               ),
             ),

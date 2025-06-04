@@ -7,7 +7,13 @@ import '../client_home/search_page.dart';
 import 'menuCirculaireWidget.dart';
 
 class PageHeaderWidget extends StatefulWidget {
-  const PageHeaderWidget({super.key});
+  final int userId;
+  final String imageUrl;
+  const PageHeaderWidget({
+    super.key,
+    required this.userId,
+    required this.imageUrl,
+  });
 
   @override
   State<PageHeaderWidget> createState() => _PageHeaderWidgetState();
@@ -31,6 +37,7 @@ class _PageHeaderWidgetState extends State<PageHeaderWidget> {
             child: SvgPicture.asset(
               AssetsData.menuIcon,
               fit: BoxFit.scaleDown,
+              color: ColorsData.purple00A,
               width: 38, // Largeur souhaitée
               height: 37,
             ),
@@ -39,7 +46,10 @@ class _PageHeaderWidgetState extends State<PageHeaderWidget> {
             showDialog(
               context: context,
               builder: (BuildContext context) {
-                return MenuCirculaireWidget();
+                return MenuCirculaireWidget(
+                  userId: widget.userId,
+                  imageUrl: widget.imageUrl,
+                );
               },
             );
           },
@@ -57,8 +67,8 @@ class _PageHeaderWidgetState extends State<PageHeaderWidget> {
                 );
               },
               child: Card(
-                color: ColorsData.purple267,
-                surfaceTintColor: ColorsData.purple267,
+                color: ColorsData.purple260,
+                surfaceTintColor: ColorsData.purple260,
                 shadowColor: ColorsData.grey,
                 margin: EdgeInsetsDirectional.symmetric(
                     horizontal: 15, vertical: 10),
@@ -68,6 +78,7 @@ class _PageHeaderWidgetState extends State<PageHeaderWidget> {
                 child: SvgPicture.asset(
                   AssetsData.searchIcon,
                   fit: BoxFit.scaleDown,
+                  color: ColorsData.purple00A,
                   width: 38,
                   height: 37,
                 ),

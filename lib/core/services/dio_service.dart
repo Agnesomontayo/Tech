@@ -70,6 +70,25 @@ class DioService {
     }
   }
 
+  Future<dynamic> getAvailable({
+    required String url
+  }) async {
+    try {
+    /*  String? token = await _getToken();
+
+      if (token == null || token.isEmpty) {
+        return {'error': 'Token non trouvé'};
+      }*/
+
+      //_dio.options.headers['Authorization'] = 'Bearer $token';
+
+      final response = await _dio.get(url);
+      return response.data;
+    } catch (error) {
+      return handleError(error);
+    }
+  }
+
 
   Future<dynamic> post({
     required String url,
@@ -83,6 +102,7 @@ class DioService {
       }
 
       _dio.options.headers['Authorization'] = 'Bearer $token';
+      _dio.options.headers['Accept'] = 'application/json';
 
       final response = await _dio.post(url, data: body);
 
@@ -192,7 +212,7 @@ class DioService {
     try {
       final response = await _dio.post(url, data: body);
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 201) {
         return response.data;
       } else {
         print('Erreur lors de l\'inscription. Code de statut : ${response
@@ -239,7 +259,7 @@ class DioService {
       }
 
       _dio.options.headers['Authorization'] = 'Bearer $token';
-      _dio.options.headers['Accept'] = 'application/json';
+      //_dio.options.headers['Accept'] = 'application/json';
 
       final response = await _dio.post(
         url,

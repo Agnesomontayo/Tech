@@ -97,7 +97,7 @@ class AuthProvider with ChangeNotifier {
 
       print('Response Data: $responseData');
       if (responseData != null) {
-        if (responseData['success'] != null && responseData['success'] == true) {
+        if (responseData['success'] != null && responseData['success'] is bool && responseData['success']) {
           if (responseData['token'] != null) {
             final token = responseData['token'];
             final user = responseData['user'];
@@ -139,7 +139,7 @@ class AuthProvider with ChangeNotifier {
           'phonenumber': phonenumber,
           'typeprofile': 'professionnel',
           'experience': experience,
-          'profession': profession,
+          'profession_id': profession,
         },
       );
       print('Response Data: $responseData');

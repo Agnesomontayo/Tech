@@ -11,11 +11,15 @@ import 'package:provider/provider.dart';
 class MapModalDraggableBottomSheet extends StatefulWidget {
   final int categoryId;
   final String categoryName;
+  final String clientName;
+  final int clientId;
 
   const MapModalDraggableBottomSheet({
     super.key,
     required this.categoryId,
     required this.categoryName,
+    required this.clientName,
+    required this.clientId,
   });
 
   @override
@@ -116,6 +120,9 @@ class _MapModalDraggableBottomSheetState extends State<MapModalDraggableBottomSh
                                   : professional['user']['profile_photo_url'],
                               biography: professional['biography'] != null ?professional['biography'] : 'Rien sur ce profil',
                               profession: professional['profession']['label'],
+                              clientId: widget.clientId,
+                              clientName: widget.clientName,
+                              professionalId: professional['id'],
                             );
                           },
                           childCount: professionals.length,
