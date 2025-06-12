@@ -8,10 +8,12 @@ import '../client_home/client_chat_page.dart';
 class ChatButtonWidget extends StatefulWidget {
   final String currentUserProfileImage;
   final int currentUserId;
+  final String typeProfile;
   const ChatButtonWidget({
     super.key,
     required this.currentUserProfileImage,
     required this.currentUserId,
+    required this.typeProfile,
   });
 
   @override
@@ -33,6 +35,7 @@ class _ChatButtonWidgetState extends State<ChatButtonWidget> {
                   builder: (context) => ClientChatPage(
                     currentUserProfileImage: widget.currentUserProfileImage,
                     currentUserId: widget.currentUserId,
+                    typeProfile: widget.typeProfile,
                   )),
             ),
           },

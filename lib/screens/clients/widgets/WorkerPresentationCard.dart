@@ -11,9 +11,9 @@ import 'package:tech/core/helpers/utils.dart';
 class WorkerPresentationCard extends StatelessWidget {
   final String name;
   final double rate;
-  final String reviews;
+  final int reviews;
   final String availability;
-  final String distance;
+  final int distance;
   final String unit;
   final String imagePath ;
   final String biography;
@@ -97,7 +97,7 @@ class WorkerPresentationCard extends StatelessWidget {
                       Icon(
                         Icons.star,
                         color: Colors.amber,
-                        size: 14,
+                        size: 20,
                       ),
                       Text(
                           rate.toString(),
@@ -124,7 +124,7 @@ class WorkerPresentationCard extends StatelessWidget {
                             textStyle: TextStyle(
                                 fontWeight: FontWeight.w400,
                                 fontSize: 16,
-                                color: ColorsData.grey6b.withOpacity(0.5)
+                                color: ColorsData.grey6b.withOpacity(0.9)
                             ),
                           )
                       ),
@@ -162,7 +162,7 @@ class WorkerPresentationCard extends StatelessWidget {
                       ),
                       SizedBox(width: 5,),
                       Text(
-                          'A $distance $unit',
+                          formatDistance(distance.toDouble()),
                           style: GoogleFonts.karla(
                             textStyle: TextStyle(
                               fontWeight: FontWeight.w500,

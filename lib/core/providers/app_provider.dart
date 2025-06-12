@@ -17,18 +17,31 @@ import 'package:tech/core/helpers/apiHelpers.dart';
 class AppProvider with ChangeNotifier {
   final DioService _connectedUserServices = DioService(baseUrl: ConstData.urlBase, token: '');
   String _token = '';
+  Map<String, dynamic> _userProfile = {};
+  bool _isLoadingProfile = false;
+  String _baseImageUrl = '';
+
+
   Future<String?> _getToken() async {
     final storage = FlutterSecureStorage();
-    return await storage.read(key: 'authToken'); // Récupérer le token
+    return await storage.read(key: 'authToken');
   }
-  User _user = User(id: -1, lastName: '', firstName: '', email: '', phonenumber: '', typeprofile: '');
-
   final storage = FlutterSecureStorage();
 
-  User get user => _user;
+  Map<String, dynamic> get userProfile => _userProfile;
+  bool get isLoadingProfile => _isLoadingProfile;
+  String get baseImageUrl => _baseImageUrl;
+
+  Future<void> initializeBaseImageUrl() async {
+    _baseImageUrl = await ApiHelper.getApiUrl();
+    print('yo n y est et bien cherhche ailleurs');
+    notifyListeners();
+  }
 
   //users
   Future<Map<String, dynamic>> getProfile () async {
+    _isLoadingProfile = true;
+    notifyListeners();
     try {
       String baseUrl = await ApiHelper.getApiUrl();
       final responseData = await _connectedUserServices.get(
@@ -37,13 +50,19 @@ class AppProvider with ChangeNotifier {
       print('user info $responseData');
 
       if (responseData != null) {
+        _userProfile = responseData ?? {};
         return responseData;
       } else {
+        _userProfile = {};
         throw Exception('Profil vide');
       }
     } catch (error) {
+      _userProfile = {};
       print('Erreur lors de la récupération du profil: $error');
       throw Exception('Impossible de récupérer le profil');
+    }finally {
+      _isLoadingProfile = false;
+      notifyListeners();
     }
   }
 
@@ -52,6 +71,8 @@ class AppProvider with ChangeNotifier {
   Future<dynamic> updateUserProfile({
     required FormData formData,
   }) async {
+    _isLoadingProfile = true;
+    notifyListeners();
     try {
       String baseUrl = await ApiHelper.getApiUrl();
       String? token = await _getToken();
@@ -66,6 +87,9 @@ class AppProvider with ChangeNotifier {
       );
 
       if (response != null && response is Map && response['success'] == true) {
+        //_userProfile = response['data'] ?? {};
+        await getProfile();
+        notifyListeners();
         return response;
       } else {
         print('Erreur réponse: $response');
@@ -74,6 +98,9 @@ class AppProvider with ChangeNotifier {
     } catch (error) {
       print('Erreur updateUserProfile: $error');
       return {'error': 'Exception updateUserProfile: $error'};
+    } finally {
+      _isLoadingProfile = false;
+      notifyListeners();
     }
   }
 

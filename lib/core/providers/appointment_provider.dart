@@ -6,7 +6,7 @@ import '../helpers/apiHelpers.dart';
 import '../models/user.dart';
 import '../services/dio_service.dart';
 
-class AppointmentProvier with ChangeNotifier {
+class AppointmentProvider with ChangeNotifier {
   final DioService _dioService =
       DioService(baseUrl: ConstData.urlBase, token: '');
 
@@ -28,13 +28,33 @@ class AppointmentProvier with ChangeNotifier {
 
   User get user => _user;
 
-  // Récupérer plusieurs rendez-vous
+  // Récupérer plusieurs rendez-vous pour un client
 
-  Future<List<dynamic>> getManyAppointments() async {
+  Future<List<dynamic>> getManyClientAppointments(int clientId) async {
     try {
       String baseUrl = await ApiHelper.getApiUrl();
       final responseData = await _dioService.get(
-        url: '${baseUrl}/appointments',
+        url: '${baseUrl}/appointments/by-clients/${clientId}',
+      );
+
+      if (responseData != null)
+          return responseData;
+       else {
+        throw Exception('Données de rdv invalides');
+      }
+    } catch (error) {
+      print('Erreur lors de la récupération des rdv: $error');
+      throw Exception('Impossible de récupérer les rdv');
+    }
+  }
+
+  // Récupérer plusieurs rendez-vous pour un professionnel
+
+  Future<List<dynamic>> getManyProfessionalAppointments(int professionalId) async {
+    try {
+      String baseUrl = await ApiHelper.getApiUrl();
+      final responseData = await _dioService.get(
+        url: '${baseUrl}/appointments/${professionalId}',
       );
 
       if (responseData != null && responseData is Map<String, dynamic>) {
@@ -54,7 +74,7 @@ class AppointmentProvier with ChangeNotifier {
 
   // Récupérer un seul rendez-vous
 
-  Future<Map<String, dynamic>> getOneServiceRequest (int appointmentId) async {
+  Future<Map<String, dynamic>> getOneAppointment (int appointmentId) async {
     try {
       String baseUrl = await ApiHelper.getApiUrl();
       final responseData = await _dioService.get(
@@ -76,26 +96,14 @@ class AppointmentProvier with ChangeNotifier {
   // Ajouter un rendez-vous
 
   Future<Map<String, dynamic>> addServiceRequest(
-      int clientId,
-      int serviceId,
-      int professionalId,
-      String side_note,
-      DateTime schedule_at,
-      int price,
-      int serviceRequestId
+      int serviceRequestId,
       ) async {
     try {
       String baseUrl = await ApiHelper.getApiUrl();
       final responseData = await _dioService.post(
         url: '$baseUrl/appointments',
         body: {
-          'client_id': clientId,
-          'professional_id': professionalId,
-          'service_id': serviceId,
           'service_request_id': serviceRequestId,
-          'price': price,
-          'scheduled_at': schedule_at,
-          'side_note': side_note,
         },
       );
 

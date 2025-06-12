@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:tech/core/providers/client_provider.dart';
 
 import '../../../core/const/assets.dart';
 import '../../../core/const/colors.dart';
@@ -12,42 +13,48 @@ import '../widgets/ServicePresentationCard.dart';
 import '../widgets/titleWidget.dart';
 import 'package:provider/provider.dart';
 
+
 class FavoriteDetailPage extends StatefulWidget {
-  const FavoriteDetailPage({super.key});
+  final Map<String, dynamic> profile;
+  final String baseImageUrl;
+  const FavoriteDetailPage({
+    super.key,
+    required this.profile,
+    required this.baseImageUrl,
+  });
 
   @override
   State<FavoriteDetailPage> createState() => _FavoriteDetailPageState();
 }
 
 class _FavoriteDetailPageState extends State<FavoriteDetailPage> {
-  Map<String, dynamic>? _profile;
-  String baseImageUrl = '';
+  //Map<String, dynamic>? actualProfil;
   bool _isLoading = true;
   final ScrollController _scrollController = ScrollController();
   bool _showLeftButton = false;
   bool _showRightButton = true;
+  Map<String, dynamic>? mostRequested;
+  List<dynamic> services = [];
+  List<dynamic> professionals = [];
 
-  Future<void> _loadProfile() async {
+  Future<void> fetchMostRequestedProfessionalsAndServices() async {
     try {
-      baseImageUrl = await ApiHelper.getApiUrl();
-      final appProvider = Provider.of<AppProvider>(context, listen: false);
-      final data = await appProvider.getProfile();
+      final clientProvider = Provider.of<ClientProvider>(context, listen: false);
+      final data = await clientProvider.getMostRequestedProfessionalsAndServices(widget.profile['clientId']);
       setState(() {
-        _profile = data;
-        _isLoading = false;
+        mostRequested = data;//.take(10).toList();
+        services = mostRequested?['most_requested_services'].take(20).toList();
+        professionals = mostRequested?['most_requested_professionals'].take(10).toList();
       });
-    } catch (error) {
-      print('Erreur de chargement du profil : $error');
-      setState(() {
-        _isLoading = false;
-      });
+    } catch (e) {
+      print('Erreur: $e');
     }
   }
 
   @override
   void initState() {
     super.initState();
-    _loadProfile();
+    fetchMostRequestedProfessionalsAndServices();
     _scrollController.addListener(_scrollListener);
   }
 
@@ -77,7 +84,8 @@ class _FavoriteDetailPageState extends State<FavoriteDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    return _profile == null
+    final actualProfil = widget.profile;
+    return actualProfil == null
         ? Center(child: CircularProgressIndicator())
         : Scaffold(
       body: SingleChildScrollView(
@@ -85,12 +93,6 @@ class _FavoriteDetailPageState extends State<FavoriteDetailPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              PageHeaderWidget(
-                userId: _profile?['id'],
-                imageUrl: _profile!['avatar'] != null && _profile!['avatar'].toString().isNotEmpty
-                    ? '${baseImageUrl}/${_profile!['avatar']}'
-                    : _profile!['profile_photo_url'],
-              ),
               Padding(
                   padding: EdgeInsets.symmetric(horizontal: 10.0),
                   child: Column(
@@ -117,16 +119,16 @@ class _FavoriteDetailPageState extends State<FavoriteDetailPage> {
                                       padding: EdgeInsets.all(10),
                                       scrollDirection: Axis.horizontal,
                                       controller: _scrollController,
-                                      itemCount: 20,
+                                      itemCount: services.length,
                                       itemBuilder: (context, index) {
+                                        final service = services[index];
                                         return ServicePresentationCard(
                                           //iconPath: AssetsData.entretienIcon,
-                                          imagePath: AssetsData.menage,
-                                          serviceName:
-                                          'Nettoyage complet $index',
-                                          clientId: _profile!['id'],
-                                          clientName: _profile!['lastName']+' '+_profile!['firstName'],
-                                          // serviceId: service['id'],
+                                          imagePath: ('${widget.baseImageUrl}/${service['service_image']}'),
+                                          serviceName: service['service_label'] ?? '',
+                                          clientId: actualProfil['clientId'],
+                                          clientName: actualProfil['lastName']+' '+actualProfil['firstName'],
+                                          serviceId: service['service_id'],
                                           //priceRange: '1000FCFA-3000FCFA'
                                         );
                                       },
@@ -215,8 +217,9 @@ class _FavoriteDetailPageState extends State<FavoriteDetailPage> {
                                     ListView.builder(
                                       padding: EdgeInsets.all(10),
                                       scrollDirection: Axis.horizontal,
-                                      itemCount: 20,
+                                      itemCount: professionals.length,
                                       itemBuilder: (context, index) {
+                                        final professional = professionals[index];
                                         return Container(
                                           width: 150,
                                           margin: EdgeInsets.symmetric(
@@ -233,11 +236,12 @@ class _FavoriteDetailPageState extends State<FavoriteDetailPage> {
                                                       width: 110,
                                                       child: CircleAvatar(
                                                         radius: 70,
-                                                        backgroundImage: AssetImage(
-                                                            AssetsData.best),
+                                                        backgroundImage: professional['professional_avatar'] != null
+                                                            ? NetworkImage('${widget.baseImageUrl}/${professional['professional_avatar']}')
+                                                            : NetworkImage(professional['professional_profile_photo_url']),
                                                       )),
                                                   Text(
-                                                    'Marie S. $index',
+                                                      professional['professional_lastName'] + ' ' + professional['professional_firstName'],
                                                     style: GoogleFonts.karla(
                                                       textStyle: TextStyle(
                                                         fontSize: 13,
@@ -245,16 +249,21 @@ class _FavoriteDetailPageState extends State<FavoriteDetailPage> {
                                                       ),
                                                     ),
                                                   ),
-                                                  Text(
-                                                    'Menuiserie',
-                                                    style: GoogleFonts.commissioner(
-                                                      textStyle: TextStyle(
-                                                          fontSize: 16,
-                                                          fontWeight:
-                                                          FontWeight.w600,
-                                                          color:
-                                                          ColorsData.purple00A,
-                                                          height: 1.0),
+                                                  SizedBox(
+                                                    width: 200,
+                                                    child: Text(
+                                                      professional['professiona_profession'],
+                                                      maxLines: 1,
+                                                      overflow: TextOverflow.ellipsis,
+                                                      textAlign: TextAlign.center,
+                                                      style: GoogleFonts.commissioner(
+                                                        textStyle: TextStyle(
+                                                          fontSize: 13,
+                                                          fontWeight: FontWeight.w600,
+                                                          color: ColorsData.purple00A,
+                                                          height: 1.0,
+                                                        ),
+                                                      ),
                                                     ),
                                                   ),
                                                 ],
@@ -273,7 +282,7 @@ class _FavoriteDetailPageState extends State<FavoriteDetailPage> {
           ),
         ),
       ),
-      floatingActionButton: Container(
+      /*floatingActionButton: Container(
         margin: EdgeInsets.symmetric(vertical: 100.0),
         child: FloatingActionButton(
             backgroundColor: ColorsData.purple00A,
@@ -283,10 +292,11 @@ class _FavoriteDetailPageState extends State<FavoriteDetailPage> {
                 context,
                 MaterialPageRoute(
                     builder: (context) => ClientChatPage(
-                      currentUserProfileImage: _profile!['avatar'] != null && _profile!['avatar'].toString().isNotEmpty
-                          ? '${baseImageUrl}/${_profile!['avatar']}'
-                          : _profile!['profile_photo_url'],
-                      currentUserId: _profile?['id'],
+                      currentUserProfileImage: actualProfil!['avatar'] != null && actualProfil!['avatar'].toString().isNotEmpty
+                          ? '${widget.baseImageUrl}/${actualProfil!['avatar']}'
+                          : actualProfil!['profile_photo_url'],
+                      currentUserId: actualProfil?['id'],
+                      typeProfile: actualProfil?['typeprofile'],
                     )),
               ),
             },
@@ -294,7 +304,7 @@ class _FavoriteDetailPageState extends State<FavoriteDetailPage> {
                 AssetsData.chatIcon
             )
         ),
-      ),
+      ),*/
     );
   }
 

@@ -17,29 +17,20 @@ import '../../clients/widgets/menuCirculaireWidget.dart';
 import 'client_chat_page.dart';
 
 class UserPage extends StatefulWidget {
-  const UserPage({super.key});
+  final String baseImageUrl;
+  const UserPage({
+    super.key,
+    required this.baseImageUrl
+  });
 
   @override
   State<UserPage> createState() => _UserPageState();
 }
 
 class _UserPageState extends State<UserPage> {
-  String baseImageUrl = '';
+  //tring baseImageUrl = '';
   Map<String, dynamic>? _profile;
 
-  @override
-  Future<void> _loadProfile() async {
-    try {
-      baseImageUrl = await ApiHelper.getApiUrl();
-      final appProvider = Provider.of<AppProvider>(context, listen: false);
-      final data = await appProvider.getProfile();
-      setState(() {
-        _profile = data;
-      });
-    } catch (error) {
-      print('Erreur de chargement du profil : $error');
-    }
-  }
 
   void handleLogout() async {
     final appProvider = Provider.of<AppProvider>(context, listen: false);
@@ -60,20 +51,32 @@ class _UserPageState extends State<UserPage> {
   @override
   void initState() {
     super.initState();
-    _loadProfile();
   }
   @override
   Widget build(BuildContext context) {
-    return _profile == null
-        ? Center(child: CircularProgressIndicator())
-        : Scaffold(
+    return Consumer<AppProvider>(
+        builder: (context, appProvider, child) {
+      final profile = appProvider.userProfile;
+      final isLoadingProfile = appProvider.isLoadingProfile;
+     /* final baseImageUrl = appProvider.baseImageUrl;
+      print('baseImageUrl $baseImageUrl');*/
+
+
+
+      if (isLoadingProfile || profile.isEmpty) {
+        return Center(child: CircularProgressIndicator());
+      }
+
+      // Si le profil est chargé, affiche le contenu de la page
+      return  Scaffold(
       body: Column(
         children: [
           PageHeaderWidget(
-            userId: _profile?['id'],
-            imageUrl: _profile!['avatar'] != null && _profile!['avatar'].toString().isNotEmpty
-          ? '${baseImageUrl}/${_profile!['avatar']}'
-          : _profile!['profile_photo_url'],
+            userId: profile['id'],
+            imageUrl: profile['avatar'] != null && profile['avatar'].toString().isNotEmpty
+          ? '${widget.baseImageUrl}/${profile['avatar']}'
+          : profile['profile_photo_url'],
+            typeProfile: profile['typeprofile'],
           ),
           Expanded(
             child: Center(
@@ -94,11 +97,9 @@ class _UserPageState extends State<UserPage> {
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           image: DecorationImage(
-                            image: _profile != null
-                                ? (_profile!['avatar'] != null
-                                ? NetworkImage('${baseImageUrl}/${_profile!['avatar']}')
-                                : NetworkImage(_profile!['profile_photo_url']))
-                                : AssetImage(AssetsData.p) as ImageProvider,
+                            image:profile['avatar'] != null && profile['avatar'].toString().isNotEmpty
+                                ? NetworkImage('${widget.baseImageUrl}/${profile['avatar']}')
+                                : NetworkImage(profile['profile_photo_url']),
                             fit: BoxFit.cover,
                           ),
                         ),
@@ -174,20 +175,11 @@ class _UserPageState extends State<UserPage> {
                                   MaterialPageRoute(
                                     builder: (context) =>
                                         UserInformationsPage(
-                                          firstName: _profile!['firstName'],
-                                          lastName: _profile!['lastName'],
-                                          phonenumber: _profile!['phonenumber'],
-                                          email: _profile!['email'],
-                                          imageUrl: _profile!['avatar'] != null && _profile!['avatar'].toString().isNotEmpty
-                                                    ? '${baseImageUrl}/${_profile!['avatar']}'
-                                                    : _profile!['profile_photo_url'],
+                                          baseImageUrl: widget.baseImageUrl,
                                         ),
                                   ),
 
                                 );
-                                if (result == true) {
-                                  _loadProfile();
-                                }
                               },
                             ),
                             GestureDetector(
@@ -395,15 +387,17 @@ class _UserPageState extends State<UserPage> {
                 context,
                 MaterialPageRoute(
                     builder: (context) => ClientChatPage(
-                      currentUserProfileImage: _profile!['avatar'] != null && _profile!['avatar'].toString().isNotEmpty
-                          ? '${baseImageUrl}/${_profile!['avatar']}'
-                          : _profile!['profile_photo_url'],
-                      currentUserId: _profile?['id'],
+                      currentUserProfileImage: profile['avatar'] != null && profile['avatar'].toString().isNotEmpty
+                          ? '${widget.baseImageUrl}/${profile['avatar']}'
+                          : profile['profile_photo_url'],
+                      currentUserId: profile['id'],
+                      typeProfile: profile['typeprofile'],
                     )),
               ),
             },
             child: SvgPicture.asset(AssetsData.chatIcon)),
       ),
     );
+        });
   }
 }

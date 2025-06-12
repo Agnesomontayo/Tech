@@ -16,6 +16,11 @@ import '../../clients/widgets/titleWidget.dart';
 import '../details/map_modal_draggable_bottom_sheet.dart';
 import '../widgets/chat_button_widget.dart';
 import 'client_chat_page.dart';
+import 'package:tech/core/helpers/utils.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:location/location.dart';
+import 'package:dio/dio.dart';
+
 
 class MapPage extends StatefulWidget {
   final Map<String, dynamic> profile;
@@ -34,9 +39,15 @@ class _MapPageState extends State<MapPage> {
   List<dynamic> categories = [];
   List<dynamic> professionals = [];
   bool _isLoading = true;
+  GoogleMapController? _mapController;
+  LocationData? _currentLocation;
+  final Location _location = Location();
+  final Set<Marker> _markers = {};
+
 
   Future<void> _loadInfos() async {
     try {
+      await _loadClientLocation();
       _fetchCategories();
     } catch (error) {
       print('Erreur de chargement des infos : $error');
@@ -45,6 +56,23 @@ class _MapPageState extends State<MapPage> {
       });
     }
   }
+
+  Future<void> _loadClientLocation() async {
+    final permission = await _location.requestPermission();
+    if (permission != PermissionStatus.granted) return;
+
+    bool serviceEnabled = await _location.serviceEnabled();
+    if (!serviceEnabled) {
+      serviceEnabled = await _location.requestService();
+      if (!serviceEnabled) return;
+    }
+
+    final loc = await _location.getLocation();
+    setState(() => _currentLocation = loc);
+
+    await _fetchNearbyProfessionals();
+  }
+
 
   Future<void> _fetchCategories() async {
     try {
@@ -63,6 +91,70 @@ class _MapPageState extends State<MapPage> {
     }
   }
 
+  Future<void> _fetchNearbyProfessionals() async {
+    if (_currentLocation == null) return;
+
+    final dio = Dio();
+    try {
+      String baseUrl = await ApiHelper.getApiUrl();
+      final response = await dio.get('${baseUrl}/locations/nearby', queryParameters: {
+        'latitude': _currentLocation!.latitude,
+        'longitude': _currentLocation!.longitude,
+        'radius': 10,
+      });
+
+      final data = response.data as List;
+
+      final newMarkers = <Marker>{
+        Marker(
+          markerId: MarkerId('me'),
+          position: LatLng(_currentLocation!.latitude!, _currentLocation!.longitude!),
+          infoWindow: InfoWindow(title: 'Vous êtes ici'),
+        ),
+      };
+
+      /*for (var pro in data) {
+        newMarkers.add(Marker(
+          markerId: MarkerId('pro_${pro['id']}'),
+          position: LatLng(
+            double.parse(pro['latitude'].toString()),
+            double.parse(pro['longitude'].toString()),
+          ),
+          infoWindow: InfoWindow(title: pro['name']),
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
+        ));
+      }*/
+
+      for (var pro in data) {
+        final customIcon = await createCustomMarkerBitmap(
+          name: pro['name'],
+          profession: pro['profession_name'],
+          availability: pro['availability'],
+        );
+
+        newMarkers.add(Marker(
+          markerId: MarkerId('pro_${pro['id']}'),
+          position: LatLng(
+            double.parse(pro['latitude'].toString()),
+            double.parse(pro['longitude'].toString()),
+          ),
+          infoWindow: InfoWindow(title: pro['name']),
+          icon: customIcon,
+        ));
+      }
+
+
+      setState(() {
+        _markers.clear();
+        _markers.addAll(newMarkers);
+      });
+
+    } catch (e) {
+      print("Erreur API: $e");
+    }
+  }
+
+
   @override
   void initState() {
     super.initState();
@@ -77,17 +169,64 @@ class _MapPageState extends State<MapPage> {
         : Scaffold(
       body:  Stack(
         children: [
-          SingleChildScrollView(
-              child: Column(
-                children: [
-                  PageHeaderWidget(
-                    userId: actualProfil['id'],
-                    imageUrl: actualProfil['avatar'] != null && actualProfil['avatar'].toString().isNotEmpty
-                        ? '${widget.baseImageUrl}/${actualProfil['avatar']}'
-                        : actualProfil['profile_photo_url'],
-                  )
-                ],
-              )
+          _currentLocation == null
+              ? Center(child: CircularProgressIndicator())
+              : GoogleMap(
+            initialCameraPosition: CameraPosition(
+              target: LatLng(_currentLocation!.latitude!, _currentLocation!.longitude!),
+              zoom: 13,
+            ),
+            markers: _markers,
+            myLocationEnabled: true,
+            myLocationButtonEnabled: true,
+            onMapCreated: (controller) => _mapController = controller,
+          ),
+          Positioned(
+            top: 50,
+            right: 10,
+            child: Column(
+              children: [
+                FloatingActionButton(
+                  mini: true,
+                  child: Icon(
+                      Icons.add,
+                    size: 40,
+                  ),
+                  onPressed: () async {
+                    if (_mapController == null) return;
+                    final zoom = await _mapController!.getZoomLevel();
+                    _mapController!.animateCamera(CameraUpdate.zoomTo(zoom + 1));
+                  },
+                ),
+                SizedBox(height: 10),
+                FloatingActionButton(
+                  mini: true,
+                  child: Icon(
+                      Icons.remove,
+                    size: 40,
+                  ),
+                  onPressed: () async {
+                    if (_mapController == null) return;
+                    final zoom = await _mapController!.getZoomLevel();
+                    _mapController!.animateCamera(CameraUpdate.zoomTo(zoom - 1));
+                  },
+                ),
+              ],
+            ),
+          ),
+          Positioned.fill(
+            child: Column(
+              children: [
+                PageHeaderWidget(
+                  userId: actualProfil['id'],
+                  imageUrl: actualProfil['avatar'] != null && actualProfil['avatar'].toString().isNotEmpty
+                      ? '${widget.baseImageUrl}/${actualProfil['avatar']}'
+                      : actualProfil['profile_photo_url'],
+                  typeProfile: actualProfil['typeprofile'],
+                ),
+                Expanded(child: Container()), // pour le scroll
+              ],
+            ),
           ),
           Align(
             alignment: Alignment.bottomCenter,
@@ -130,7 +269,7 @@ class _MapPageState extends State<MapPage> {
                                   return MapModalDraggableBottomSheet(
                                     categoryId: categoryId,
                                     categoryName: categoryName,
-                                    clientName: actualProfil['name'],
+                                    clientName: actualProfil['lastName']+' '+actualProfil['firstName'],
                                     clientId: actualProfil['id'],
                                   );
                                 }
@@ -150,6 +289,7 @@ class _MapPageState extends State<MapPage> {
             ? '${widget.baseImageUrl}/${actualProfil['avatar']}'
             : actualProfil['profile_photo_url'],
         currentUserId: actualProfil['id'],
+        typeProfile: actualProfil['typeprofile'],
       ),
     );
   }

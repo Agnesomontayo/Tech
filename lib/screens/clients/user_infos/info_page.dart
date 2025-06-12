@@ -10,6 +10,7 @@ import 'package:provider/provider.dart';
 import '../../../core/const/assets.dart';
 import '../../../core/const/colors.dart';
 import '../../../core/helpers/apiHelpers.dart';
+import '../../../core/helpers/utils.dart';
 import '../../../core/providers/app_provider.dart';
 import '../../../core/services/dio_service.dart';
 import '../../clients/widgets/CustumAppBar.dart';
@@ -17,19 +18,21 @@ import '../../clients/widgets/EditableInfo.dart';
 import '../../clients/widgets/ServicePresentationListItem.dart';
 
 class UserInformationsPage extends StatefulWidget {
-  final String firstName;
+  final baseImageUrl;
+  /*final String firstName;
   final String lastName;
   final String phonenumber;
   final String email;
-  final String? imageUrl;
+  final String? imageUrl;*/
 
   const UserInformationsPage({
     super.key,
-    required this.firstName,
+    /*required this.firstName,
     required this.lastName,
     required this.phonenumber,
     required this.email,
-    this.imageUrl,
+    this.imageUrl,*/
+    required this.baseImageUrl
   });
 
   @override
@@ -38,7 +41,7 @@ class UserInformationsPage extends StatefulWidget {
 
 class _UserInformationsPageState extends State<UserInformationsPage> {
   bool _isEditable = false;
-  String baseImageUrl = '';
+  //String baseImageUrl = '';
   Map<String, dynamic>? _profile;
   bool _isLoading = true;
   final _formKey = GlobalKey<FormState>();
@@ -99,7 +102,8 @@ class _UserInformationsPageState extends State<UserInformationsPage> {
         setState(() {
           _isEditable = false;
         });
-        Navigator.pop(context, true);
+        stopBackgroundLocationUpdate();
+        Navigator.pop(context);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Échec de la mise à jour')),
@@ -111,15 +115,31 @@ class _UserInformationsPageState extends State<UserInformationsPage> {
 @override
   void initState() {
     super.initState();
-    firstname = widget.firstName;
-    lastName = widget.lastName;
-    phonenumber = widget.phonenumber;
-    email = widget.email;
-    imageUrl = widget.imageUrl;
+    final appProvider = Provider.of<AppProvider>(context, listen: false);
+    final userProfile = appProvider.userProfile;
+    firstname = userProfile['firstName'];
+    lastName = userProfile['lastName'];
+    phonenumber = userProfile['phonenumber'];
+    email = userProfile['email'];
+    //imageUrl = widget.imageUrl;
   }
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    final appProvider = Provider.of<AppProvider>(context);
+    final userProfile = appProvider.userProfile;
+    final isLoadingProfile = appProvider.isLoadingProfile;
+    String? displayImageUrl;
+    if (_pickedImage != null) {
+      displayImageUrl = _pickedImage!.path;
+    } else if (userProfile['avatar'] != null) {
+      displayImageUrl = '${widget.baseImageUrl}/${userProfile['avatar']}';
+    } else {
+      displayImageUrl = userProfile['profile_photo_url'];
+    }
+
+    return isLoadingProfile
+        ? Center(child: CircularProgressIndicator())
+        : Scaffold(
         appBar: AppBar(
           toolbarHeight: 2.0,
         ),
@@ -181,27 +201,14 @@ class _UserInformationsPageState extends State<UserInformationsPage> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
-                          /*Container(
-                        width: 100,
-                        height: 100,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          image: DecorationImage(
-                            image: AssetImage(
-                              AssetsData.p,
-                            ),
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      ),*/
-                          imageUrl == null
+                          displayImageUrl == null
                               ? Center(child: CircularProgressIndicator())
                               : CircleAvatar(
                             radius: 50,
                             backgroundImage: _pickedImage != null
                                 ? FileImage(_pickedImage!)
-                                : (imageUrl != null
-                                ? NetworkImage(imageUrl!)
+                                : (displayImageUrl != null
+                                ? NetworkImage(displayImageUrl)
                                 : AssetImage(AssetsData.p)) as ImageProvider,
                           ),
                           Spacer(),

@@ -100,9 +100,9 @@ class _SearchPageState extends State<SearchPage> {
                                   name: 'Abraham Monie $index',
                                   rate: 4.5,
                                   availability: 'Disponible',
-                                  distance: '500',
+                                  distance: 500,
                                   unit: 'm',
-                                  reviews: '250',
+                                  reviews: 250,
                                   imagePath: AssetsData.best,
                                   biography:
                                       'lhfzmoaijgapzhgpoakezngioznggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg',

@@ -668,6 +668,7 @@ class _ProfessionnelHomeState extends State<ProfessionnelHome> {
                             ? '${baseImageUrl}/${_profile!['avatar']}'
                             : _profile!['profile_photo_url'],
                         currentUserId: _profile?['id'],
+                        typeProfil: _profile!['typeprofile'],
                       )),
                 ),
               },

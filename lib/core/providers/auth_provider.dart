@@ -58,6 +58,7 @@ class AuthProvider with ChangeNotifier {
         return {
           'error': '',
           'profileType': user['typeprofile'],
+          'token': token,
         };
       } else {
         final apiError = responseData['message'] ?? 'Mot de passe ou e-mail incorrect';

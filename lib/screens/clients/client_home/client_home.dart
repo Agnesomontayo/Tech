@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:tech/core/const/colors.dart';
 import 'package:tech/core/const/assets.dart';
+import 'package:tech/core/providers/professionnal_provider.dart';
 import 'package:tech/screens/clients/client_home/all_works.dart';
 import 'package:tech/screens/clients/client_home/client_chat_page.dart';
 import 'package:tech/screens/clients/client_home/search_page.dart';
@@ -51,22 +52,27 @@ class _ClientHomeState extends State<ClientHome> {
   List<dynamic> categories = [];
   List<dynamic> services = [];
   bool _isLoading = true;
+  List<dynamic> topRatedProfessionals = [];
 
 
   Future<void> _loadInfos() async {
     try {
       _fetchCategories();
       fetchServices();
+      fetchTopRatedProfessionals();
+      if (!mounted) return;
       setState(() {
         _isLoading = false;
       });
     } catch (error) {
       print('Erreur de chargement du profil : $error');
+      if (!mounted) return;
       setState(() {
         _isLoading = false;
       });
     }
   }
+
   Future<void> _fetchCategories() async {
     try {
       final categoriesProvider = Provider.of<ProfessioncategoryProvider>(context, listen: false);
@@ -74,12 +80,13 @@ class _ClientHomeState extends State<ClientHome> {
 
       setState(() {
         categories = responseData;
-        _isLoading = false;
+        //_isLoading = false;
       });
     } catch (error) {
       print('Erreur: $error');
+      if (!mounted) return;
       setState(() {
-        _isLoading = false;
+        //_isLoading = false;
       });
     }
   }
@@ -93,12 +100,27 @@ class _ClientHomeState extends State<ClientHome> {
       });
     } catch (e) {
       print('Erreur: $e');
+      if (!mounted) return;
+    }
+  }
+
+  Future<void> fetchTopRatedProfessionals() async {
+    try {
+      final professionalProvider = Provider.of<ProfessionalProvider>(context, listen: false);
+      final data = await professionalProvider.getTopRatedAllProfessionsProfessionals();
+      setState(() {
+        topRatedProfessionals = data.take(10).toList();
+      });
+    } catch (e) {
+      print('Erreur: $e');
+      if (!mounted) return;
     }
   }
 
   @override
   void initState() {
     super.initState();
+    print('profil actuel ${widget.profile}');
     _scrollController.addListener(_scrollListener);
     _loadInfos();
   }
@@ -129,10 +151,12 @@ class _ClientHomeState extends State<ClientHome> {
   @override
   Widget build(BuildContext context) {
     final actualProfil = widget.profile;
-    return Scaffold(
-      body: actualProfil == null
-          ? Center(child: CircularProgressIndicator())
-          : RefreshIndicator(
+    if (actualProfil.isEmpty)
+      {
+        return Center(child: CircularProgressIndicator());
+      }
+      return Scaffold(
+      body: RefreshIndicator(
         onRefresh: _handleRefresh,
         child: SingleChildScrollView(
           child:  Container(
@@ -167,6 +191,7 @@ class _ClientHomeState extends State<ClientHome> {
                               imageUrl: actualProfil['avatar'] != null && actualProfil['avatar'].toString().isNotEmpty
                                   ? '${widget.baseImageUrl}/${actualProfil['avatar']}'
                                   : actualProfil['profile_photo_url'],
+                              typeProfile: actualProfil['typeprofile'],
                             );
                           },
                         );
@@ -316,7 +341,7 @@ class _ClientHomeState extends State<ClientHome> {
 
                     ],
                   )
-                  
+
                 ),
                 Container(
                   height: 230,
@@ -409,87 +434,97 @@ class _ClientHomeState extends State<ClientHome> {
                   child: TitleWidget(title: 'Les mieux notés'),
                 ),
                 Container(
-                    height: 200,
-                    child: Column(
-                      children: [
-                        Expanded(
-                          child: Stack(
-                            children: [
-                              ListView.builder(
-                                padding: EdgeInsets.all(10),
-                                scrollDirection: Axis.horizontal,
-                                itemCount: 20,
-                                itemBuilder: (context, index) {
-                                  return Container(
-                                    width: 150,
-                                    margin: EdgeInsets.symmetric(horizontal: 0),
-                                    color: Colors.transparent,
-                                    child: Center(
-                                      child: Column(
-                                        children: [
-                                          Container(
-                                            decoration: BoxDecoration(
-                                              shape: BoxShape.circle,
-                                            ),
-                                            height: 110,
-                                            width: 110,
-                                            child: CircleAvatar(
-                                              radius: 70,
-                                              backgroundImage: AssetImage(AssetsData.best),
-                                            )
+                  height: 400,
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: Stack(
+                          children: [
+                            ListView.builder(
+                              padding: EdgeInsets.all(10),
+                              scrollDirection: Axis.horizontal,
+                              itemCount: topRatedProfessionals.length,
+                              itemBuilder: (context, index) {
+                                final professional = topRatedProfessionals[index];
+                                return Container(
+                                  width: 150,
+                                  margin: EdgeInsets.symmetric(horizontal: 0),
+                                  color: Colors.transparent,
+                                  child: Center(
+                                    child: Column(
+                                      children: [
+                                        Container(
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
                                           ),
-                                          Text(
-                                            'Marie S. $index',
+                                          height: 110,
+                                          width: 110,
+                                          child: CircleAvatar(
+                                            radius: 70,
+                                            backgroundImage: professional['user']['avatar'] != null
+                                                ? NetworkImage('${widget.baseImageUrl}/${professional['user']['avatar']}')
+                                                : NetworkImage(professional['user']['profile_photo_url']),
+                                        ),
+                                        ),
+                                        SizedBox(height: 6),
+                                        SizedBox(
+                                          width: 200,
+                                          child: Text(
+                                            professional['user']['lastName'] + ' ' + professional['user']['firstName'],
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            textAlign: TextAlign.center,
                                             style: GoogleFonts.karla(
                                               textStyle: TextStyle(
-                                                fontSize: 13,
+                                                fontSize: 14,
                                                 fontWeight: FontWeight.w500,
                                               ),
                                             ),
                                           ),
-                                          Text(
-                                            'Menuiserie',
+                                        ),
+                                        SizedBox(
+                                          width: 200,
+                                          child: Text(
+                                            professional['profession']['label'],
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            textAlign: TextAlign.center,
                                             style: GoogleFonts.commissioner(
                                               textStyle: TextStyle(
-                                                fontSize: 16,
+                                                fontSize: 13,
                                                 fontWeight: FontWeight.w600,
                                                 color: ColorsData.purple00A,
-                                                height: 1.0
+                                                height: 1.0,
                                               ),
                                             ),
                                           ),
-                                          Container(
-                                            height: 5,
-                                            child: RatingBar.builder(
-                                              initialRating: 2.5, // Note initiale
-                                              minRating: 1,
-                                              direction: Axis.horizontal,
-                                              allowHalfRating: true, // Permet de donner des demi-étoiles
-                                              itemCount: 5,
-                                              itemSize: 20,
-                                              itemPadding: EdgeInsets.symmetric(horizontal: 2.0),
-                                              itemBuilder: (context, _) => Icon(
-                                                Icons.star,
-                                                color: Colors.amber,
-                                              ),
-                                              onRatingUpdate: (rating) {
-                                                print(rating); // Affiche la note sélectionnée
-                                              },
+                                        ),
+                                        Container(
+                                          height: 20,
+                                          child: RatingBarIndicator(
+                                            rating: professional['average_rating'] ?? 0.0,
+                                            itemBuilder: (context, index) => Icon(
+                                              Icons.star,
+                                              color: Colors.amber,
                                             ),
-                                          )
-                                        ],
-                                      )
+                                            itemCount: 5,
+                                            itemSize: 20.0,
+                                            direction: Axis.horizontal,
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                  );
-                                },
-                              ),
-                            ],
-                          ),
-                        )
-                      ],
-                    )
-
+                                  ),
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
+
                 SizedBox(height: 90,)
               ],
             ),
@@ -508,6 +543,7 @@ class _ClientHomeState extends State<ClientHome> {
               ? '${widget.baseImageUrl}/${actualProfil['avatar']}'
               : actualProfil['profile_photo_url'],
           currentUserId: actualProfil['id'],
+          typeProfile: actualProfil['typeprofile'],
         )
     );
   }
@@ -516,7 +552,6 @@ class _ClientHomeState extends State<ClientHome> {
     await Future.delayed(
       Duration(seconds: 1),
     );
-    setState(() {});
   }
   @override
   void dispose() {

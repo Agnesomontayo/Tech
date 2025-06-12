@@ -9,10 +9,12 @@ import 'menuCirculaireWidget.dart';
 class PageHeaderWidget extends StatefulWidget {
   final int userId;
   final String imageUrl;
+  final String typeProfile;
   const PageHeaderWidget({
     super.key,
     required this.userId,
     required this.imageUrl,
+    required this.typeProfile,
   });
 
   @override
@@ -49,6 +51,7 @@ class _PageHeaderWidgetState extends State<PageHeaderWidget> {
                 return MenuCirculaireWidget(
                   userId: widget.userId,
                   imageUrl: widget.imageUrl,
+                  typeProfile: widget.typeProfile,
                 );
               },
             );

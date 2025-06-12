@@ -13,6 +13,7 @@ import '../../../core/const/colors.dart';
 import '../../../core/helpers/apiHelpers.dart';
 import '../../../core/providers/app_provider.dart';
 import '../../clients/widgets/menuCirculaireWidget.dart';
+import '../details/appointment_page.dart';
 import '../widgets/PageHeaderWidget.dart';
 import '../widgets/chat_button_widget.dart';
 import 'client_chat_page.dart';
@@ -51,7 +52,7 @@ class _FavoritePageState extends State<FavoritePage> {
             bottom: PreferredSize(
                 preferredSize: Size.fromHeight(60.0),
                 child: Container(
-                  padding: EdgeInsets.all(5.0),
+                  padding: EdgeInsets.all(2.0),
                   margin: EdgeInsets.all(10.0),
                   decoration: BoxDecoration(
                     color: ColorsData.purple00A.withOpacity(0.1),
@@ -86,12 +87,19 @@ class _FavoritePageState extends State<FavoritePage> {
               imageUrl: actualProfil['avatar'] != null && actualProfil['avatar'].toString().isNotEmpty
                   ? '${widget.baseImageUrl}/${actualProfil['avatar']}'
                   : actualProfil['profile_photo_url'],
+              typeProfile: actualProfil['typeprofile'],
             ),
           ),
           body: TabBarView(
               children: [
-                FavoriteDetailPage(),
-                AppointmentTrackingPage()
+                AppointmentPage(
+                  clientId: actualProfil['clientId'],
+                  currentUserId: actualProfil['id'],
+                ),
+                FavoriteDetailPage(
+                  profile: actualProfil,
+                  baseImageUrl: widget.baseImageUrl,
+                )
               ]
           ),
           floatingActionButton: ChatButtonWidget(
@@ -99,6 +107,7 @@ class _FavoritePageState extends State<FavoritePage> {
                 ? '${widget.baseImageUrl}/${actualProfil['avatar']}'
                 : actualProfil['profile_photo_url'],
             currentUserId: actualProfil['id'],
+            typeProfile: actualProfil['typeprofile'],
           ),
         )
     );

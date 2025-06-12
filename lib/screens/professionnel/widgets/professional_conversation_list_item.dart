@@ -13,6 +13,7 @@ class ProfessionalConversationListItem extends StatefulWidget {
   final String time;
   final bool isMessageRead;
   final String currentUserProfileImage;
+  final String typeProfil;
   const ProfessionalConversationListItem({
     super.key,
     required this.userId,
@@ -23,6 +24,7 @@ class ProfessionalConversationListItem extends StatefulWidget {
     required this.time,
     required this.isMessageRead,
     required this.currentUserProfileImage,
+    required this.typeProfil,
   });
 
   @override
@@ -46,6 +48,7 @@ class _ProfessionalConversationListItemState extends State<ProfessionalConversat
               time: widget.time,
               //isMessageRead: widget.isMessageRead,
               currentUserProfileImage: widget.currentUserProfileImage,
+              typeProfil: widget.typeProfil,
             ),
           ),
         );

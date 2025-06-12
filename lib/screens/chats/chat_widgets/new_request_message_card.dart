@@ -1,9 +1,11 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:tech/core/utils/func.dart';
 import 'package:tech/screens/clients/client_forms/accept_request_form.dart';
+import 'package:tech/screens/clients/details/appointment_tracking_page.dart';
 
 import '../../../core/const/assets.dart';
 import '../../../core/const/colors.dart';
@@ -20,6 +22,8 @@ class NewRequestMessageCard extends StatefulWidget {
   final String businessType;
   final String currentUserProfileImage;
   final ChatMessage messageBody;
+  final int currentUserId;
+  final String typeProfil;
 
   const NewRequestMessageCard({
     super.key,
@@ -29,6 +33,8 @@ class NewRequestMessageCard extends StatefulWidget {
     required this.businessType,
     required this.currentUserProfileImage,
     required this.messageBody,
+    required this.currentUserId,
+    required this.typeProfil,
   });
 
   @override
@@ -44,8 +50,8 @@ class _NewRequestMessageCardState extends State<NewRequestMessageCard> {
   bool showAcceptationBottomRow = true;
   bool showCancelBottom = false;
   bool showCancelBottomToSender = true;
-  bool showTrackingButtom = false;
   Map<String, dynamic> statusConfig = {};
+  bool showAppointmentTrackingButton = false;
 
   void _openFormModal(BuildContext context) {
     showDialog(
@@ -96,6 +102,7 @@ class _NewRequestMessageCardState extends State<NewRequestMessageCard> {
         showAcceptationBottomRow = false;
         showCancelBottom = false;
         showCancelBottomToSender = false;
+        showAppointmentTrackingButton = true;
       });
     } else if (status == 'pending') {
       setState(() {
@@ -179,15 +186,27 @@ class _NewRequestMessageCardState extends State<NewRequestMessageCard> {
     }
 
   }
-
-  void _handleTrackingRequest() async {
-    try {
-
-    } catch(e){
-
-    }
+  Future<String?> _getToken() async {
+    final storage = FlutterSecureStorage();
+    return await storage.read(key: 'authToken');
+  }
+   _handleTrackingRequest(BuildContext context,int appointmentId) async {
+     String url = await ApiHelper.getUrl();
+    String? token = await _getToken();
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => AppointmentTrackingPage(
+            appointmentId: appointmentId,
+            currentUserId: widget.currentUserId,
+            baseUrl: url,
+            userToken: token!,
+            appKey: 'pu8fzsphp4gk5znq6ybs',
+            typeProfile: widget.typeProfil,
+        )),
+      );
   }
   final List<Map<String, dynamic>> durations = [
+    {'label': '5 minutes', 'value': 5},
     {'label': '15 minutes', 'value': 15},
     {'label': '30 minutes', 'value': 30},
     {'label': '45 minutes', 'value': 45},
@@ -836,14 +855,23 @@ class _NewRequestMessageCardState extends State<NewRequestMessageCard> {
                                     ],
                                   ),
                                 )
-                              else if (showTrackingButtom)
+                              else if (showAppointmentTrackingButton && actualData['appointment_id'] != null)
                                 Padding(
                                     padding: const EdgeInsets.only(top: 8.0),
                                     child: ElevatedButton(
-                                      onPressed: _handleTrackingRequest,
+                                      onPressed: () async {
+                                        if (actualData['appointment_id'] != null) {
+                                          await _handleTrackingRequest(context, actualData['appointment_id'] as int);
+                                        } else {
+                                          print('Erreur: appointment_id est null pour le suivi du rendez-vous.');
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            const SnackBar(content: Text('Impossible de suivre: ID de rendez-vous manquant.')),
+                                          );
+                                        }
+                                      },
                                       child: Text('Suivre le rendez-vous'),
                                       style: ElevatedButton.styleFrom(
-                                        backgroundColor: Color(0xFF007DDD),
+                                        backgroundColor: ColorsData.purple00A,
                                         foregroundColor: Colors.white,
                                       ),
                                     ),

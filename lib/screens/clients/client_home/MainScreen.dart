@@ -31,7 +31,7 @@ class _MainScreenState extends State<MainScreen> {
     });
   }
 
-  Widget getScreen(int index) {
+  Widget getScreen(int index, Map<String, dynamic> profile, String baseImageUrl) {
     switch (index) {
       case 0:
         return
@@ -53,7 +53,9 @@ class _MainScreenState extends State<MainScreen> {
           );
       case 3:
         return
-          UserPage();
+          UserPage(
+            baseImageUrl: baseImageUrl,
+          );
       default:
         return
           ClientHome(
@@ -64,7 +66,7 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   @override
-  Future<void> _loadProfile() async {
+ /* Future<void> _loadProfile() async {
     try {
       baseImageUrl = await ApiHelper.getApiUrl();
       final appProvider = Provider.of<AppProvider>(context, listen: false);
@@ -79,24 +81,37 @@ class _MainScreenState extends State<MainScreen> {
         isLoading = false;
       });
     }
-  }
+  }*/
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    _loadProfile();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final appProvider = Provider.of<AppProvider>(context, listen: false);
+      appProvider.initializeBaseImageUrl();
+      appProvider.getProfile();
+    });
+    //_loadProfile();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return Consumer<AppProvider>(
+        builder: (context, appProvider, child){
+      final profile = appProvider.userProfile;
+      final isLoading = appProvider.isLoadingProfile;
+      final baseImageUrl = appProvider.baseImageUrl;
+      
+      print('mainscreenprofile ${profile}');
+
+      return Scaffold(
       appBar: AppBar(
        toolbarHeight: 2,
       ),
       body: isLoading
           ? Center(child: CircularProgressIndicator())
-          :getScreen(_selectedIndex),
+          :getScreen(_selectedIndex, profile, baseImageUrl),
       extendBody: true,
       bottomNavigationBar: isLoading
           ? null
@@ -104,6 +119,8 @@ class _MainScreenState extends State<MainScreen> {
         selectedIndex: _selectedIndex,
         onItemTapped: _onItemTapped,
       ),
+    );
+        }
     );
   }
 

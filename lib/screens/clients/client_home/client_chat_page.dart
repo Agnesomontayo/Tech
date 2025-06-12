@@ -10,10 +10,12 @@ import 'package:provider/provider.dart';
 class ClientChatPage extends StatefulWidget {
   final int currentUserId;
   final String currentUserProfileImage;
+  final String typeProfile;
   const ClientChatPage({
     super.key,
     required this.currentUserId,
     required this.currentUserProfileImage,
+    required this.typeProfile,
   });
 
   @override
@@ -43,7 +45,7 @@ class _ClientChatPageState extends State<ClientChatPage> {
   Future<void> _fetchProfessionals() async {
     try {
       final professionalProvider = Provider.of<ProfessionalProvider>(context, listen: false);
-      final data = await professionalProvider.getManyProfessionals();
+      final data = await professionalProvider.getClientRequestedProfessionalsList(widget.currentUserId);
       setState(() {
         chatProfessionals = data;
         _isLoading = false;
@@ -64,58 +66,16 @@ class _ClientChatPageState extends State<ClientChatPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title:  Text("Conversations",
+            style: TextStyle(
+                fontSize: 25, fontWeight: FontWeight.bold)),
+      ),
       body: SingleChildScrollView(
         physics: BouncingScrollPhysics(),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            SafeArea(
-              child: Padding(
-                padding: EdgeInsets.only(left: 16, right: 16, top: 10),
-                child: Column(
-                  children: [
-/*                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.teal,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(10)),
-                        ),
-                      ),
-                      onPressed: logout,
-                      child: Text('Logout'),
-                    ),*/
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        Text("Conversations",
-                            style: TextStyle(
-                                fontSize: 32, fontWeight: FontWeight.bold)),
-                        Container(
-                          padding:
-                          EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                          height: 30,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(30),
-                            color: ColorsData.purple260,
-                          ),
-                          child: Row(
-                            children: <Widget>[
-                              Icon(Icons.add,
-                                  color: ColorsData.purple00A, size: 20),
-                              SizedBox(width: 2),
-                              Text("Add New",
-                                  style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold)),
-                            ],
-                          ),
-                        )
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
            /* Padding(
               padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
               child: TextField(
@@ -144,6 +104,7 @@ class _ClientChatPageState extends State<ClientChatPage> {
                 return ClientConversationListItem(
                   currentUserId: widget.currentUserId ?? 0,
                   currentUserProfileImage: widget.currentUserProfileImage,
+                  typeProfile: widget.typeProfile,
                   userId: professional['user']['id'],
                   name: professional['user']['lastName'] + ' ' + professional['user']['firstName'],
                   messageText: '',//chatProfessionals[index].messageText ?? '',

@@ -45,5 +45,7 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSLocationWhenInUseUsageDescription</key>
+    <string>Cette app a besoin de votre position pour afficher les professionnels proches.</string>
 </dict>
 </plist>

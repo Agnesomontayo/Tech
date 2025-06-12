@@ -13,6 +13,7 @@ class ClientConversationListItem extends StatefulWidget {
   final String currentUserProfileImage;
   final String time;
   final bool isMessageRead;
+  final String typeProfile;
   const ClientConversationListItem({
     super.key,
     required this.userId,
@@ -23,6 +24,7 @@ class ClientConversationListItem extends StatefulWidget {
     required this.currentUserProfileImage,
     required this.time,
     required this.isMessageRead,
+    required this.typeProfile,
   });
 
   @override
@@ -45,6 +47,7 @@ class _ClientConversationListItemState extends State<ClientConversationListItem>
               currentUserProfileImage: widget.currentUserProfileImage,
               messageText: widget.messageText,
               time: widget.time,
+              typeProfil: widget.typeProfile,
             ),
           ),
         );

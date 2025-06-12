@@ -14,10 +14,10 @@ class WorkerPresentationModal extends StatefulWidget {
   final String availability;
 
   //final Color availabilityColor;
-  final String distance;
+  final int distance;
   final String unit;
   final double rate;
-  final String reviews;
+  final int reviews;
   final String biography;
   final String profession;
   final int clientId;
@@ -109,9 +109,35 @@ class _WorkerPresentationModalState extends State<WorkerPresentationModal> {
                                 horizontal: 0, vertical: 15.0),
                             child: Row(
                               children: [
+                                SvgPicture.asset(
+                                  AssetsData.locationOnIcon,
+                                  height: 30,
+                                  width: 30,
+                                  color: Color(0xFFFB0049),
+                                ),
+                                SizedBox(
+                                  width: 5,
+                                ),
+                                Text(
+                                    formatDistance(widget.distance.toDouble()),
+                                    style: GoogleFonts.karla(
+                                      textStyle: TextStyle(
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 16,
+                                          color: ColorsData.purple),
+                                    )),
+                                SizedBox(
+                                  width: 10.0,
+                                ),
+                              ],
+                            ),
+                          ),
+                          Container(
+                            child: Row(
+                              children: [
                                 Container(
                                   padding: EdgeInsets.symmetric(
-                                      horizontal: 20, vertical: 7),
+                                      horizontal: 10, vertical: 7),
                                   decoration: BoxDecoration(
                                       color: widget.availability == 'available'
                                           ? Colors.green
@@ -131,72 +157,35 @@ class _WorkerPresentationModalState extends State<WorkerPresentationModal> {
                                 SizedBox(
                                   width: 10,
                                 ),
-                                SvgPicture.asset(
-                                  AssetsData.locationOnIcon,
-                                  color: Color(0xFFFB0049),
-                                ),
-                                SizedBox(
-                                  width: 5,
-                                ),
-                                Text('A ${widget.distance} ${widget.unit}',
-                                    style: GoogleFonts.karla(
-                                      textStyle: TextStyle(
-                                          fontWeight: FontWeight.w400,
-                                          fontSize: 14,
-                                          color: ColorsData.grey),
-                                    )),
-                                   /* RatingBar.builder(
-                                      initialRating: widget.rate,
-                                      minRating: 1,
-                                      direction: Axis.horizontal,
-                                      allowHalfRating: true,
-                                      itemCount: 5,
-                                      itemSize: 18,
-                                      itemPadding: EdgeInsets.symmetric(
-                                          horizontal: 0.0),
-                                      itemBuilder: (context, _) => Icon(
-                                        Icons.star,
-                                        color: Colors.amber,
-                                      ),
-                                      onRatingUpdate: (rating) {
-                                        setState(() {
-                                          currentRating = rating;
-                                        });
-                                      },
-                                    ),*/
-                                /* SizedBox(width: 10),
-                                    Text(
-                                      currentRating.toStringAsFixed(1),
-                                      style: TextStyle(fontSize: 14),
-                                    ),*/
-                                SizedBox(
-                                  width: 10.0,
-                                ),
                                 Icon(
                                   Icons.star,
                                   color: Colors.amber,
-                                  size: 14,
+                                  size: 20,
                                 ),
-                                Text(
-                                    widget.rate.toString(),
-                                    style: GoogleFonts.karla(
-                                      textStyle: TextStyle(
-                                        fontWeight: FontWeight.w700,
-                                        fontSize: 16,
-                                      ),
-                                    )
+                                Flexible(
+                                  child: Text(
+                                      widget.rate.toString(),
+                                      style: GoogleFonts.karla(
+                                        textStyle: TextStyle(
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 20,
+                                        ),
+                                      )
+                                  ),
                                 ),
 
-                                    SizedBox(
-                                      width: 10.0,
-                                    ),
-                                    Text(' ${widget.reviews} avis',
+                                SizedBox(
+                                  width: 10.0,
+                                ),
+                                Flexible(
+                                    child: Text(' ${widget.reviews} avis',
                                         style: GoogleFonts.karla(
                                           textStyle: TextStyle(
                                               fontWeight: FontWeight.w400,
-                                              fontSize: 14,
+                                              fontSize: 18,
                                               color: ColorsData.purple00C),
-                                        )),
+                                        ))
+                                ),
                               ],
                             ),
                           ),
@@ -208,8 +197,8 @@ class _WorkerPresentationModalState extends State<WorkerPresentationModal> {
                                   capitalizeEachWord(widget.name),
                                   style: GoogleFonts.karla(
                                     textStyle: TextStyle(
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 22,
+                                      fontWeight: FontWeight.w900,
+                                      fontSize: 25,
                                     ),
                                   ),
                                 ),
@@ -438,27 +427,6 @@ class _WorkerPresentationModalState extends State<WorkerPresentationModal> {
                                   _openFormModal(context);
                                   print('bla');
                                 },
-                              ),
-                              SizedBox(
-                                width: 5.0,
-                              ),
-                              GestureDetector(
-                                child: Container(
-                                  padding: EdgeInsets.all(10.0),
-                                  decoration: BoxDecoration(
-                                      color: ColorsData.purple00C,
-                                      borderRadius:
-                                      BorderRadius.circular(20.0)),
-                                  child: Text(
-                                    'Noter mes performances',
-                                    style: GoogleFonts.karla(
-                                      textStyle: TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w500,
-                                          color: ColorsData.white),
-                                    ),
-                                  ),
-                                ),
                               ),
 /*
                               Spacer(),

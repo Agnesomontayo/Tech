@@ -11,6 +11,7 @@ import 'package:tech/core/providers/auth_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/services.dart';
 
+import '../../core/helpers/utils.dart';
 import '../clients/client_home/MainScreen.dart';
 import '../professionnel/professionnel_home/MainScreenProfessionnal.dart';
 
@@ -219,6 +220,8 @@ class _LoginPageState extends State<LoginPage> {
                               MaterialPageRoute(builder: (context) => MainScreen()),
                             );
                           } else if (profileType == 'professionnel') {
+                            print('token ${loginResult['token']}');
+                            await startBackgroundLocationUpdate(loginResult['token']);
                             Navigator.push(
                               context,
                               MaterialPageRoute(builder: (context) => MainScreenProfessionnal()),

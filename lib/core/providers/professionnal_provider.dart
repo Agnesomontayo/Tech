@@ -65,6 +65,55 @@ class ProfessionalProvider with ChangeNotifier {
     }
   }
 
+  // liste des professionels a qui un client a demandé un service
+
+  Future<List<dynamic>> getClientRequestedProfessionalsList(int clientId) async {
+    try {
+      String baseUrl = await ApiHelper.getApiUrl();
+      final responseData = await _connectedUserServices.get(
+        url: '${baseUrl}/conversations/professionals-list/${clientId}',
+      );
+
+      if (responseData != null && responseData is Map<String, dynamic>) {
+        print('conversation professional ${responseData}');
+        if (responseData.containsKey('professionals')) {
+          return responseData['professionals'];
+        } else {
+          throw Exception('Clé "professionals" non trouvée dans la réponse');
+        }
+      } else {
+        throw Exception('Données de professionnels invalides');
+      }
+    } catch (error) {
+      print('Erreur lors de la récupération des professionnels: $error');
+      throw Exception('Impossible de récupérer les professionnels');
+    }
+  }
+
+  // liste des professionels  classés pas leur notes
+  Future<List<dynamic>> getTopRatedAllProfessionsProfessionals() async {
+    try {
+      String baseUrl = await ApiHelper.getApiUrl();
+      final responseData = await _connectedUserServices.get(
+        url: '${baseUrl}/professionals/top-rated-all-professions',
+      );
+
+      if (responseData != null && responseData is Map<String, dynamic>) {
+        print('rate list ${responseData}');
+        if (responseData.containsKey('professionals')) {
+          return responseData['professionals'];
+        } else {
+          throw Exception('Clé "professionals" non trouvée dans la réponse');
+        }
+      } else {
+        throw Exception('Données de professionnels invalides');
+      }
+    } catch (error) {
+      print('Erreur lors de la récupération des professionnels: $error');
+      throw Exception('Impossible de récupérer les professionnels');
+    }
+  }
+
 // récupérer les professionnels qui peeuvent réaliser un service
 
   Future<List<dynamic>> getProfessionalsByService(int serviceId) async {

@@ -141,23 +141,7 @@ class ReverbChatService {
     }
   }
 
-  /*void _handleServiceRequest(Map<String, dynamic> requestData) {
-    if (debug) print('Demande de service reçue: $requestData');
 
-    // Standardisation du format
-    final content = requestData['content'] is String
-        ? jsonDecode(requestData['content'])
-        : requestData['content'];
-
-    onMessageReceived({
-      'id': requestData['id'],
-      'type': requestData['type'],
-      'sender_id': requestData['sender_id'],
-      'content': jsonEncode(content),//content,
-      'status': content['status'],
-      'updated_at': requestData['updated_at'],
-    });
-  }*/
   void _handleServiceRequest(Map<String, dynamic> requestData) {
     if (debug) print('Demande de service reçue: $requestData');
 

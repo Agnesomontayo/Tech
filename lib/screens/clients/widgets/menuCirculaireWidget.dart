@@ -9,11 +9,13 @@ import '../client_home/client_chat_page.dart';
 class MenuCirculaireWidget extends StatefulWidget {
   final int userId;
   final String imageUrl;
+  final String typeProfile;
 
   const MenuCirculaireWidget({
     super.key,
     required this.userId,
     required this.imageUrl,
+    required this.typeProfile,
   });
 
   @override
@@ -115,6 +117,7 @@ class _MenuCirculaireWidgetState extends State<MenuCirculaireWidget>
                                   builder: (context) => ClientChatPage(
                                     currentUserId: widget.userId,
                                     currentUserProfileImage: widget.imageUrl,
+                                    typeProfile: widget.typeProfile,
                                   )),
                             );
                           },

@@ -20,6 +20,7 @@ class ChatDetailPage extends StatefulWidget {
   final String currentUserProfileImage;
   final String? messageText;
   final String? time;
+  final String typeProfil;
 
   const ChatDetailPage({
     super.key,
@@ -30,6 +31,7 @@ class ChatDetailPage extends StatefulWidget {
     required this.currentUserProfileImage,
     this.messageText,
     this.time,
+    required this.typeProfil,
   });
 
   @override
@@ -79,51 +81,6 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
       appKey: 'pu8fzsphp4gk5znq6ybs',
       userId: widget.currentUserId,
       debug: true,
-     /* onMessageReceived: (data) {
-        if (!mounted) return;
-
-        if (data['type'] == 'typing') {
-          setState(() => isTyping = true);
-          Future.delayed(Duration(seconds: 2), () {
-            if (mounted) setState(() => isTyping = false);
-          });
-        } else if (data['event'] == 'message.updated') {
-          setState(() {
-            final messageId = data['id'];
-            final newContent = data['content'];
-            final newType = data['type'] ?? 'text';
-
-            final index = messages.indexWhere((m) => m.id == messageId);
-            if (index != -1) {
-              final senderId = data['sender_id'];
-              final senderType = senderId == widget.currentUserId ? 'sender' : 'receiver';
-
-              messages[index] = ChatMessage(
-                id: messageId,
-                content: newContent,
-                senderType: senderType,
-                businessType: newType,
-              );
-            }
-          });
-        } else if (data['sender_id'] == widget.userId) {
-          setState(() {
-            final content = data['content'] is String
-                ? data['content']
-                : jsonEncode(data['content']);
-            messages.add(ChatMessage(
-              id: data['id'],
-              content: content,
-              senderType: 'receiver',
-              businessType: data['type'] ?? 'text',
-            ));
-            isTyping = false;
-          });
-          //_scrollToBottom();
-        }else if (data['type'] == 'update_status_service_request' && data['status'] == 'canceled') {
-          setState(() => messages = [...messages]); // Force le rebuild
-        }
-      },*/
       onMessageReceived: (data) {
         if (!mounted) return;
 
@@ -326,6 +283,8 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
                     businessType: message.businessType,
                     currentUserProfileImage: widget.currentUserProfileImage,
                     messageBody: message,
+                    currentUserId: widget.currentUserId,
+                    typeProfil: widget.typeProfil,
                   );
                 }
                 else {

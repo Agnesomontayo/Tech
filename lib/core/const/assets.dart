@@ -12,6 +12,7 @@ class AssetsData {
   static String best = "$imageAssets/des1.jpeg";
   static String menage = "$imageAssets/menage.jpeg";
   static String carpenter = "$imageAssets/carpter.svg";
+  static String noImage = "$imageAssets/no-image.png";
 
   //Icons
   static String searchIcon = "$iconAssets/loupe.svg";
@@ -50,4 +51,6 @@ class AssetsData {
   static String logBookIcon = "$iconAssets/book.svg";
   static String groupsIcon = "$iconAssets/groups.svg";
   static String ratesIcon = "$iconAssets/rates.svg";
+  static String markerIcon = "$iconAssets/mark.svg";
+
 }

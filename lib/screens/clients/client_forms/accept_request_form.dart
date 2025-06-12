@@ -35,6 +35,7 @@ class _AcceptRequestFormState extends State<AcceptRequestForm> {
   late int price;
   bool _isLoading = true;
   final List<Map<String, dynamic>> durations = [
+    {'label': '2 minutes', 'value': 2},
     {'label': '15 minutes', 'value': 15},
     {'label': '30 minutes', 'value': 30},
     {'label': '45 minutes', 'value': 45},

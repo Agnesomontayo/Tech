@@ -9,10 +9,12 @@ import '../widgets/professional_conversation_list_item.dart';
 class ProfessionalChatPage extends StatefulWidget {
   final int currentUserId;
   final String currentUserProfileImage;
+  final String typeProfil;
   const ProfessionalChatPage({
     super.key,
     required this.currentUserId,
     required this.currentUserProfileImage,
+    required this.typeProfil,
   });
 
   @override
@@ -42,7 +44,7 @@ class _ProfessionalChatPageState extends State<ProfessionalChatPage> {
   Future<void> _fetchClients() async {
     try {
       final clientProvider = Provider.of<ClientProvider>(context, listen: false);
-      final data = await clientProvider.getManyClients();
+      final data = await clientProvider.getClientRequestedProfessionalsList(widget.currentUserId);
       setState(() {
         chatClients = data;
         _isLoading = false;
@@ -63,58 +65,17 @@ class _ProfessionalChatPageState extends State<ProfessionalChatPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        appBar: AppBar(
+        title:  Text("Conversations",
+        style: TextStyle(
+        fontSize: 25, fontWeight: FontWeight.bold)
+    )
+        ),
       body: SingleChildScrollView(
         physics: BouncingScrollPhysics(),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            SafeArea(
-              child: Padding(
-                padding: EdgeInsets.only(left: 16, right: 16, top: 10),
-                child: Column(
-                  children: [
-/*                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.teal,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(10)),
-                        ),
-                      ),
-                      onPressed: logout,
-                      child: Text('Logout'),
-                    ),*/
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        Text("Conversations",
-                            style: TextStyle(
-                                fontSize: 32, fontWeight: FontWeight.bold)),
-                        Container(
-                          padding:
-                          EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                          height: 30,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(30),
-                            color: ColorsData.purple260,
-                          ),
-                          child: Row(
-                            children: <Widget>[
-                              Icon(Icons.add,
-                                  color: ColorsData.purple00A, size: 20),
-                              SizedBox(width: 2),
-                              Text("Add New",
-                                  style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold)),
-                            ],
-                          ),
-                        )
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
             /* Padding(
               padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
               child: TextField(
@@ -151,6 +112,7 @@ class _ProfessionalChatPageState extends State<ProfessionalChatPage> {
                   time: '',//chatClients[index].time ?? '',
                   currentUserProfileImage: widget.currentUserProfileImage,
                   isMessageRead: false,
+                  typeProfil: widget.typeProfil,
                 );
               },
             ),

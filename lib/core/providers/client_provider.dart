@@ -62,6 +62,56 @@ class ClientProvider with ChangeNotifier {
     }
   }
 
+  // liste des clients qui ont demadé un service à un professionnel
+
+  Future<List<dynamic>> getClientRequestedProfessionalsList(int professionalId) async {
+    try {
+      String baseUrl = await ApiHelper.getApiUrl();
+      final responseData = await _dioService.get(
+        url: '${baseUrl}/conversations/clients-list/${professionalId}',
+      );
+
+      if (responseData != null && responseData is Map<String, dynamic>) {
+        print('conversation clients ${responseData}');
+        if (responseData.containsKey('clients')) {
+          return responseData['clients'];
+        } else {
+          throw Exception('Clé "clients" non trouvée dans la réponse');
+        }
+      } else {
+        throw Exception('Données de clients invalides');
+      }
+    } catch (error) {
+      print('Erreur lors de la récupération des clients: $error');
+      throw Exception('Impossible de récupérer les clients');
+    }
+  }
+
+
+  // liste des services et professionnels les plus demandés par le client
+
+  Future<Map<String, dynamic>> getMostRequestedProfessionalsAndServices(int clientId) async {
+    try {
+      String baseUrl = await ApiHelper.getApiUrl();
+      final responseData = await _dioService.get(
+        url: '${baseUrl}/clients/reports/most-requested-services/most-requested-professionals/${clientId}',
+      );
+
+      if (responseData != null && responseData is Map<String, dynamic>) {
+        print('conversation clients ${responseData}');
+        if (responseData.containsKey('most_requested_services') && responseData.containsKey('most_requested_professionals')) {
+          return responseData;
+        } else {
+          throw Exception('Clé "clients" non trouvée dans la réponse');
+        }
+      } else {
+        throw Exception('Données de clients invalides');
+      }
+    } catch (error) {
+      print('Erreur lors de la récupération des clients: $error');
+      throw Exception('Impossible de récupérer les clients');
+    }
+  }
 // modifier un client
 
 

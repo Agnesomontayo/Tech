@@ -1,8 +1,12 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:location/location.dart';
 
 import '../../../core/const/assets.dart';
 import '../../../core/const/colors.dart';
 import '../../../core/helpers/apiHelpers.dart';
+import '../../../core/helpers/utils.dart';
 import '../../../core/providers/professionnal_provider.dart';
 import '../widgets/WorkerPresentationCard.dart';
 import '../widgets/titleWidget.dart';
@@ -30,6 +34,9 @@ class _MapModalDraggableBottomSheetState extends State<MapModalDraggableBottomSh
   List<dynamic> professionals = [];
   bool _isLoading = true;
   String baseImageUrl = '';
+  LocationData? _currentLocation;
+  final Location _location = Location();
+  final Set<Marker> _markers = {};
 
   Future<void> _fetchProfessionals() async {
     try {
@@ -50,10 +57,68 @@ class _MapModalDraggableBottomSheetState extends State<MapModalDraggableBottomSh
   }
 
 
+
+
+  Future<void> _loadInfos() async {
+    try {
+      await _loadClientLocation();
+     // _fetchProfessionals();
+    } catch (error) {
+      print('Erreur de chargement des infos : $error');
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _loadClientLocation() async {
+    final permission = await _location.requestPermission();
+    if (permission != PermissionStatus.granted) return;
+
+    bool serviceEnabled = await _location.serviceEnabled();
+    if (!serviceEnabled) {
+      serviceEnabled = await _location.requestService();
+      if (!serviceEnabled) return;
+    }
+
+    final loc = await _location.getLocation();
+    setState(() => _currentLocation = loc);
+
+    await _fetchNearbyProfessionals();
+  }
+
+  Future<void> _fetchNearbyProfessionals() async {
+    if (_currentLocation == null) return;
+
+    final dio = Dio();
+    try {
+      String baseUrl = await ApiHelper.getApiUrl();
+      final response = await dio.get('${baseUrl}/locations/nearby-by-categories', queryParameters: {
+        'latitude': _currentLocation!.latitude,
+        'longitude': _currentLocation!.longitude,
+        'radius': 10,
+        'category_id': widget.categoryId,
+      });
+      setState(() {
+        professionals = response.data;
+        _isLoading = false;
+      });
+      
+      print('professionels avec notes ${professionals}');
+
+    } catch (e) {
+      print("Erreur API: $e");
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+
   @override
   void initState() {
     super.initState();
-    _fetchProfessionals();
+    _loadInfos();
   }
 
   
@@ -109,20 +174,20 @@ class _MapModalDraggableBottomSheetState extends State<MapModalDraggableBottomSh
                               (context, index) {
                                 final professional = professionals[index];
                             return  WorkerPresentationCard(
-                              name: professional['user']['lastName'] + ' ' + professional['user']['firstName'],
-                              rate: 4.5,
+                              name: professional['lastName'] + ' ' + professional['firstName'],
+                              rate: professional['average_rating'],
                               availability: professional['availability'],
-                              distance: '500',
+                              distance: professional['distance'],
                               unit: 'm',
-                              reviews: '250',
-                              imagePath: professional['user']['avatar'] != null
-                                  ? baseImageUrl + '/' + professional['user']['avatar']
-                                  : professional['user']['profile_photo_url'],
+                              reviews: professional['review_count'],
+                              imagePath: professional['avatar'] != null
+                                  ? baseImageUrl + '/' + professional['avatar']
+                                  : professional['profile_photo_url'],
                               biography: professional['biography'] != null ?professional['biography'] : 'Rien sur ce profil',
-                              profession: professional['profession']['label'],
+                              profession: professional['profession_name'],
                               clientId: widget.clientId,
                               clientName: widget.clientName,
-                              professionalId: professional['id'],
+                              professionalId: professional['professional_id'],
                             );
                           },
                           childCount: professionals.length,
