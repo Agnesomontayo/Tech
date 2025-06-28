@@ -16,20 +16,23 @@ import '../user_infos/settings_page.dart';
 import '../widgets/menuCirsulaireWidget.dart';
 
 class ProfessionnalUserPage extends StatefulWidget {
-  const ProfessionnalUserPage({super.key});
+  final String baseImageUrl;
+  const ProfessionnalUserPage({
+    super.key,
+    required this.baseImageUrl
+  });
 
   @override
   State<ProfessionnalUserPage> createState() => _ProfessionnalUserPageState();
 }
 
 class _ProfessionnalUserPageState extends State<ProfessionnalUserPage> {
-  String baseImageUrl = '';
   Map<String, dynamic>? _profile;
 
   @override
   Future<void> _loadProfile() async {
     try {
-      baseImageUrl = await ApiHelper.getApiUrl();
+      //baseImageUrl = await ApiHelper.getApiUrl();
       final appProvider = Provider.of<AppProvider>(context, listen: false);
       final data = await appProvider.getProfile();
       setState(() {
@@ -63,9 +66,21 @@ class _ProfessionnalUserPageState extends State<ProfessionnalUserPage> {
   }
   @override
   Widget build(BuildContext context) {
-    return _profile == null
-        ? Center(child: CircularProgressIndicator())
-        : Scaffold(
+   return Consumer<AppProvider>(
+        builder: (context, appProvider, child) {
+      final profile = appProvider.userProfile;
+      final isLoadingProfile = appProvider.isLoadingProfile;
+      /* final baseImageUrl = appProvider.baseImageUrl;
+      print('baseImageUrl $baseImageUrl');*/
+
+
+
+      if (isLoadingProfile || profile.isEmpty) {
+        return Center(child: CircularProgressIndicator());
+      }
+
+      // Si le profil est chargé, affiche le contenu de la page
+    return Scaffold(
       body: Column(
         children: [
           Row(
@@ -119,7 +134,7 @@ class _ProfessionnalUserPageState extends State<ProfessionnalUserPage> {
                               image: DecorationImage(
                                 image: _profile != null
                                     ? (_profile!['avatar'] != null
-                                    ? NetworkImage('${baseImageUrl}/${_profile!['avatar']}')
+                                    ? NetworkImage('${widget.baseImageUrl}/${_profile!['avatar']}')
                                     : NetworkImage(_profile!['profile_photo_url']))
                                     : AssetImage(AssetsData.p) as ImageProvider,
                                 fit: BoxFit.cover,
@@ -203,7 +218,7 @@ class _ProfessionnalUserPageState extends State<ProfessionnalUserPage> {
                                               phonenumber: _profile!['phonenumber'],
                                               email: _profile!['email'],
                                               imageUrl: _profile!['avatar'] != null && _profile!['avatar'].toString().isNotEmpty
-                                                  ? '${baseImageUrl}/${_profile!['avatar']}'
+                                                  ? '${widget.baseImageUrl}/${_profile!['avatar']}'
                                                   : _profile!['profile_photo_url'],
                                               professionId: _profile!['profession']['id'],
                                               experience: _profile!['experience'],
@@ -243,12 +258,12 @@ class _ProfessionnalUserPageState extends State<ProfessionnalUserPage> {
                                     ],
                                   ),
                                   onTap: () {
-                                    Navigator.push(
+                                    /*Navigator.push(
                                       context,
                                       MaterialPageRoute(
                                         builder: (context) => WorkNotificationPage(),
                                       ),
-                                    );
+                                    );*/
                                   },
                                 ),
                                 GestureDetector(
@@ -420,6 +435,8 @@ class _ProfessionnalUserPageState extends State<ProfessionnalUserPage> {
             onPressed: () => {},
             child: SvgPicture.asset(AssetsData.chatIcon)),
       ),
+    );
+        }
     );
   }
 }

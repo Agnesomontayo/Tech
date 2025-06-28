@@ -14,10 +14,10 @@ class ProfcustomLogo extends StatelessWidget {
   const ProfcustomLogo(
       {super.key,
         this.direction = Axis.vertical,
-        this.width = 125,
-        this.height = 125,
+        this.width = 60,
+        this.height = 75,
         this.showImageLogo = true,
-        this.fontSize = 25});
+        this.fontSize = 28});
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +32,7 @@ class ProfcustomLogo extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(1.0),
         child: SvgPicture.asset(
-          AssetsData.ProfcustomLogo,
+          AssetsData.logo,
         ),
       ),
     )
@@ -43,7 +43,7 @@ class ProfcustomLogo extends StatelessWidget {
       style: GoogleFonts.brunoAce(
        textStyle: TextStyle(
           color: ColorsData.white,
-          fontWeight: FontWeight.w400,
+          fontWeight: FontWeight.w500,
           fontSize: fontSize,
         )
       ),

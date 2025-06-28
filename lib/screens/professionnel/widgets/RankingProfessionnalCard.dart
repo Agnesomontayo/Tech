@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../core/const/assets.dart';
 import '../../../core/const/colors.dart';
 
 class RankingProfessionalCard extends StatefulWidget {
@@ -41,9 +42,9 @@ class _RankingProfessionalCardState extends State<RankingProfessionalCard> {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(50),
                 image: DecorationImage(
-                    image: AssetImage(
-                        widget.imagePath
-                    ),
+                    image:  widget.imagePath != null
+                        ? NetworkImage(widget.imagePath)
+                        : AssetImage(AssetsData.menage) as ImageProvider,
                     fit: BoxFit.fill
                 ),
               ),

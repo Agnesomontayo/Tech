@@ -44,8 +44,8 @@ class _LoginPageState extends State<LoginPage> {
         child: Stack(
           children: [
             Positioned(
-              top: -270,
-              left: -160,
+              top: -220,
+              left: -130,
               child: Transform.rotate(
                 angle: 0.2,
                 child: Container(
@@ -59,57 +59,32 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
             Positioned(
-              top: -150,
+              top: 20,
               left: 60,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  SvgPicture.asset(
+                    AssetsData.authIllustration,
+                    width: 200,
+                    height: 200,
+                    fit: BoxFit.contain,
+                  ),
                   Stack(
                     alignment: Alignment.center,
                     children: [
-                      Container(
+                      /*Container(
                         width: 230,
                         height: 230,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: ColorsData.purple00A,
                         ),
-                      ),
-                      Positioned(
-                        bottom: 0,
-                        child: ClipOval(
-                          child: SizedBox(
-                            width: 100,
-                            height: 100,
-                            child: ColorFiltered(
-                              colorFilter: ColorFilter.mode(
-                                Colors.white,
-                                BlendMode.srcATop,
-                              ),
-                              child: SvgPicture.asset(
-                                AssetsData.ProfcustomLogo,
-                                fit: BoxFit.contain,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
+                      ),*/
                     ],
                   ),
                   SizedBox(height: 35),
-                  Padding(
-                    padding: EdgeInsets.only(left: 0),
-                    child: Text(
-                      "Connexion",
-                      style: GoogleFonts.brunoAce(
-                        textStyle: TextStyle(
-                          color: Colors.white,
-                          fontSize: 24,
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                    ),
-                  ),
+
                 ],
               ),
             ),
@@ -117,8 +92,19 @@ class _LoginPageState extends State<LoginPage> {
               child: Padding(
                 padding: const EdgeInsets.all(28.0),
                 child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    SizedBox(height: 210),
+                    SizedBox(height: 220),
+                    Text(
+                        "Connexion",
+                        style: GoogleFonts.brunoAce(
+                          textStyle: TextStyle(
+                            color: ColorsData.purple00A,
+                            fontSize: 24,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                      ),
                     CustomTextInput(
                       hintText: 'Email',
                       controller: emailController,

@@ -40,6 +40,8 @@ class AppointmentDisplayData {
   final int id;
   final AppointmentStatus status;
   final int remainingMinutes;
+  final DateTime? start_date;
+  final DateTime? end_date;
   final String action;
   final DateTime timestamp;
   final int durationMinutes;
@@ -49,6 +51,8 @@ class AppointmentDisplayData {
     required this.id,
     required this.status,
     required this.remainingMinutes,
+    this.start_date,
+    this.end_date,
     required this.action,
     required this.timestamp,
     required this.durationMinutes,
@@ -67,6 +71,8 @@ class AppointmentDisplayData {
       action: json['action'] as String? ?? 'initial_load',
       timestamp: DateTime.tryParse(json['updated_at']?.toString() ?? json['created_at']?.toString() ?? '') ?? DateTime.now(),
       durationMinutes: serviceRequestData != null ? serviceRequestData['duration_minutes'] as int? ?? 0 : 0,
+      start_date: DateTime.tryParse(json['start_time']?.toString() ?? ''),
+      end_date: DateTime.tryParse(json['end_time']?.toString() ?? ''),
       /*serviceRequest: ServiceRequestDisplayData.fromJson(serviceRequestData),*/
     );
   }

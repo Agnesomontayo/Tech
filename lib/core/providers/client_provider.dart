@@ -112,6 +112,98 @@ class ClientProvider with ChangeNotifier {
       throw Exception('Impossible de récupérer les clients');
     }
   }
+  // récupérer la localisation d'un client
+/*
+  Future<Map<String, dynamic>> getClientLocation (int clientId) async {
+    try {
+      String baseUrl = await ApiHelper.getApiUrl();
+      final responseData = await _dioService.get(
+        url: '${baseUrl}/locations/clients/${clientId}',
+      );
+      print('client info $responseData');
+
+      if (responseData != null) {
+        return responseData;
+      } else {
+        throw Exception('Ce client n\'existe pas');
+      }
+    } catch (error) {
+      print('Erreur lors de la récupération le client: $error');
+      throw Exception('Impossible de récupérer le client');
+    }
+  }
+
+  // récupérer la localisation d'un professionnel
+
+  Future<Map<String, dynamic>> getProfessionalLocation (int professionalId) async {
+    try {
+      String baseUrl = await ApiHelper.getApiUrl();
+      final responseData = await _dioService.get(
+        url: '${baseUrl}/locations/professionals/${professionalId}',
+      );
+      print('professional info $responseData');
+
+      if (responseData != null) {
+        return responseData;
+      } else {
+        throw Exception('Ce professionnel n\'existe pas');
+      }
+    } catch (error) {
+      print('Erreur lors de la récupération du professionnel: $error');
+      throw Exception('Impossible de récupérer le professionnel');
+    }
+  }*/
+
+// Récupérer la localisation d'un client
+  Future<Map<String, dynamic>?> getClientLocation(int clientId) async {
+    try {
+      String baseUrl = await ApiHelper.getApiUrl();
+      final responseData = await _dioService.get(
+        url: '${baseUrl}/locations/clients/$clientId',
+      );
+
+      print('client info $responseData');
+
+      if (responseData != null &&
+          responseData['latitude'] != null &&
+          responseData['longitude'] != null) {
+        return {
+          'latitude': responseData['latitude'],
+          'longitude': responseData['longitude'],
+        };
+      }
+      return null;
+    } catch (error) {
+      print('Erreur lors de la récupération du client: $error');
+      return null;
+    }
+  }
+
+// Récupérer la localisation d'un professionnel
+  Future<Map<String, dynamic>?> getProfessionalLocation(int professionalId) async {
+    try {
+      String baseUrl = await ApiHelper.getApiUrl();
+      final responseData = await _dioService.get(
+        url: '${baseUrl}/locations/professionals/$professionalId',
+      );
+
+      print('professional info $responseData');
+
+      if (responseData != null &&
+          responseData['latitude'] != null &&
+          responseData['longitude'] != null) {
+        return {
+          'latitude': responseData['latitude'],
+          'longitude': responseData['longitude'],
+        };
+      }
+      return null;
+    } catch (error) {
+      print('Erreur lors de la récupération du professionnel: $error');
+      return null;
+    }
+  }
+
 // modifier un client
 
 

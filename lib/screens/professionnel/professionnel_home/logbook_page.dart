@@ -1,15 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:tech/screens/professionnel/details/history_page.dart';
+import 'package:tech/screens/professionnel/details/client_page.dart';
 import 'package:tech/screens/professionnel/details/ranking_page.dart';
 
 import '../../../core/const/assets.dart';
 import '../../../core/const/colors.dart';
+import '../../clients/widgets/chat_button_widget.dart';
+import '../details/requests_list_page.dart';
 import '../widgets/menuCirsulaireWidget.dart';
 
 class LogbookPage extends StatefulWidget {
-  const LogbookPage({super.key});
+  final Map<String, dynamic> profile;
+  final String baseImageUrl;
+  const LogbookPage({
+    super.key,
+    required this.profile,
+    required this.baseImageUrl
+  });
 
   @override
   State<LogbookPage> createState() => _LogbookPageState();
@@ -20,6 +28,11 @@ class _LogbookPageState extends State<LogbookPage> {
 
 
   Widget build(BuildContext context) {
+    final actualProfil = widget.profile;
+    if (actualProfil.isEmpty)
+    {
+      return Center(child: CircularProgressIndicator());
+    }
     return DefaultTabController(
         length: 2,
         child: Scaffold(
@@ -52,8 +65,8 @@ class _LogbookPageState extends State<LogbookPage> {
                       ),
                       //labelColor: Colors.white,
                       tabs: [
-                        Tab(text: 'Historique',),
-                        Tab(text: 'Classement',)
+                        Tab(text: 'Rendez-vous',),
+                        Tab(text: 'Vos clients',)
                       ]
                   ),
                 )
@@ -86,17 +99,21 @@ class _LogbookPageState extends State<LogbookPage> {
           ),
           body: TabBarView(
               children: [
-                HistoryPage(),
-                RankingPage()
+                WorkRequestLists(
+                  professionalId: actualProfil['professionalId'],
+                  currentUserId: actualProfil['id'],
+                ),
+                ClientPage(
+                  professionalId: actualProfil['professionalId'],
+                ),
               ]
           ),
-          floatingActionButton: Container(
-            margin: EdgeInsets.symmetric(vertical: 100.0),
-            child: FloatingActionButton(
-                backgroundColor: ColorsData.purple00A,
-                shape: CircleBorder(),
-                onPressed: () => {},
-                child: SvgPicture.asset(AssetsData.chatIcon)),
+          floatingActionButton: ChatButtonWidget(
+            currentUserProfileImage: actualProfil['avatar'] != null && actualProfil['avatar'].toString().isNotEmpty
+                ? '${widget.baseImageUrl}/${actualProfil['avatar']}'
+                : actualProfil['profile_photo_url'],
+            currentUserId: actualProfil['id'],
+            typeProfile: actualProfil['typeprofile'],
           ),
         )
     );

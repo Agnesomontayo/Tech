@@ -8,10 +8,18 @@ import 'package:tech/screens/professionnel/widgets/menuCirsulaireWidget.dart';
 
 import '../../../core/const/assets.dart';
 import '../../../core/const/colors.dart';
+import '../details/ranking_page.dart';
 import '../widgets/RankingProfessionnalCard.dart';
+import '../widgets/chat_button_widget.dart';
 
 class RequestPage extends StatefulWidget {
-  const RequestPage({super.key});
+  final Map<String, dynamic> profile;
+  final String baseImageUrl;
+  const RequestPage({
+    super.key,
+    required this.profile,
+    required this.baseImageUrl
+  });
 
   @override
   State<RequestPage> createState() => _RequestPageState();
@@ -20,7 +28,10 @@ class RequestPage extends StatefulWidget {
 class _RequestPageState extends State<RequestPage> {
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
+    final actualProfil = widget.profile;
+    return actualProfil == null
+        ? Center(child: CircularProgressIndicator())
+        : DefaultTabController(
         length: 2,
         child: Scaffold(
           appBar: AppBar(
@@ -52,8 +63,8 @@ class _RequestPageState extends State<RequestPage> {
                       ),
                       //labelColor: Colors.white,
                       tabs: [
-                        Tab(text: 'Requêtes',),
-                        Tab(text: 'Notifications',)
+                        Tab(text: 'Notifications',),
+                        Tab(text: 'Classement',)
                       ]
                   ),
                 )
@@ -86,17 +97,21 @@ class _RequestPageState extends State<RequestPage> {
           ),
           body: TabBarView(
               children: [
-                WorkRequestLists(),
-                WorkNotificationPage(),
+                WorkNotificationPage(
+                  professionId: actualProfil['professionalId'],
+                  currentFrequency: actualProfil['reminder_frequency'] == null ? '2' : actualProfil['reminder_frequency'].toString(),
+                ),
+                RankingPage(
+                  professionId: actualProfil['profession_id'],
+                )
               ]
           ),
-          floatingActionButton: Container(
-            margin: EdgeInsets.symmetric(vertical: 100.0),
-            child: FloatingActionButton(
-                backgroundColor: ColorsData.purple00A,
-                shape: CircleBorder(),
-                onPressed: () => {},
-                child: SvgPicture.asset(AssetsData.chatIcon)),
+          floatingActionButton: ChatButtonWidget(
+            currentUserProfileImage: actualProfil['avatar'] != null && actualProfil['avatar'].toString().isNotEmpty
+                ? '${widget.baseImageUrl}/${actualProfil['avatar']}'
+                : actualProfil['profile_photo_url'],
+            currentUserId: actualProfil['id'],
+            typeProfile: actualProfil['typeprofile'],
           ),
         )
     );

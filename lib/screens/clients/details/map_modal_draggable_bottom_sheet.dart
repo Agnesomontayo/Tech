@@ -61,6 +61,7 @@ class _MapModalDraggableBottomSheetState extends State<MapModalDraggableBottomSh
 
   Future<void> _loadInfos() async {
     try {
+      baseImageUrl = await ApiHelper.getApiUrl();
       await _loadClientLocation();
      // _fetchProfessionals();
     } catch (error) {
@@ -175,7 +176,7 @@ class _MapModalDraggableBottomSheetState extends State<MapModalDraggableBottomSh
                                 final professional = professionals[index];
                             return  WorkerPresentationCard(
                               name: professional['lastName'] + ' ' + professional['firstName'],
-                              rate: professional['average_rating'],
+                              rate: (professional['average_rating'] ?? 0).toDouble(),
                               availability: professional['availability'],
                               distance: professional['distance'],
                               unit: 'm',

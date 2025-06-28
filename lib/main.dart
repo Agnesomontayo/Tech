@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:tech/core/providers/appointment_provider.dart';
 import 'package:tech/core/providers/client_provider.dart';
@@ -30,6 +33,10 @@ import 'package:tech/screens/clients/client_home/client_home.dart';
 void main() async {
   //WidgetsFlutterBinding.ensureInitialized();
   WidgetsFlutterBinding.ensureInitialized();
+
+  if (Platform.isAndroid) {
+    AndroidGoogleMapsFlutter.useAndroidViewSurface = true;
+  }
 
   await requestLocationPermission();
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);

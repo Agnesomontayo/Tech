@@ -9,6 +9,9 @@
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyCgnqFTts4IdXVmulti0NvaByi7ZzKL7xg"/>
+        <meta-data
+            android:name="flutter.enable-impeller"
+            android:value="false" />
 
         <activity
             android:name=".MainActivity"

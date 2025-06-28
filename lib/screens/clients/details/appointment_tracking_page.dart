@@ -2,8 +2,13 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_polyline_points/flutter_polyline_points.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
+import 'package:tech/core/utils/func.dart';
 import 'package:tech/screens/clients/client_forms/review_form.dart';
 import 'dart:convert';
 
@@ -11,8 +16,11 @@ import '../../../core/const/assets.dart';
 import '../../../core/const/colors.dart';
 import '../../../core/models/appointment.dart';
 import '../../../core/models/service.dart';
+import '../../../core/providers/client_provider.dart';
+import '../../../core/services/professional_location_service.dart';
 import '../../../core/services/reverb_appointment_service.dart';
 import '../widgets/CustumAppBar.dart';
+import 'package:provider/provider.dart';
 
 class AppointmentTrackingPage extends StatefulWidget {
   final int appointmentId;
@@ -48,6 +56,13 @@ class _AppointmentTrackingPageState extends State<AppointmentTrackingPage> {
   DateTime? _appointmentStartTime;
   DateTime? _lastUpdateTimestamp;
   bool isProfessional = false;
+  late GoogleMapController _mapController;
+  LatLng? _clientLocation;
+  LatLng? _professionalLocation;
+  Set<Marker> _markers = {};
+  Set<Polyline> _polylines = {};
+  List<LatLng> _polylineCoordinates = [];
+  late PolylinePoints _polylinePoints;
 
 
   void _initReverbService() {
@@ -115,7 +130,7 @@ class _AppointmentTrackingPageState extends State<AppointmentTrackingPage> {
     }
   }
 
-  Future<void> _fetchInitialAppointmentState() async {
+  /*Future<void> _fetchInitialAppointmentState() async {
     try {
       final response = await http.get(
         Uri.parse('http://${widget.baseUrl}:8000/api/appointments/${widget.appointmentId}'),
@@ -127,11 +142,12 @@ class _AppointmentTrackingPageState extends State<AppointmentTrackingPage> {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        print('data ${data}');
+        //print('data ${data}');
         setState(() {
           _appointmentData = AppointmentDisplayData.fromJson(data);
           _serviceRequestData = ServiceRequestDisplayData.fromJson(data['service_request']);
-          print('_appointmentData ${_appointmentData}');
+          print('clientId ${_serviceRequestData?.client_id}');
+          print('professionnalId ${_serviceRequestData?.professional_id}');
           _statusMessage = 'Rendez-vous chargé.';
           widget.typeProfile == 'professionnel' ? isProfessional = true : isProfessional = false;
         });
@@ -147,9 +163,59 @@ class _AppointmentTrackingPageState extends State<AppointmentTrackingPage> {
         print('Error fetching initial appointment state: $e');
       });
     }
-  }
+  }*/
 
-  /// Gère les mises à jour de rendez-vous reçues via Reverb.
+  Future<void> _fetchInitialAppointmentState() async {
+    try {
+      final response = await http.get(
+        Uri.parse('http://${widget.baseUrl}:8000/api/appointments/${widget.appointmentId}'),
+        headers: {
+          'Authorization': 'Bearer ${widget.userToken}',
+          'Accept': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        print('Données complètes reçues: $data'); // Debug complet
+
+        if (data['service_request'] == null) {
+          throw Exception('Données service_request manquantes dans la réponse');
+        }
+
+        setState(() {
+          _appointmentData = AppointmentDisplayData.fromJson(data);
+          _serviceRequestData = ServiceRequestDisplayData.fromJson(data['service_request']);
+
+          // Vérification explicite des IDs
+          if (_serviceRequestData?.client_id == null || _serviceRequestData?.professional_id == null) {
+            throw Exception('IDs client ou professionnel manquants dans service_request');
+          }
+
+          print('Client ID: ${_serviceRequestData?.client_id}');
+          print('Professional ID: ${_serviceRequestData?.professional_id}');
+
+          _statusMessage = 'Rendez-vous chargé.';
+          isProfessional = widget.typeProfile == 'professionnel';
+        });
+
+        // Appeler _getLocations() seulement après avoir tout initialisé
+        if (mounted) {
+          await _getLocations();
+        }
+      } else {
+        throw Exception('Erreur HTTP ${response.statusCode}: ${response.body}');
+      }
+    } catch (e) {
+      print('Error fetching initial appointment state: $e');
+      if (mounted) {
+        setState(() {
+          _statusMessage = 'Erreur: ${e.toString()}';
+        });
+        _showErrorSnackBar('Erreur de chargement du rendez-vous');
+      }
+    }
+  }
 
   void _handleAppointmentUpdate(Map<String, dynamic> data) {
     if (!mounted) return;
@@ -171,7 +237,7 @@ class _AppointmentTrackingPageState extends State<AppointmentTrackingPage> {
       }
     });
   }
-  /// Callback lorsque Reverb est connecté.
+
   void _handleReverbConnected() {
     if (!mounted) return;
     setState(() {
@@ -181,7 +247,6 @@ class _AppointmentTrackingPageState extends State<AppointmentTrackingPage> {
     print('Connected to appointment updates');
   }
 
-  /// Callback en cas d'erreur Reverb.
   void _handleReverbError(dynamic error, [StackTrace? stackTrace]) {
     if (!mounted) return;
     setState(() {
@@ -191,7 +256,6 @@ class _AppointmentTrackingPageState extends State<AppointmentTrackingPage> {
     print('Appointment update error: $error\n$stackTrace');
   }
 
-  /// Callback lorsque Reverb est déconnecté.
   void _handleReverbDisconnected() {
     if (!mounted) return;
     setState(() {
@@ -212,7 +276,6 @@ class _AppointmentTrackingPageState extends State<AppointmentTrackingPage> {
   }
 
   void _startCountdown() {
-    //_stopCountdown();
     _lastUpdateTimestamp = DateTime.now();
     _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (!mounted) {
@@ -242,12 +305,199 @@ class _AppointmentTrackingPageState extends State<AppointmentTrackingPage> {
     _countdownTimer = null;
   }
 
+  Future<void> _getLocations() async {
+    if (!mounted) return;
+
+    // Vérification approfondie
+    if (_serviceRequestData == null) {
+      print('ServiceRequestData non initialisé');
+      return;
+    }
+
+    final clientId = _serviceRequestData?.client_id;
+    final professionalId = _serviceRequestData?.professional_id;
+
+    if (clientId == null || professionalId == null) {
+      print('IDs manquants - client: $clientId, professional: $professionalId');
+      return;
+    }
+
+    try {
+      final clientProvider = Provider.of<ClientProvider>(context, listen: false);
+
+      print('Récupération position pour client: $clientId');
+      final clientResponse = await clientProvider.getClientLocation(clientId);
+      _processClientResponse(clientResponse);
+
+      print('Récupération position pour professionnel: $professionalId');
+      final proResponse = await clientProvider.getProfessionalLocation(professionalId);
+      _processProfessionalResponse(proResponse);
+
+      if (_clientLocation != null && _professionalLocation != null) {
+        print('Calcul itinéraire entre client et professionnel');
+        await _getPolyline();
+      } else {
+        print('Positions insuffisantes pour calculer itinéraire');
+      }
+    } catch (e) {
+      print('Erreur récupération positions: $e');
+      _showErrorSnackBar('Erreur de chargement des positions');
+    }
+  }
+
+  void _processClientResponse(Map<String, dynamic>? response) {
+    if (response == null || response['latitude'] == null || response['longitude'] == null) {
+      print('Réponse client incomplète');
+      return;
+    }
+
+    final lat = double.tryParse(response['latitude'].toString());
+    final lng = double.tryParse(response['longitude'].toString());
+
+    if (lat == null || lng == null) {
+      print('Coordonnées client invalides');
+      return;
+    }
+
+    setState(() {
+      _clientLocation = LatLng(lat, lng);
+      _markers.add(
+        Marker(
+          markerId: const MarkerId('client'),
+          position: _clientLocation!,
+          infoWindow: const InfoWindow(title: 'Client'),
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+        ),
+      );
+    });
+  }
+
+  void _processProfessionalResponse(Map<String, dynamic>? response) {
+    if (response == null || response['latitude'] == null || response['longitude'] == null) {
+      print('Réponse professionnel incomplète');
+      return;
+    }
+
+    final lat = double.tryParse(response['latitude'].toString());
+    final lng = double.tryParse(response['longitude'].toString());
+
+    if (lat == null || lng == null) {
+      print('Coordonnées professionnel invalides');
+      return;
+    }
+
+    setState(() {
+      _professionalLocation = LatLng(lat, lng);
+      _markers.add(
+        Marker(
+          markerId: const MarkerId('professional'),
+          position: _professionalLocation!,
+          infoWindow: const InfoWindow(title: 'Prestataire'),
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+        ),
+      );
+    });
+  }
+
+  Future<void> _getPolyline() async {
+    try {
+      // 1. Créez un objet PolylineRequest
+      final PolylineRequest request = PolylineRequest(
+        origin: PointLatLng(_professionalLocation!.latitude, _professionalLocation!.longitude),
+        destination: PointLatLng(_clientLocation!.latitude, _clientLocation!.longitude),
+        mode: TravelMode.driving, // 'mode' remplace 'travelMode' ici
+         // Votre clé API
+      );
+
+      // 2. Passez l'objet request à la méthode
+      final result = await _polylinePoints.getRouteBetweenCoordinates(
+        request: request, // Utilisez le paramètre nommé 'request'
+        googleApiKey: 'AIzaSyCgnqFTts4IdXVmulti0NvaByi7ZzKL7xg',
+      );
+
+      if (result.points.isNotEmpty) {
+        setState(() {
+          _polylineCoordinates = result.points
+              .map((point) => LatLng(point.latitude, point.longitude))
+              .toList();
+
+          _polylines.add(
+            Polyline(
+              polylineId: const PolylineId('route'),
+              points: _polylineCoordinates,
+              color: ColorsData.purple00A, // Assurez-vous que ColorsData est accessible
+              width: 5,
+            ),
+          );
+        });
+      }
+    } catch (e) {
+      print('Erreur calcul itinéraire: $e');
+    }
+  }
+
+  void _startLocationUpdates() {
+    Timer.periodic(Duration(minutes: 1), (timer) {
+      if (widget.typeProfile == 'professionnel') {
+        _updateProfessionalLocation();
+      } else {
+        _getLocations();
+      }
+    });
+  }
+
+  Future<String?> _getToken() async {
+    final storage = FlutterSecureStorage();
+    return await storage.read(key: 'authToken'); // Récupérer le token
+  }
+
+  Future<void> _updateProfessionalLocation() async {
+    try {
+      final position = await Geolocator.getCurrentPosition();
+      final token = await _getToken();
+      final locationService = ProfessionalLocationService();
+      print('professionnal position ${position}');
+      await locationService.sendLocation(
+        latitude: position.latitude,
+        longitude: position.longitude,
+        token: token!,
+      );
+     /* await http.post(
+        Uri.parse('http://${widget.baseUrl}:8000/api/update-location'),
+        headers: {'Authorization': 'Bearer ${await _getToken()}'},
+        body: {
+          'latitude': position.latitude.toString(),
+          'longitude': position.longitude.toString(),
+        },
+      );*/
+    } catch (e) {
+      print('Erreur mise à jour position: $e');
+    }
+  }
+
+  @override
   @override
   void initState() {
     super.initState();
     print('typeprofile: ${widget.typeProfile}');
-    _initReverbService();
-    _fetchInitialAppointmentState();
+    _polylinePoints = PolylinePoints();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+       _initReverbService();
+      await _fetchInitialAppointmentState();
+      _startLocationUpdates();
+    });
+  }
+
+  void _showErrorSnackBar(String message) {
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        duration: const Duration(seconds: 3),
+      ),
+    );
   }
   @override
   void dispose() {
@@ -266,6 +516,9 @@ class _AppointmentTrackingPageState extends State<AppointmentTrackingPage> {
       body: _appointmentData == null
       ? Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
+            padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).size.height *
+                    0.20), // Ajoute du padding en bas
             child: Container(
               padding: EdgeInsets.symmetric(horizontal: 10.0),
               child: Column(
@@ -325,8 +578,8 @@ class _AppointmentTrackingPageState extends State<AppointmentTrackingPage> {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Container(
-                                  height: 40,
-                                  width: 40,
+                                  height: 35,
+                                  width: 35,
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
                                     color: (getStatusConfig(_appointmentData!.status)['iconColor'] ?? Colors.grey).withOpacity(0.15),
@@ -398,6 +651,23 @@ class _AppointmentTrackingPageState extends State<AppointmentTrackingPage> {
                         ? 'http://${widget.baseUrl}:8000/api/${_serviceRequestData!.client?.avatarUrl}'
                         : _serviceRequestData!.client?.profile_photo_url,
                   ),
+                  if (_appointmentData!.start_date != null)
+                  _buildInfosListItems(
+                    'Début du rendez-vous',
+                    formatDate((_appointmentData!.start_date).toString()),
+                    null,
+                    Icons.more_time,
+                    null,
+                    null,
+                  ) else
+                    _buildInfosListItems(
+                      'Début du rendez-vous',
+                      'Le rendez-vous n\'a pas encore commencé',
+                      null,
+                      Icons.more_time,
+                      null,
+                      null,
+                    ),
                   _buildInfosListItems(
                     'Temps restant',
                     '${_currentRemainingMinutes} minutes',
@@ -406,6 +676,23 @@ class _AppointmentTrackingPageState extends State<AppointmentTrackingPage> {
                     null,
                     null,
                   ),
+                  if (_appointmentData!.end_date != null)
+                  _buildInfosListItems(
+                    'Fin du rendez-vous',
+                    formatDate((_appointmentData!.end_date).toString()) ?? 'Le rendez-vous n\'est pas terminé',
+                    null,
+                    Icons.access_time,
+                    null,
+                    null,
+                  ) else
+                    _buildInfosListItems(
+                      'Fin du rendez-vous',
+                      'Le rendez-vous n\'est pas terminé',
+                      null,
+                      Icons.access_time,
+                      null,
+                      null,
+                    ),
                   /*const SizedBox(height: 10),
                   Text('${_appointmentData!.serviceRequest.service.label}'),
                   Text('Statut: ${_appointmentData!.status.toApiString().toUpperCase()}', style: Theme.of(context).textTheme.headlineSmall),
@@ -413,7 +700,30 @@ class _AppointmentTrackingPageState extends State<AppointmentTrackingPage> {
                   Text('Temps restant: ${_currentRemainingMinutes} minutes', style: Theme.of(context).textTheme.titleLarge),
                   */
                   const SizedBox(height: 30),
-                  if (!isProfessional && _appointmentData!.status == AppointmentStatus.completed || _appointmentData!.status == AppointmentStatus.stopped)
+                  if (_clientLocation != null && widget.typeProfile == 'professionnel')
+                    Container(
+                      height: 300,
+                      margin: EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: Colors.grey),
+                      ),
+                      child: GoogleMap(
+                        initialCameraPosition: CameraPosition(
+                          target: _clientLocation!,
+                          zoom: 14,
+                        ),
+                        markers: _markers,
+                        polylines: _polylines,
+                        onMapCreated: (controller) {
+                          setState(() {
+                            _mapController = controller;
+                          });
+                        },
+                      ),
+                    ),
+                  const SizedBox(height: 30),
+                  if (!isProfessional && _appointmentData!.status == AppointmentStatus.completed || !isProfessional && _appointmentData!.status == AppointmentStatus.stopped)
                     Align(
                       alignment: Alignment.center,
                       child: ElevatedButton(
@@ -505,7 +815,7 @@ class _AppointmentTrackingPageState extends State<AppointmentTrackingPage> {
               children: [
                 if (image != null)
                 Container(
-                  height: 90,
+                  height: 80,
                   width: 140,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(5),
@@ -525,8 +835,8 @@ class _AppointmentTrackingPageState extends State<AppointmentTrackingPage> {
                     ),
                   ) else if (avatar != null)
                     Container(
-                        height: 80,
-                        width: 80,
+                        height: 70,
+                        width: 70,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(50),
                           image: DecorationImage(
@@ -661,7 +971,4 @@ class _AppointmentTrackingPageState extends State<AppointmentTrackingPage> {
     }
   }
 
-  void _submitReview(double rating, String comment) {
-    print('Review submitted: Rating: $rating, Comment: $comment');
-  }
 }

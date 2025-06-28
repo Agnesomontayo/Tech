@@ -65,6 +65,7 @@ dependencies:
   permission_handler:
   vector_graphics:
   screenshot:
+  flutter_polyline_points:
 
 dev_dependencies:
   flutter_test:

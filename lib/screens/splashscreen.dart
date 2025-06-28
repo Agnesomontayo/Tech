@@ -20,12 +20,9 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    // Activer le mode immersif lors de l'affichage du splashscreen
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
 
-    // Simuler un délai pour le splashscreen
-    Future.delayed(Duration(seconds: 3), () {
-      // Naviguer vers la page principale
+    Future.delayed(Duration(seconds: 5), () {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => LoginPage()),

@@ -94,6 +94,26 @@ class ServicesProvider with ChangeNotifier {
     }
   }
 
+  // Récupérer les services les  plus demands dans un domaine
+
+  Future<List<dynamic>> getTrendyServicesByProfession(int professionId) async {
+    try {
+      String baseUrl = await ApiHelper.getApiUrl();
+      final responseData = await _connectedUserServices.get(
+        url: '${baseUrl}/professionals/dashboard/most-requested-services/${professionId}',
+      );
+
+      if (responseData != null) {
+          return responseData;
+      } else {
+        throw Exception('Données de professions invalides');
+      }
+    } catch (error) {
+      print('Erreur lors de la récupération des professions: $error');
+      throw Exception('Impossible de récupérer les professions');
+    }
+  }
+
 // modifier une profession
 
 // supprimer une profession

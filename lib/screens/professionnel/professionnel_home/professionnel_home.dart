@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:tech/core/providers/professionnal_provider.dart';
 import 'package:tech/screens/professionnel/professionnel_home/professional_chat_page.dart';
 import 'package:tech/screens/professionnel/widgets/menuCirsulaireWidget.dart';
 
@@ -9,6 +10,7 @@ import '../../../core/const/assets.dart';
 import '../../../core/const/colors.dart';
 import '../../../core/helpers/apiHelpers.dart';
 import '../../../core/providers/app_provider.dart';
+import '../../../core/providers/services_provider.dart';
 import '../../clients/client_home/all_services.dart';
 import '../../clients/client_home/all_works.dart';
 import '../../clients/details/work_details.dart';
@@ -16,9 +18,18 @@ import '../../professionnel/widgets/ServicePresentationCard.dart';
 import '../../clients/widgets/WorkCardWidget.dart';
 import '../../clients/widgets/titleWidget.dart';
 import 'package:provider/provider.dart';
+import 'package:tech/screens/professionnel/widgets/tops_display_on_home_page.dart';
+
+import '../widgets/chat_button_widget.dart';
 
 class ProfessionnelHome extends StatefulWidget {
-  const ProfessionnelHome({super.key});
+  final Map<String, dynamic> profile;
+  final String baseImageUrl;
+  const ProfessionnelHome({
+    super.key,
+    required this.profile,
+    required this.baseImageUrl
+  });
 
   @override
   State<ProfessionnelHome> createState() => _ProfessionnelHomeState();
@@ -28,20 +39,37 @@ class _ProfessionnelHomeState extends State<ProfessionnelHome> {
   final ScrollController _scrollController = ScrollController();
   bool _showLeftButton = false;
   bool _showRightButton = true;
-
-  Map<String, dynamic>? _profile;
-  String baseImageUrl = '';
-
   bool _isLoading = true;
+  List<dynamic> topClients = [];
+  List<dynamic> topProfessionals = [];
+  int clientsCount = 0;
+  double averageRating = 0.0;
+  List<dynamic> services = [];
 
-
-  Future<void> _loadProfile() async {
+  Future<void> fetchServices() async {
     try {
-      baseImageUrl = await ApiHelper.getApiUrl();
-      final appProvider = Provider.of<AppProvider>(context, listen: false);
-      final data = await appProvider.getProfile();
+      final serviceProvider = Provider.of<ServicesProvider>(context, listen: false);
+      final data = await serviceProvider.getTrendyServicesByProfession(widget.profile['profession_id']);
       setState(() {
-        _profile = data;
+        services = data.take(20).toList();
+      });
+      print('services ${services}');
+    } catch (e) {
+      print('Erreur: $e');
+      if (!mounted) return;
+    }
+  }
+
+  Future<void> _loadProfessionalReports() async {
+    try {
+      final professionnalProvider = Provider.of<ProfessionalProvider>(context, listen: false);
+      final data = await professionnalProvider.getProfessionalReports(widget.profile['professionalId']);
+      await fetchServices();
+      setState(() {
+        topClients = data['top_3_clients'];
+        topProfessionals = data['top_5_professionals_global'];
+        clientsCount = data['distinct_client_count'];
+        averageRating = data['average_rating'];
         _isLoading = false;
       });
     } catch (error) {
@@ -57,7 +85,7 @@ class _ProfessionnelHomeState extends State<ProfessionnelHome> {
   void initState() {
     super.initState();
     _scrollController.addListener(_scrollListener);
-    _loadProfile();
+    _loadProfessionalReports();
   }
 
   void _scrollListener() {
@@ -84,12 +112,35 @@ class _ProfessionnelHomeState extends State<ProfessionnelHome> {
     );
   }
 
+  final List<Map<String, dynamic>> fakeTopClients = [
+    {
+      'id': 1,
+      'name': 'Alice Dupont',
+      'avatar': null,
+      'profile_photo_url': 'https://randomuser.me/api/portraits/women/1.jpg',
+    },
+    {
+      'id': 2,
+      'name': 'Marc Bernard',
+      'avatar': null,
+      'profile_photo_url': 'https://randomuser.me/api/portraits/men/2.jpg',
+    },
+    {
+      'id': 3,
+      'name': 'Sophie Martin',
+      'avatar': null,
+      'profile_photo_url': 'https://randomuser.me/api/portraits/women/3.jpg',
+    },
+  ];
+
+
   @override
   Widget build(BuildContext context) {
+    final actualProfil = widget.profile;
+    if (_isLoading)
+      return const Center(child: CircularProgressIndicator());
     return Scaffold(
-        body: _profile == null
-            ? Center(child: CircularProgressIndicator())
-            : RefreshIndicator(
+        body: RefreshIndicator(
           onRefresh: _handleRefresh,
           child: SingleChildScrollView(
             child: Container(
@@ -129,11 +180,9 @@ class _ProfessionnelHomeState extends State<ProfessionnelHome> {
                         margin: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
                         child: CircleAvatar(
                           radius: 20,
-                          backgroundImage: _profile != null
-                              ? (_profile!['avatar'] != null
-                              ? NetworkImage('${baseImageUrl}/${_profile!['avatar']}')
-                              : NetworkImage(_profile!['profile_photo_url']))
-                              : AssetImage(AssetsData.p) as ImageProvider,
+                          backgroundImage: actualProfil['avatar'] != null
+                              ? NetworkImage('${widget.baseImageUrl}/${actualProfil['avatar']}')
+                              : NetworkImage(actualProfil['profile_photo_url']),
                         ),
                       ),
                     ],
@@ -145,7 +194,7 @@ class _ProfessionnelHomeState extends State<ProfessionnelHome> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Bonjour ${_profile!['lastName'] ?? ''}' ,
+                          'Bonjour ${actualProfil['lastName'] ?? ''}' ,
                           style: GoogleFonts.commissioner(
                             textStyle: TextStyle(
                               color: ColorsData.purple00A,
@@ -232,7 +281,7 @@ class _ProfessionnelHomeState extends State<ProfessionnelHome> {
                                               ),
                                               Expanded(
                                                 child: Text(
-                                                  '100.000',
+                                                  '${clientsCount}',
                                                   style:
                                                       GoogleFonts.commissioner(
                                                     textStyle: TextStyle(
@@ -294,7 +343,7 @@ class _ProfessionnelHomeState extends State<ProfessionnelHome> {
                                               ),
                                               Expanded(
                                                 child: Text(
-                                                  '4.5',
+                                                  '${averageRating}',
                                                   style:
                                                       GoogleFonts.commissioner(
                                                     textStyle: TextStyle(
@@ -338,6 +387,12 @@ class _ProfessionnelHomeState extends State<ProfessionnelHome> {
                         ),
                         Center(
                           child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              TopClientsWidget(topClients: fakeTopClients, baseImageUrl: widget.baseImageUrl),
+                            ]
+                          ),
+                          /*Stack(
                             alignment: Alignment.center,
                             children: [
                               // Le cercle de gauche
@@ -384,7 +439,7 @@ class _ProfessionnelHomeState extends State<ProfessionnelHome> {
                                 ),
                               ),
                             ],
-                          ),
+                          ),*/
                         ),
                         SizedBox(
                           height: 50.0,
@@ -405,6 +460,13 @@ class _ProfessionnelHomeState extends State<ProfessionnelHome> {
                         ),
                         Center(
                           child: Stack(
+                            alignment: Alignment.center,
+                            clipBehavior: Clip.none,
+                            children: [
+                              TopProfessionalsWidget(topPros: topProfessionals, baseImageUrl: widget.baseImageUrl),
+                            ]
+                          ),
+                          /*Stack(
                             alignment: Alignment.center,
                             children: [
                               Transform.translate(
@@ -482,7 +544,7 @@ class _ProfessionnelHomeState extends State<ProfessionnelHome> {
                                 ),
                               ),
                             ],
-                          ),
+                          )*/
                         ),
                       ],
                     ),
@@ -523,13 +585,15 @@ class _ProfessionnelHomeState extends State<ProfessionnelHome> {
                                   padding: EdgeInsets.all(10),
                                   scrollDirection: Axis.horizontal,
                                   controller: _scrollController,
-                                  itemCount: 20,
+                                  itemCount: services.length,
                                   itemBuilder: (context, index) {
+                                    final service = services[index];
                                     return ServicePresentationCard(
                                         iconPath: AssetsData.entretienIcon,
-                                        imagePath: AssetsData.menage,
-                                        serviceName: 'Nettoyage complet $index',
-                                        priceRange: '1000FCFA-3000FCFA');
+                                        imagePath: ('${widget.baseImageUrl}/${service['image']}'),
+                                        serviceName: service['label'],
+                                        description: service['description']
+                                    );
                                   },
                                 ),
                                 Positioned(
@@ -594,9 +658,16 @@ class _ProfessionnelHomeState extends State<ProfessionnelHome> {
                   Padding(
                     padding:
                         EdgeInsets.symmetric(horizontal: 20.0, vertical: 15.0),
-                    child: TitleWidget(title: 'Nos petits conseils'),
+                    child: TitleWidget(title: 'Nos petits conseils pour vous'),
                   ),
                   Container(
+                    child: Center(
+                      child: Text(
+                        'Pas de conseils pour le moment 😢'
+                      ),
+                    ),
+                  ),
+                  /*Container(
                       height: 200,
                       child: Column(
                         children: [
@@ -638,7 +709,7 @@ class _ProfessionnelHomeState extends State<ProfessionnelHome> {
                             ),
                           )
                         ],
-                      )),
+                      )),*/
                   SizedBox(
                     height: 150,
                   )
@@ -655,24 +726,13 @@ class _ProfessionnelHomeState extends State<ProfessionnelHome> {
         ),
         // extendBody: true,
         floatingActionButton: Container(
-          margin: EdgeInsets.symmetric(vertical: 100.0),
-          child: FloatingActionButton(
-              backgroundColor: ColorsData.purple00A,
-              shape: CircleBorder(),
-              onPressed: () => {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => ProfessionalChatPage(
-                        currentUserProfileImage: _profile!['avatar'] != null && _profile!['avatar'].toString().isNotEmpty
-                            ? '${baseImageUrl}/${_profile!['avatar']}'
-                            : _profile!['profile_photo_url'],
-                        currentUserId: _profile?['id'],
-                        typeProfil: _profile!['typeprofile'],
-                      )),
-                ),
-              },
-              child: SvgPicture.asset(AssetsData.chatIcon)),
+          child: ChatButtonWidget(
+            currentUserProfileImage: actualProfil['avatar'] != null && actualProfil['avatar'].toString().isNotEmpty
+                ? '${widget.baseImageUrl}/${actualProfil['avatar']}'
+                : actualProfil['profile_photo_url'],
+            currentUserId: actualProfil['id'],
+            typeProfile: actualProfil['typeprofile'],
+          ),
         ));
   }
 

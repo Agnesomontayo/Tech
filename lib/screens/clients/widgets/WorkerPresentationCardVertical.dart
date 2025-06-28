@@ -5,17 +5,17 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:tech/screens/clients/widgets/titleWidget.dart';
 import '../../../core/const/assets.dart';
 import '../../../core/const/colors.dart';
+import '../../../core/helpers/utils.dart';
 import '../../../screens/clients/widgets/WorkerPresentationModal.dart';
 import '../client_forms/new_request_form.dart';
 
 class WorkerPresentationCardVertical extends StatefulWidget {
   final String name;
   final double rate;
-  final String reviews;
+  final int reviews;
   final String availability;
-  final String distance;
+  final int distance;
   final String unit;
-  final Color availabilityColor;
   final String imagePath ;
   final String profession;
   final int serviceId;
@@ -32,7 +32,6 @@ class WorkerPresentationCardVertical extends StatefulWidget {
     required this.availability,
     required this.distance,
     required this.unit,
-    required this.availabilityColor,
     required this.imagePath,
     required this.profession,
     required this.serviceId,
@@ -66,7 +65,9 @@ class _WorkerPresentationCardVerticalState extends State<WorkerPresentationCardV
         width: 180,
         margin: EdgeInsets.symmetric( horizontal: 10),
         padding: EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-        child: Column(
+        child: Stack( // Utilisation d'un Stack pour superposer l'icône
+          children: [
+        Column(
           children: [
             Container(
               height: 90,
@@ -88,7 +89,7 @@ class _WorkerPresentationCardVerticalState extends State<WorkerPresentationCardV
                 children: [
                   SizedBox(height: 5,),
                   Container(
-                    height: 40,
+                    //height: 40,
                     child:  Text(
                       widget.name,
                       textAlign: TextAlign.center,
@@ -102,22 +103,65 @@ class _WorkerPresentationCardVerticalState extends State<WorkerPresentationCardV
                     ),
                   ),
                   SizedBox(height: 3,),
-                  Container(
-                    height: 40,
-                    child: Text(
-                      widget.profession,
-                      overflow: TextOverflow.clip,
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.karla(
-                        textStyle: TextStyle(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 13,
-                          color: ColorsData.purple00C,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.location_on,
+                        color: Color(0xFFFB0049),
+                        size: 20,
+                      ),
+                      SizedBox(width: 5,),
+                      Text(
+                          formatDistance(widget.distance.toDouble()),
+                          style: GoogleFonts.karla(
+                            textStyle: TextStyle(
+                              fontWeight: FontWeight.w500,
+                              fontSize: 14,
+                            ),
+                          )
+                      ),
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.star,
+                        color: Colors.amber,
+                        size: 20,
+                      ),
+                      Text(
+                          widget.rate.toString(),
+                          style: GoogleFonts.karla(
+                            textStyle: TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 16,
+                            ),
+                          )
+                      ),
+                      SizedBox(width: 8,),
+                      Container(
+                        width: 4,
+                        height: 4,
+                        decoration: BoxDecoration(
+                            color: ColorsData.grey6b.withOpacity(0.5),
+                            borderRadius: BorderRadius.circular(20)
                         ),
                       ),
-                    ),
+                      SizedBox(width: 8,),
+                      Text(
+                          ' ${widget.reviews} avis',
+                          style: GoogleFonts.karla(
+                            textStyle: TextStyle(
+                                fontWeight: FontWeight.w400,
+                                fontSize: 16,
+                                color: ColorsData.grey6b.withOpacity(0.9)
+                            ),
+                          )
+                      ),
+                    ],
                   ),
-                  SizedBox(height: 2,),
                   GestureDetector(
                     child:  Container(
                       padding: EdgeInsets.symmetric(horizontal: 10, vertical: 3),
@@ -145,6 +189,28 @@ class _WorkerPresentationCardVerticalState extends State<WorkerPresentationCardV
             ),
           ],
         ),
+        Positioned(
+            top: 0,
+            left: 0,
+            child: Container(
+              padding: const EdgeInsets.all(4), // Petit padding pour l'icône
+              decoration: BoxDecoration(
+                color: widget.availability == 'available'
+                    ? Colors.green.shade700
+                    : Colors.red.shade700, // Rouge plus foncé
+                shape: BoxShape.circle, // Forme circulaire
+              ),
+              child: Icon(
+                widget.availability == 'available'
+                    ? Icons.online_prediction // Icône de coche pour disponible
+                    : Icons.do_not_disturb_on, // Icône de croix pour indisponible
+                color: Colors.white,
+                size: 18, // Taille de l'icône
+              ),
+            ),
+        )
+          ]
+        )
       ),
      /* onTap: (){
         showModalBottomSheet(

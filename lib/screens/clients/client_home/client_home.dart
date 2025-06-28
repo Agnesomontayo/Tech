@@ -502,7 +502,7 @@ class _ClientHomeState extends State<ClientHome> {
                                         Container(
                                           height: 20,
                                           child: RatingBarIndicator(
-                                            rating: professional['average_rating'] ?? 0.0,
+                                            rating: (professional['average_rating'] ?? 0).toDouble(), // Convert to double
                                             itemBuilder: (context, index) => Icon(
                                               Icons.star,
                                               color: Colors.amber,

@@ -137,22 +137,34 @@ class _WorkerPresentationModalState extends State<WorkerPresentationModal> {
                               children: [
                                 Container(
                                   padding: EdgeInsets.symmetric(
-                                      horizontal: 10, vertical: 7),
+                                      horizontal: 5, vertical: 3),
                                   decoration: BoxDecoration(
                                       color: widget.availability == 'available'
-                                          ? Colors.green
-                                          : Colors.red,
+                                          ? Colors.green.shade700
+                                          : Colors.red.shade700,
                                       borderRadius: BorderRadius.circular(20)),
-                                  child: Text(
-                                      widget.availability == 'available'
-                                          ? 'Disponibble'
-                                          : 'Indisponible',
-                                      style: GoogleFonts.karla(
-                                        textStyle: TextStyle(
-                                            fontWeight: FontWeight.w400,
-                                            fontSize: 14,
-                                            color: ColorsData.white),
-                                      )),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        widget.availability == 'available'
+                                            ? Icons.online_prediction
+                                            : Icons.do_not_disturb_on,
+                                        color: Colors.white,
+                                        size: 18,
+                                      ),
+                                      SizedBox(width: 4),
+                                      Text(
+                                          widget.availability == 'available'
+                                              ? 'Disponible'
+                                              : 'Indisponible',
+                                          style: GoogleFonts.karla(
+                                            textStyle: TextStyle(
+                                                fontWeight: FontWeight.w600,
+                                                fontSize: 14,
+                                                color: ColorsData.white),
+                                          )),
+                                    ],
+                                  )
                                 ),
                                 SizedBox(
                                   width: 10,

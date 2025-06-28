@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:tech/core/const/assets.dart';
 import 'package:tech/core/providers/professionnal_provider.dart';
 import 'package:tech/core/providers/serviceRequest_provider.dart';
@@ -8,6 +10,7 @@ import '../../../core/const/colors.dart';
 import '../../../core/helpers/apiHelpers.dart';
 import '../../../core/providers/app_provider.dart';
 import '../../../core/providers/services_provider.dart';
+import '../../../core/services/dio_service.dart';
 import '../widgets/CustumInputs.dart';
 import '../widgets/CustumDropdown.dart';
 import '../widgets/CustumDateInputs.dart';
@@ -57,8 +60,65 @@ class _NewRequestFormModalState extends State<NewRequestFormModal> {
   int? professionalId;
   String? side_note;
   DateTime? schedule_at;
+  final DioService _dioService = DioService(baseUrl: '', token: '');
 
-  @override
+
+  Future<bool> _askForLocationPermission(BuildContext context) async {
+    return await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: Text("Partager votre position"),
+        content: Text("Voulez-vous partager votre position actuelle avec le professionnel pour faciliter le rendez-vous ?"),
+        actions: [
+          TextButton(
+            child: Text("Non merci"),
+            onPressed: () => Navigator.of(context).pop(false),
+          ),
+          TextButton(
+            child: Text("Autoriser"),
+            onPressed: () => Navigator.of(context).pop(true),
+          ),
+        ],
+      ),
+    ) ?? false;
+  }
+
+  Future<void> _getAndSaveClientLocation() async {
+    try {
+      // Vérifier les permissions
+      String baseUrl = await ApiHelper.getApiUrl();
+      final status = await Permission.location.request();
+      if (!status.isGranted) {
+        throw Exception('Permission de localisation refusée');
+      }
+
+      // Récupérer la position
+      final position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.best,
+      );
+
+      // Envoyer la position au backend
+      final response = await _dioService.post(
+        url: '${baseUrl}/update-location',
+        body: {
+          'latitude': position.latitude,
+          'longitude': position.longitude,
+        },
+      );
+
+      if (response == null) {
+        throw Exception('Erreur sauvegarde position');
+      }
+    } catch (e) {
+      print('Erreur récupération position: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Impossible de récupérer votre position')),
+      );
+    }
+  }
+
+
   Future<void> _fetchServices() async {
     try {
       if (widget.serviceId == null) {
@@ -115,6 +175,13 @@ class _NewRequestFormModalState extends State<NewRequestFormModal> {
         schedule_at!,
         side_note!,
       );
+
+      if (widget.clientId != null) {
+        final positionAllowed = await _askForLocationPermission(context);
+        if (positionAllowed) {
+          await _getAndSaveClientLocation();
+        }
+      }
 
       print('Demande créée : $request');
       ScaffoldMessenger.of(context).showSnackBar(

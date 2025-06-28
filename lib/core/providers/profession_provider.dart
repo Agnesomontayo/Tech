@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'dart:async';
 import 'dart:convert';
@@ -37,7 +38,7 @@ class ProfessionProvider with ChangeNotifier {
         if (responseData.containsKey('data')) {
           return responseData['data'];
         } else {
-          throw Exception('Clé "professions" non trouvée dans la réponse');
+          throw Exception('Clé "data" non trouvée dans la réponse');
         }
       } else {
         throw Exception('Données de professions invalides');
@@ -52,26 +53,27 @@ class ProfessionProvider with ChangeNotifier {
 
   Future<List<dynamic>> getManyAvailableProfessions() async {
     try {
+      Dio dio = Dio();
       String baseUrl = await ApiHelper.getApiUrl();
-      final responseData = await _connectedUserServices.get(
-        url: '${baseUrl}/professions-available',
-      );
+      final response = await dio.get('${baseUrl}/professions-available');
 
-      if (responseData != null && responseData is Map<String, dynamic>) {
-        if (responseData.containsKey('data')) {
-          return responseData['data'];
+      if (response.statusCode == 200) {
+        if (response.data is List) {
+          return response.data;
+        }
+        else if (response.data is Map && response.data['data'] is List) {
+          return response.data['data'];
         } else {
-          throw Exception('Clé "professions" non trouvée dans la réponse');
+          throw Exception('Format de données inattendu');
         }
       } else {
-        throw Exception('Données de professions invalides');
+        throw Exception('Échec de la requête: ${response.statusCode}');
       }
     } catch (error) {
       print('Erreur lors de la récupération des professions: $error');
-      throw Exception('Impossible de récupérer les professions');
+      throw Exception('Impossible de récupérer les professions: ${error.toString()}');
     }
   }
-
   // récupérer une profession
 
   Future<Map<String, dynamic>> getOneProfession (int professionId) async {

@@ -21,16 +21,14 @@ Future<BitmapDescriptor> createCustomMarkerBitmap({
   required String profession,
   required String availability,
 }) async {
-  // Crée un contrôleur pour le package screenshot
   ScreenshotController screenshotController = ScreenshotController();
 
-  // Le widget que vous souhaitez rendre en image
   final widgetToRender = Material(
-    type: MaterialType.transparency, // Permet un fond transparent si nécessaire
+    type: MaterialType.transparency,
     child: Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: Colors.white, // Couleur de fond de votre marqueur
+        color: Colors.white,
         borderRadius: BorderRadius.circular(8),
         boxShadow: const [
           BoxShadow(
@@ -41,22 +39,27 @@ Future<BitmapDescriptor> createCustomMarkerBitmap({
         ],
       ),
       child: Row(
-        mainAxisSize: MainAxisSize.min, // Indispensable pour que le Row prenne la taille minimale de ses enfants
+        mainAxisSize: MainAxisSize.min,
         children: [
-          // Indicateur de disponibilité (cercle de couleur)
           Container(
-            width: 16,
-            height: 16,
+            width: 20,
+            height: 20,
             decoration: BoxDecoration(
-              color: _getAvailabilityColor(availability), // Fonction pour la couleur
+              color: _getAvailabilityColor(availability),
               shape: BoxShape.circle,
             ),
+            child: Icon(
+              availability == 'available'
+                  ? Icons.online_prediction
+                  : Icons.do_not_disturb_on,
+              color: Colors.white,
+              size: 18,
+            ),
           ),
-          const SizedBox(width: 8), // Espace entre l'indicateur et le texte
-          // Nom et profession du professionnel
+          const SizedBox(width: 8),
           Column(
-            mainAxisSize: MainAxisSize.min, // La colonne prend la taille minimale de ses enfants
-            crossAxisAlignment: CrossAxisAlignment.start, // Alignement du texte à gauche
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 name,
@@ -80,27 +83,19 @@ Future<BitmapDescriptor> createCustomMarkerBitmap({
     ),
   );
 
-  // Capture le widget et le convertit en Uint8List (tableau d'octets)
-  // Le package screenshot s'occupe de tout le rendu off-screen,
-  // y compris la création de RenderRepaintBoundary.
   final Uint8List? byteData = await screenshotController.captureFromWidget(
     widgetToRender,
-    delay: const Duration(milliseconds: 50), // Un petit délai pour s'assurer que tout est rendu
-    pixelRatio: 3.0, // Résolution de l'image (plus élevé = plus détaillé)
-    // Vous pouvez spécifier une taille cible si vous voulez une image de dimensions fixes :
-    // targetSize: const Size(200, 100),
+    delay: const Duration(milliseconds: 50),
+    pixelRatio: 3.0,
   );
 
-  // Vérifie si la capture a réussi
   if (byteData == null) {
     throw Exception("Erreur: Impossible de capturer le widget comme image pour le marqueur personnalisé.");
   }
 
-  // Crée un BitmapDescriptor à partir des octets de l'image
   return BitmapDescriptor.fromBytes(byteData);
 }
 
-/// Détermine la couleur de l'indicateur de disponibilité.
 Color _getAvailabilityColor(String availability) {
   switch (availability.toLowerCase()) { // Utilisation de toLowerCase pour une comparaison insensible à la casse
     case 'available':
@@ -111,103 +106,6 @@ Color _getAvailabilityColor(String availability) {
       return Colors.grey; // Couleur par défaut si le statut est inconnu
   }
 }
-/*Future<BitmapDescriptor> createCustomMarkerBitmap({
-  required String name,
-  required String profession,
-  required String availability,
-}) async {
-  // Create a widget to render
-  final widget = Material(
-    type: MaterialType.transparency,
-    child: Container(
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 4)],
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Availability indicator
-          Container(
-            width: 16,
-            height: 16,
-            decoration: BoxDecoration(
-              color: _getAvailabilityColor(availability),
-              shape: BoxShape.circle,
-            ),
-          ),
-          const SizedBox(width: 8),
-          // Name and profession text
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(name, style: const TextStyle(fontWeight: FontWeight.bold)),
-              Text(profession, style: TextStyle(fontSize: 12, color: Colors.grey[700])),
-            ],
-          ),
-        ],
-      ),
-    ),
-  );
-
-  // Render the widget to an image
-  final RenderRepaintBoundary boundary = await _renderWidgetToImage(widget);
-  final ui.Image image = await boundary.toImage(pixelRatio: 3.0);
-  final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-  return BitmapDescriptor.fromBytes(byteData!.buffer.asUint8List());
-}
-
-Color _getAvailabilityColor(String availability) {
-  switch (availability) {
-    case 'available':
-      return Colors.green;
-    case 'unavailable':
-      return Colors.red;
-    default:
-      return Colors.grey;
-  }
-}*/
-/*
-
-Future<RenderRepaintBoundary> _renderWidgetToImage(Widget widget) async {
-  final RenderView renderView = RenderView(
-    view: WidgetsBinding.instance.window,
-    child: RenderPositionedBox(
-      alignment: Alignment.center,
-      child: RenderRepaintBoundary(),
-    ),
-    configuration: ViewConfiguration(
-      //size: WidgetsBinding.instance.window.physicalSize,
-      devicePixelRatio: WidgetsBinding.instance.window.devicePixelRatio,
-    ),
-  );
-
-  final PipelineOwner pipelineOwner = PipelineOwner();
-  pipelineOwner.rootNode = renderView;
-
-  final BuildOwner buildOwner = BuildOwner(focusManager: FocusManager());
-  final rootElement = RenderObjectToWidgetAdapter<RenderBox>(
-    container: renderView.child! as RenderObjectWithChildMixin<RenderBox>,
-    child: Directionality(
-      textDirection: TextDirection.ltr,
-      child: widget,
-    ),
-  ).attachToRenderTree(buildOwner);
-
-  buildOwner.buildScope(rootElement);
-  buildOwner.finalizeTree();
-
-  pipelineOwner.flushLayout();
-  pipelineOwner.flushCompositingBits();
-  pipelineOwner.flushPaint();
-
-  return renderView.child as RenderRepaintBoundary;
-}
-*/
-
 
 
 String capitalizeFirstLetter(String text) {

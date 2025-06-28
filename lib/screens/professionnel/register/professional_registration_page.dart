@@ -79,11 +79,14 @@ class _ProfessionalRegistrationPageState  extends State<ProfessionalRegistration
       body: RefreshIndicator(
         onRefresh: _handleRefresh,
      child: SingleChildScrollView(
-        child: Stack(
+       padding: EdgeInsets.only(
+           bottom: MediaQuery.of(context).size.height *
+               0.20),
+       child: Stack(
           children: [
             Positioned(
-              top: -270,
-              left: -160,
+              top: -220,
+              left: -130,
               child: Transform.rotate(
                 angle: 0.2,
                 child: Container(
@@ -97,12 +100,18 @@ class _ProfessionalRegistrationPageState  extends State<ProfessionalRegistration
               ),
             ),
             Positioned(
-              top: -150,
+              top: 20,
               left: 60,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Stack(
+                  SvgPicture.asset(
+                    AssetsData.authIllustration,
+                    width: 200,
+                    height: 200,
+                    fit: BoxFit.contain,
+                  ),
+                  /*Stack(
                     alignment: Alignment.center,
                     children: [
                       Container(
@@ -133,21 +142,8 @@ class _ProfessionalRegistrationPageState  extends State<ProfessionalRegistration
                         ),
                       ),
                     ],
-                  ),
+                  ),*/
                   SizedBox(height: 35),
-                  Padding(
-                    padding: EdgeInsets.only(left: 0),
-                    child: Text(
-                      "Inscription",
-                      style: GoogleFonts.brunoAce(
-                        textStyle: TextStyle(
-                          color: Colors.white,
-                          fontSize: 24,
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                    ),
-                  ),
                 ],
               ),
             ),
@@ -157,6 +153,19 @@ class _ProfessionalRegistrationPageState  extends State<ProfessionalRegistration
                 child: Column(
                   children: [
                     SizedBox(height: 200),
+                    Padding(
+                      padding: EdgeInsets.only(left: 0),
+                      child: Text(
+                        "Inscription",
+                        style: GoogleFonts.brunoAce(
+                          textStyle: TextStyle(
+                            color: ColorsData.purple00A,
+                            fontSize: 24,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                      ),
+                    ),
                     CustomTextInput(
                         hintText: 'NOM',
                         controller: nameController,

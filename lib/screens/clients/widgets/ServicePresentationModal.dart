@@ -1,7 +1,10 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:location/location.dart';
 import 'package:tech/core/providers/professionnal_provider.dart';
 import 'package:tech/screens/clients/widgets/WorkerPresentationCardVertical.dart';
 import '../../../core/const/assets.dart';
@@ -53,12 +56,16 @@ class _ServicePresentationModalState extends State<ServicePresentationModal> {
   String baseImageUrl = '';
   double currentRating = 0.0;
   bool _isClicked = false;
+  LocationData? _currentLocation;
+  final Location _location = Location();
+  final Set<Marker> _markers = {};
 
   Future<void> _loadInfos() async {
     try {
       baseImageUrl = await ApiHelper.getApiUrl();
+      await _loadClientLocation();
       _fetchServiceProfessions();
-      _fetchProfessionalsByService();
+      //_fetchProfessionalsByService();
     } catch (error) {
       print('Erreur de chargement du profil : $error');
       setState(() {
@@ -85,7 +92,7 @@ class _ServicePresentationModalState extends State<ServicePresentationModal> {
     }
   }
 
-  Future<void> _fetchProfessionalsByService() async {
+  /*Future<void> _fetchProfessionalsByService() async {
     try {
       final professionalProvider = Provider.of<ProfessionalProvider>(context, listen: false);
       final data = await professionalProvider.getProfessionalsByService(widget.serviceId);
@@ -95,6 +102,49 @@ class _ServicePresentationModalState extends State<ServicePresentationModal> {
       });
     } catch (error) {
       print('Erreur: $error');
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }*/
+
+  Future<void> _loadClientLocation() async {
+    final permission = await _location.requestPermission();
+    if (permission != PermissionStatus.granted) return;
+
+    bool serviceEnabled = await _location.serviceEnabled();
+    if (!serviceEnabled) {
+      serviceEnabled = await _location.requestService();
+      if (!serviceEnabled) return;
+    }
+
+    final loc = await _location.getLocation();
+    setState(() => _currentLocation = loc);
+
+    await _fetchNearbyProfessionals();
+  }
+
+  Future<void> _fetchNearbyProfessionals() async {
+    if (_currentLocation == null) return;
+
+    final dio = Dio();
+    try {
+      String baseUrl = await ApiHelper.getApiUrl();
+      final response = await dio.get('${baseUrl}/locations/nearby-by-services', queryParameters: {
+        'latitude': _currentLocation!.latitude,
+        'longitude': _currentLocation!.longitude,
+        'radius': 10,
+        'service_id': widget.serviceId,
+      });
+      setState(() {
+        professionals = response.data['professionals'];
+        _isLoading = false;
+      });
+
+      print('professionels avec notes ${professionals}');
+
+    } catch (e) {
+      print("Erreur API: $e");
       setState(() {
         _isLoading = false;
       });
@@ -332,22 +382,21 @@ class _ServicePresentationModalState extends State<ServicePresentationModal> {
                               itemBuilder: (context, index) {
                                 final professional = professionals[index];
                                 return WorkerPresentationCardVertical(
-                                  name: professional['user']['lastName'] + ' ' + professional['user']['firstName'],
-                                  rate: 2.5,
-                                  reviews: '',
-                                  availability: 'dispo',
-                                  distance: '255',
+                                  name: professional['lastName'] + ' ' + professional['firstName'],
+                                  rate: (professional['average_rating'] ?? 0).toDouble(),
+                                  reviews: professional['review_count'],
+                                  availability: professional['availability'],
+                                  distance: professional['distance'],
                                   unit: 'l',
-                                  availabilityColor: Colors.green,
-                                  imagePath: professional['user']['avatar'] != null
-                                      ? baseImageUrl + '/' + professional['user']['avatar']
-                                      : professional['user']['profile_photo_url'],
-                                  profession: professional['profession']['label'],
+                                  imagePath: professional['avatar'] != null
+                                      ? baseImageUrl + '/' + professional['avatar']
+                                      : professional['profile_photo_url'],
+                                  profession: professional['profession_name'],
                                   serviceId: widget.serviceId,
                                   clientId: widget.clientId,
                                   clientName: widget.clientName,
                                   serviceLabel: widget.label,
-                                  professionalId: professional['id'],
+                                  professionalId: professional['professional_id'],
                                 );
                               },
                             )

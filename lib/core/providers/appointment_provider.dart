@@ -54,15 +54,11 @@ class AppointmentProvider with ChangeNotifier {
     try {
       String baseUrl = await ApiHelper.getApiUrl();
       final responseData = await _dioService.get(
-        url: '${baseUrl}/appointments/${professionalId}',
+        url: '${baseUrl}/appointments/by-professionals/${professionalId}',
       );
 
-      if (responseData != null && responseData is Map<String, dynamic>) {
-        if (responseData.containsKey('data')) {
-          return responseData['data'];
-        } else {
-          throw Exception('Clé "appointments" non trouvée dans la réponse');
-        }
+      if (responseData != null) {
+          return responseData;
       } else {
         throw Exception('Données de rdv invalides');
       }
