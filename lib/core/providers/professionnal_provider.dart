@@ -1,68 +1,291 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:tech/core/models/professionel.dart';
 import 'package:tech/core/services/dio_service.dart';
 import 'package:tech/core/const/const.dart';
 import 'package:tech/core/providers/auth_provider.dart';
 
+import '../helpers/apiHelpers.dart';
+import '../models/user.dart';
+
 class ProfessionalProvider with ChangeNotifier {
-  final DioService _dioService = DioService(baseUrl: ConstData.urlBase, token: '');
-  final AuthProvider _authProvider;
+  final DioService _connectedUserServices = DioService(baseUrl: ConstData.urlBase, token: '');
+  String _token = '';
+  Future<String?> getToken() async {
+    return await storage.read(key: 'authToken');
+  }
+  User _user = User(id: -1, lastName: '', firstName: '', email: '', phonenumber: '', typeprofile: '');
 
-  ProfessionalProvider(this._authProvider);
+  final storage = FlutterSecureStorage();
 
-  Future<Map<String, dynamic>> logIn(String email, String password) async {
+  User get user => _user;
+
+  // liste des professionnels
+
+  Future<List<dynamic>> getManyProfessionals() async {
     try {
-      final result = await _dioService.post(
-        url: '${ConstData.urlBase}login',
-        body: {
-          'email': email,
-          'password': password,
-        },
+      String baseUrl = await ApiHelper.getApiUrl();
+      final responseData = await _connectedUserServices.get(
+        url: '${baseUrl}/users/professionals',
       );
 
-      if (result['success']) {
-        final professionelData = result['data']['user'];
-        final professionel = Professionel.fromJson(professionelData);
-        _authProvider.setUser(professionel);
+      if (responseData != null && responseData is Map<String, dynamic>) {
+        if (responseData.containsKey('data')) {
+          return responseData['data'];
+        } else {
+          throw Exception('professionnels non trouvés dans la réponse');
+        }
+      } else {
+        throw Exception('Données de services invalides');
       }
-
-      return result;
     } catch (error) {
-      return {'success': false, 'message': 'Une erreur s\'est produite lors de la connexion.'};
+      print('Erreur lors de la récupération des services: $error');
+      throw Exception('Impossible de récupérer les services');
     }
   }
 
-  Future<Map<String, dynamic>> registerProfessional(
-      String nom,
-      String prenom,
-      String email,
-      String telephone,
-      String password,
-      String experience,
-      String profession,
-      ) async {
+  // récupérer un professionnel
+
+  Future<Map<String, dynamic>> getOneProfessional (int professionalId) async {
     try {
-      final result = await _dioService.post(
-        url: '${ConstData.urlBase}register_professional', // Assurez-vous que l'URL d'inscription professionnelle est correcte
-        body: {
-          'nom': nom,
-          'prenom': prenom,
-          'email': email,
-          'password': password,
-          'experience': experience,
-          'profession': profession,
-        },
+      String baseUrl = await ApiHelper.getApiUrl();
+      final responseData = await _connectedUserServices.get(
+        url: '${baseUrl}/users/professionals/${professionalId}',
       );
+      print('professional info $responseData');
 
-      if (result['success']) {
-        final professionelData = result['data']['professionel'];
-        final professionel = Professionel.fromJson(professionelData);
+      if (responseData != null) {
+        return responseData;
+      } else {
+        throw Exception('Ce professionnel n\'existe pas');
       }
-
-      return result;
     } catch (error) {
-      return {'success': false, 'message': 'Une erreur s\'est produite lors de l\'inscription professionnelle.'};
+      print('Erreur lors de la récupération le professionnel: $error');
+      throw Exception('Impossible de récupérer le professionnel');
     }
   }
-// Ajoutez d'autres méthodes spécifiques au professionnel si nécessaire
+
+  // liste des professionels a qui un client a demandé un service
+
+  Future<List<dynamic>> getClientRequestedProfessionalsList(int clientId) async {
+    try {
+      String baseUrl = await ApiHelper.getApiUrl();
+      final responseData = await _connectedUserServices.get(
+        url: '${baseUrl}/conversations/professionals-list/${clientId}',
+      );
+
+      if (responseData != null && responseData is Map<String, dynamic>) {
+        print('conversation professional ${responseData}');
+        if (responseData.containsKey('professionals')) {
+          return responseData['professionals'];
+        } else {
+          throw Exception('Clé "professionals" non trouvée dans la réponse');
+        }
+      } else {
+        throw Exception('Données de professionnels invalides');
+      }
+    } catch (error) {
+      print('Erreur lors de la récupération des professionnels: $error');
+      throw Exception('Impossible de récupérer les professionnels');
+    }
+  }
+
+  // liste des professionels  classés pas leur notes
+  Future<List<dynamic>> getTopRatedAllProfessionsProfessionals() async {
+    try {
+      String baseUrl = await ApiHelper.getApiUrl();
+      final responseData = await _connectedUserServices.get(
+        url: '${baseUrl}/professionals/top-rated-all-professions',
+      );
+
+      if (responseData != null && responseData is Map<String, dynamic>) {
+        print('rate list ${responseData}');
+        if (responseData.containsKey('professionals')) {
+          return responseData['professionals'];
+        } else {
+          throw Exception('Clé "professionals" non trouvée dans la réponse');
+        }
+      } else {
+        throw Exception('Données de professionnels invalides');
+      }
+    } catch (error) {
+      print('Erreur lors de la récupération des professionnels: $error');
+      throw Exception('Impossible de récupérer les professionnels');
+    }
+  }
+
+// récupérer les professionnels qui peeuvent réaliser un service
+
+  Future<List<dynamic>> getProfessionalsByService(int serviceId) async {
+    try {
+      String baseUrl = await ApiHelper.getApiUrl();
+      final responseData = await _connectedUserServices.get(
+        url: '${baseUrl}/professionals/by-service/${serviceId}',
+      );
+
+      if (responseData != null && responseData is Map<String, dynamic>) {
+        print('service professional ${responseData}');
+        if (responseData.containsKey('professionals')) {
+          return responseData['professionals'];
+        } else {
+          throw Exception('Clé "professionals" non trouvée dans la réponse');
+        }
+      } else {
+        throw Exception('Données de professionnels invalides');
+      }
+    } catch (error) {
+      print('Erreur lors de la récupération des professionnels: $error');
+      throw Exception('Impossible de récupérer les professionnels');
+    }
+  }
+
+  // récupérer les professionnels en fonction des catégories de services
+
+  Future<List<dynamic>> getProfessionalsByCategory(int categoryId) async {
+    try {
+      String baseUrl = await ApiHelper.getApiUrl();
+      final responseData = await _connectedUserServices.get(
+        url: '${baseUrl}/professionals/by-category/${categoryId}',
+      );
+
+      if (responseData != null && responseData is Map<String, dynamic>) {
+        print('service professionals ${responseData}');
+        if (responseData.containsKey('professionals')) {
+          return responseData['professionals'];
+        } else {
+          throw Exception('Clé "professionals" non trouvée dans la réponse');
+        }
+      } else {
+        throw Exception('Données de professionnels invalides');
+      }
+    } catch (error) {
+      print('Erreur lors de la récupération des professionnels: $error');
+      throw Exception('Impossible de récupérer les professionnels');
+    }
+  }
+  // liste de professionnels en fonction d'une profession
+
+  Future<List<dynamic>> getProfessionalsByProfession(int professionId) async {
+    try {
+      String baseUrl = await ApiHelper.getApiUrl();
+      final responseData = await _connectedUserServices.get(
+        url: '${baseUrl}/professionalsByProfession/${professionId}',
+      );
+
+      if (responseData != null && responseData is Map<String, dynamic>) {
+        print('service professionals ${responseData}');
+        if (responseData.containsKey('professionals')) {
+          return responseData['professionals'];
+        } else {
+          throw Exception('Clé "professionals" non trouvée dans la réponse');
+        }
+      } else {
+        throw Exception('Données de professionnels invalides');
+      }
+    } catch (error) {
+      print('Erreur lors de la récupération des professionnels: $error');
+      throw Exception('Impossible de récupérer les professionnels');
+    }
+  }
+
+  // liste des statistiques pour un professionnel
+
+  Future<Map<String, dynamic>> getProfessionalReports(int professionalId) async {
+    try {
+      String baseUrl = await ApiHelper.getApiUrl();
+      final responseData = await _connectedUserServices.get(
+        url: '${baseUrl}/professionals/dashboard/${professionalId}',
+      );
+
+      if (responseData != null && responseData is Map<String, dynamic>) {
+        print('dashboard professionnals ${responseData}');
+        if (responseData.containsKey('professional_id')) {
+          return responseData['data'];
+        } else {
+          throw Exception('Clé "professional_id" non trouvée dans la réponse');
+        }
+      } else {
+        throw Exception('Données de professionnel invalides');
+      }
+    } catch (error) {
+      print('Erreur lors de la récupération des professionnels: $error');
+      throw Exception('Impossible de récupérer les professionnels');
+    }
+  }
+
+
+  // liste des clients d'un professionnel
+  Future<Map<String, dynamic>> getClientsByProfessional(int professionalId) async {
+    try {
+      String baseUrl = await ApiHelper.getApiUrl();
+      final responseData = await _connectedUserServices.get(
+        url: '${baseUrl}/professionals/clients/${professionalId}',
+      );
+
+      if (responseData != null && responseData is Map<String, dynamic>) {
+        print('clients ${responseData}');
+        if (responseData.containsKey('professional_id')) {
+          return responseData;
+        } else {
+          throw Exception('Clé "professional_id" non trouvée dans la réponse');
+        }
+      } else {
+        throw Exception('Données de professionnel invalides');
+      }
+    } catch (error) {
+      print('Erreur lors de la récupération des professionnels: $error');
+      throw Exception('Impossible de récupérer les professionnels');
+    }
+  }
+
+  // liste des interactions que le professionnel a eu avec ce client
+
+  Future<Map<String, dynamic>> getClientProfessionalInteractions(int professionalId, int clientId) async {
+    try {
+      String baseUrl = await ApiHelper.getApiUrl();
+      final responseData = await _connectedUserServices.get(
+        url: '${baseUrl}/interactions/${clientId}/${professionalId}',
+      );
+
+      if (responseData != null && responseData is Map<String, dynamic>) {
+        print('interactionss ${responseData}');
+        if (responseData.containsKey('professional_id') && responseData.containsKey('client_id')) {
+          return responseData;
+        } else {
+          throw Exception('Clé "professional_id" et "client_id" non trouvée dans la réponse');
+        }
+      } else {
+        throw Exception('Données de professionnel invalides');
+      }
+    } catch (error) {
+      print('Erreur lors de la récupération des professionnels: $error');
+      throw Exception('Impossible de récupérer les professionnels');
+    }
+  }
+
+  // classement des profeesionels
+
+  Future<List<dynamic>> getGlobalRankingProfessionalByProfession(int professionId) async {
+    try {
+      String baseUrl = await ApiHelper.getApiUrl();
+      final responseData = await _connectedUserServices.get(
+        url: '${baseUrl}/professionals/global-ranking/${professionId}',
+      );
+
+      if (responseData != null) {
+        print('classement ${responseData}');
+          return responseData;
+      } else {
+        throw Exception('Données de professionnel invalides');
+      }
+    } catch (error) {
+      print('Erreur lors de la récupération des professionnels: $error');
+      throw Exception('Impossible de récupérer les professionnels');
+    }
+  }
+
+// modifier un professionnel
+
+// supprimer un compte professionnel
+
 }

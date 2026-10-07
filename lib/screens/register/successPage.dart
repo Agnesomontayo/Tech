@@ -4,8 +4,8 @@ import 'package:tech/core/const/assets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:tech/screens/splashscreen.dart';
-import 'client_registration_page.dart';
-import 'professional_registration_page.dart';
+import '../clients/register/client_registration_page.dart';
+import '../professionnel/register/professional_registration_page.dart';
 
 class SuccessPage extends StatelessWidget {
   @override

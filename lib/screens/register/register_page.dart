@@ -3,9 +3,9 @@ import 'package:tech/core/const/colors.dart';
 import 'package:tech/core/const/assets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'client_registration_page.dart';
-import 'professional_registration_page.dart';
-import 'package:tech/screens/widgets/CustumInputs.dart';
+import '../clients/register/client_registration_page.dart';
+import '../professionnel/register/professional_registration_page.dart';
+import 'package:tech/screens/clients/widgets/CustumInputs.dart';
 class RegisterPage extends StatefulWidget {
   @override
   _RegisterPageState createState() => _RegisterPageState();
@@ -70,8 +70,8 @@ class _RegisterPageState extends State<RegisterPage> {
         child: Stack(
           children: [
             Positioned(
-              top: -270,
-              left: -160,
+              top: -220,
+              left: -130,
               child: Transform.rotate(
                 angle: 0.2,
                 child: Container(
@@ -85,66 +85,75 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
             ),
             Positioned(
-              top: -150,
+              top: 20,
               left: 60,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  SvgPicture.asset(
+                    AssetsData.authIllustration,
+                    width: 200,
+                    height: 200,
+                    fit: BoxFit.contain,
+                  ),
                   Stack(
                     alignment: Alignment.center,
                     children: [
-                      Container(
+                      /*Container(
                         width: 230,
                         height: 230,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: ColorsData.purple00A,
                         ),
-                      ),
-                      Positioned(
-                        bottom: 0,
-                        child: ClipOval(
-                          child: SizedBox(
-                            width: 100,
-                            height: 100,
-                            child: ColorFiltered(
-                              colorFilter: ColorFilter.mode(
-                                Colors.white,
-                                BlendMode.srcATop,
-                              ),
-                              child: SvgPicture.asset(
-                                AssetsData.ProfcustomLogo,
-                                fit: BoxFit.contain,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
+                      ),*/
+                      // Positioned(
+                      //   bottom: 0,
+                      //   child: ClipOval(
+                      //     child: SizedBox(
+                      //       width: 100,
+                      //       height: 100,
+                      //       child: ColorFiltered(
+                      //         colorFilter: ColorFilter.mode(
+                      //           Colors.white,
+                      //           BlendMode.srcATop,
+                      //         ),
+                      //         child: SvgPicture.asset(
+                      //           AssetsData.ProfcustomLogo,
+                      //           fit: BoxFit.contain,
+                      //         ),
+                      //       ),
+                      //     ),
+                      //   ),
+                      // ),
                     ],
                   ),
                   SizedBox(height: 35),
-                  Padding(
-                    padding: EdgeInsets.only(left: 0),
-                    child: Text(
-                      "Inscription",
-                      style: GoogleFonts.brunoAce(
-                        textStyle: TextStyle(
-                          color: Colors.white,
-                          fontSize: 24,
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                    ),
-                  ),
+
                 ],
               ),
             ),
             SizedBox(height: 200),
+            Padding(
+              padding: EdgeInsets.only(left: 0, top: 250.0,),
+              child: Center(
+                child: Text(
+                  "Inscription",
+                  style: GoogleFonts.brunoAce(
+                    textStyle: TextStyle(
+                      color: ColorsData.purple00A,
+                      fontSize: 24,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ),
+              )
+            ),
             Center(
               child: Padding(
                 padding: const EdgeInsetsDirectional.only(
                   start: 0.0,
-                  top: 220.0,
+                  top: 290.0,
                   bottom: 0.0,
                 ),
               child: Text(
@@ -163,11 +172,11 @@ class _RegisterPageState extends State<RegisterPage> {
               child: Padding(
                 padding: const EdgeInsetsDirectional.only(
                   start: 0.0,
-                  top: 300.0,
+                  top: 330.0,
                   bottom: 0.0,
                 ),
 
-                child: Row( // Utilisation de Row pour placer les cercles sur la même ligne
+                child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [

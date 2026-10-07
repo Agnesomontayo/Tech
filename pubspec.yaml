@@ -51,6 +51,21 @@ dependencies:
   equatable:
   flutter_secure_storage:
   font_awesome_flutter:
+  flutter_rating_bar:
+  flutter_plugin_android_lifecycle:
+  device_info_plus:
+  web_socket_channel:
+  shimmer:
+  cached_network_image:
+  image_picker:
+  path:
+  location:
+  geolocator:
+  workmanager:
+  permission_handler:
+  vector_graphics:
+  screenshot:
+  flutter_polyline_points:
 
 dev_dependencies:
   flutter_test:
@@ -61,7 +76,7 @@ dev_dependencies:
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^3.0.0
+  flutter_lints: ^5.0.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

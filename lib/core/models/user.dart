@@ -2,40 +2,48 @@ import 'package:flutter/cupertino.dart';
 
 class User {
   final int id;
-  final String nom;
-  final String prenom;
+  final String lastName;
+  final String firstName;
   final String email;
-  final String typeprofil;
+  final String typeprofile;
   final String phonenumber;
+  final String? avatar;
+  final String? profile_photo_url;
 
   User({
     required this.id,
-    required this.nom,
-    required this.prenom,
+    required this.lastName,
+    required this.firstName,
     required this.email,
-    required this.typeprofil,
+    required this.typeprofile,
     required this.phonenumber,
+    this.avatar,
+    this.profile_photo_url,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
       id: json['id'],
-      nom: json['nom'],
-      prenom: json['prenom'],
+      lastName: json['lastName'],
+      firstName: json['firstName'],
       email: json['email'],
-      typeprofil: json['typeprofil'],
+      typeprofile: json['typeprofile'],
       phonenumber: json['phonenumber'],
+      avatar: json['avatar'],
+      profile_photo_url: json['profile_photo_url'],
     );
 
   }
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'nom': nom,
-      'prenom': prenom,
+      'lastName': lastName,
+      'firstName': firstName,
       'email': email,
       'phonenumber': phonenumber,
-      'typeprofil': typeprofil,
+      'typeprofile': typeprofile,
+      'avatar': avatar,
+      'profile_photo_url': profile_photo_url,
     };
   }
 }

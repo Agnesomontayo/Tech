@@ -5,7 +5,9 @@ import 'package:tech/core/const/colors.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:tech/screens/login/login_page.dart';
-import 'package:tech/screens/widgets/logo.dart';
+import 'package:tech/screens/clients/widgets/logo.dart';
+
+import '../core/helpers/utils.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -18,12 +20,9 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    // Activer le mode immersif lors de l'affichage du splashscreen
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
 
-    // Simuler un délai pour le splashscreen
-    Future.delayed(Duration(seconds: 3), () {
-      // Naviguer vers la page principale
+    Future.delayed(Duration(seconds: 5), () {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => LoginPage()),

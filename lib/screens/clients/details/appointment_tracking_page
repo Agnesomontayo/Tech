@@ -1,0 +1,116 @@
+import 'package:flutter/material.dart';
+
+import '../../../core/services/reverb_appointment_service.dart';
+
+class AppointmentTrackingPage extends StatefulWidget {
+  final String appointmentId;
+  final String currentUserId;
+
+  const AppointmentTrackingPage({
+    super.key,
+    required this.appointmentId,
+    required this.currentUserId,
+  });
+
+  @override
+  State<AppointmentTrackingPage> createState() => _AppointmentTrackingPageState();
+}
+
+class _AppointmentTrackingPageState extends State<AppointmentTrackingPage> {
+  late ReverbAppointmentService _appointmentService;
+  AppointmentStatus _currentStatus = AppointmentStatus.planned;
+  int _remainingMinutes = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _initReverbService();
+  }
+
+  void _initReverbService() {
+    _appointmentService = ReverbAppointmentService(
+      baseUrl: 'votre-domaine.com',
+      token: 'votre-token-jwt',
+      appKey: 'votre-app-key',
+      userId: widget.currentUserId,
+      debug: true,
+      onAppointmentUpdate: (data) {
+        if (!mounted) return;
+
+        setState(() {
+          _currentStatus = _parseStatus(data['status']);
+          _remainingMinutes = data['remaining_minutes'];
+
+          if (data['action'] == 'completed') {
+            _showReviewForm();
+          }
+        });
+      },
+      onConnected: () => print('Connected to appointment updates'),
+      onError: (e) => print('Appointment update error: $e'),
+    );
+
+    _appointmentService.connect();
+  }
+
+  AppointmentStatus _parseStatus(String status) {
+    switch (status) {
+      case 'started': return AppointmentStatus.started;
+      case 'paused': return AppointmentStatus.paused;
+      case 'completed': return AppointmentStatus.completed;
+      case 'stopped': return AppointmentStatus.stopped;
+      default: return AppointmentStatus.planned;
+    }
+  }
+
+  void _showReviewForm() {
+    // Afficher le formulaire d'avis
+  }
+
+  @override
+  void dispose() {
+    _appointmentService.disconnect();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Column(
+        children: [
+          Text('Statut: ${_currentStatus.toString()}'),
+          Text('Temps restant: $_remainingMinutes minutes'),
+          if (_currentStatus == AppointmentStatus.completed)
+            ReviewForm(onSubmit: _submitReview),
+
+          // Boutons d'action
+          Row(
+            children: [
+              if (_currentStatus == AppointmentStatus.started)
+                _buildActionButton('Mettre en pause', _pauseAppointment),
+              if (_currentStatus == AppointmentStatus.paused)
+                _buildActionButton('Reprendre', _resumeAppointment),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionButton(String text, VoidCallback onPressed) {
+    return ElevatedButton(
+      onPressed: onPressed,
+      child: Text(text),
+    );
+  }
+
+  Future<void> _pauseAppointment() async {
+    // Appel API pour mettre en pause
+  }
+
+  Future<void> _resumeAppointment() async {
+    // Appel API pour reprendre
+  }
+}
+
+
