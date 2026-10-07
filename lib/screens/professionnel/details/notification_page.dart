@@ -9,10 +9,12 @@ import 'notification_frequency_settings.dart';
 class WorkNotificationPage extends StatefulWidget {
   final int professionId;
   final String currentFrequency;
+  final String currentAvailability;
   const WorkNotificationPage({
     super.key,
     required this.professionId,
     required this.currentFrequency,
+    required this.currentAvailability,
   });
 
   @override
@@ -62,6 +64,7 @@ class _WorkNotificationPageState extends State<WorkNotificationPage> {
                 MaterialPageRoute(
                   builder: (context) => FrequencySettingsPage(
                     initialFrequency: widget.currentFrequency,
+                    currentAvailability: widget.currentAvailability,
                   ),
                 ),
               );

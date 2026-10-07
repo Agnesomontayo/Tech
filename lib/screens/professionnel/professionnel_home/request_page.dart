@@ -100,6 +100,7 @@ class _RequestPageState extends State<RequestPage> {
                 WorkNotificationPage(
                   professionId: actualProfil['professionalId'],
                   currentFrequency: actualProfil['reminder_frequency'] == null ? '2' : actualProfil['reminder_frequency'].toString(),
+                  currentAvailability: actualProfil['availability'],
                 ),
                 RankingPage(
                   professionId: actualProfil['profession_id'],

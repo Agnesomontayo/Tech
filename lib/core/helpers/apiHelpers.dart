@@ -9,7 +9,7 @@ class ApiHelper {
     if (isEmulator) {
       return 'http://10.0.2.2:8000/api';
     } else {
-      return 'http://192.168.100.113:8000/api';
+      return 'http://192.168.216.166:8000/api';//'http://192.168.216.166:8000/api';//'http://192.168.100.113:8000/api';
     }
   }
 
@@ -31,7 +31,7 @@ class ApiHelper {
     if (isEmulator) {
       return '10.0.2.2';
     } else {
-      return '192.168.100.113';
+      return '192.168.216.166';//'192.168.216.166';//'192.168.100.113';
     }
   }
 
